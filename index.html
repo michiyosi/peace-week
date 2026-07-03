@@ -3,17 +3,35 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>ピースウィーク｜810のピースで2045年をつくる</title>
-<meta name="description" content="好きな色と2045年へのメッセージを、ひとつのピースに。みんなのピースが集まって、未来の広島の一枚になる。">
+<title>ピースウィーク｜810のピースで、2045年の広島をつくる</title>
+<meta name="description" content="好きな色と2045年へのメッセージを、ひとつのピースに。810のピースが集まって、未来の広島の一枚になる。8/1–8/6 ベルパルク。">
+<meta name="theme-color" content="#fff7ec">
+<link rel="canonical" href="https://michiyosi.github.io/peace-week/">
+<meta property="og:type" content="website">
+<meta property="og:title" content="ピースウィーク｜810のピースで、2045年の広島をつくる">
+<meta property="og:description" content="好きな色と2045年へのメッセージを、ひとつのピースに。810のピースが集まって、未来の広島の一枚になる。">
+<meta property="og:url" content="https://michiyosi.github.io/peace-week/">
+<meta property="og:locale" content="ja_JP">
+<meta name="twitter:card" content="summary">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath fill='%23ff5a5f' d='M12 22q0-8 8-8h7c-1-7 11-7 10 0h7q8 0 8 8v7c7-1 7 11 0 10v7q0 8-8 8H20q-8 0-8-8V22z'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@500;700;900&family=Yusei+Magic&display=swap" rel="stylesheet">
+<!-- =====================================================================
+     ピースウィーク v2.0 (2026-07-04)
+     単一HTML・外部依存は Google Fonts のみ・データ送信なし
+     URLパラメータ: ?rm=1 / ?seed=N / ?cols=N / ?rows=N
+     テストフック:  window.PW.place / .assemble / .reset / .fill / .count
+     ===================================================================== -->
 <style>
   :root{
-    --bg1:#fff7ec; --bg2:#ffeede; --bg3:#eaf6ff;
-    --ink:#3a2f2a; --ink-soft:#8a7d72;
+    --bg1:#fff8ee; --bg2:#ffeedd; --bg3:#e9f5ff;
+    --ink:#38302a; --ink-soft:#8d7f73; --ink-faint:#bcae9f;
     --card:#ffffff;
     --accent:#ff5a5f; --accent2:#3a86ff; --accent3:#ffd23f;
+    --line:rgba(120,90,60,.14);
+    --shadow-s:0 2px 8px rgba(80,50,30,.12);
+    --shadow-m:0 10px 30px rgba(80,50,30,.16);
     --round:'Zen Maru Gothic','Hiragino Maru Gothic ProN','Yu Gothic',system-ui,sans-serif;
     --pop:'Yusei Magic','Zen Maru Gothic',sans-serif;
   }
@@ -22,186 +40,344 @@
     -webkit-font-smoothing:antialiased;-webkit-tap-highlight-color:transparent}
   body{
     background:
-      radial-gradient(circle at 12% 18%, rgba(255,210,63,.16), transparent 42%),
-      radial-gradient(circle at 88% 82%, rgba(58,134,255,.14), transparent 46%),
-      radial-gradient(circle at 50% 120%, rgba(255,90,95,.12), transparent 55%),
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.45 0 0 0 0 0.35 0 0 0 0 0.25 0 0 0 0.05 0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E"),
+      radial-gradient(circle at 12% 16%, rgba(255,210,63,.18), transparent 42%),
+      radial-gradient(circle at 88% 84%, rgba(58,134,255,.15), transparent 46%),
+      radial-gradient(circle at 50% 120%, rgba(255,90,95,.13), transparent 55%),
       linear-gradient(160deg, var(--bg1), var(--bg2) 55%, var(--bg3));
   }
+  button{font-family:var(--round)}
+  :focus-visible{outline:3px solid var(--accent2);outline-offset:2px;border-radius:8px}
   #app{position:fixed;inset:0;display:flex;flex-direction:column}
 
   /* ---------- header ---------- */
   header{
-    flex:0 0 auto;display:flex;align-items:center;gap:14px;
+    flex:0 0 auto;display:flex;align-items:center;gap:clamp(10px,1.6vw,18px);
     padding:clamp(10px,2vh,20px) clamp(14px,3vw,34px) 4px;
   }
-  .brand{display:flex;flex-direction:column;line-height:1;gap:4px}
+  .logo{flex:0 0 auto;width:clamp(34px,4.6vh,46px);height:clamp(34px,4.6vh,46px);
+    filter:drop-shadow(0 3px 6px rgba(255,90,95,.35))}
+  .logo svg{width:100%;height:100%;display:block;animation:bob 5s ease-in-out infinite}
+  @keyframes bob{0%,100%{transform:rotate(-4deg)}50%{transform:rotate(5deg) translateY(-2px)}}
+  .brand{display:flex;flex-direction:column;line-height:1;gap:5px;min-width:0}
+  .eyebrow{font-size:clamp(9px,1.2vh,11px);font-weight:700;letter-spacing:.22em;color:var(--ink-soft);
+    text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .eyebrow b{color:var(--accent2);font-weight:700}
   .brand h1{
     margin:0;font-family:var(--pop);font-weight:400;
-    font-size:clamp(24px,3.4vw + 1vh,40px);letter-spacing:.02em;color:var(--ink);
+    font-size:clamp(24px,3.2vw + 1vh,40px);letter-spacing:.02em;color:var(--ink);white-space:nowrap;
   }
-  .brand h1 b{color:var(--accent)}
-  .brand .sub{font-size:clamp(11px,1.5vh,13px);color:var(--ink-soft);letter-spacing:.04em;font-weight:500}
+  .brand h1 b{font-weight:400;
+    background:linear-gradient(120deg,#ff5a5f,#ff8a3d 70%);
+    -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:var(--accent)}
+  .brand .sub{font-size:clamp(11px,1.5vh,13px);color:var(--ink-soft);letter-spacing:.04em;font-weight:700}
   .spacer{flex:1 1 auto}
-  .counter{
-    display:flex;flex-direction:column;align-items:flex-end;gap:6px;min-width:clamp(150px,26vw,240px)
-  }
-  .count-num{font-family:var(--pop);font-size:clamp(20px,2.4vw + 1vh,30px);line-height:1;color:var(--ink)}
-  .count-num b{color:var(--accent);font-size:1.28em}
-  .count-goal{color:var(--ink-soft);font-weight:500}
-  .bar{width:100%;height:9px;border-radius:99px;background:rgba(58,47,42,.10);overflow:hidden}
+  .counter{display:flex;flex-direction:column;align-items:flex-end;gap:6px;min-width:clamp(150px,25vw,250px)}
+  .count-line{display:flex;align-items:baseline;gap:2px}
+  .count-num{font-family:var(--pop);font-size:clamp(20px,2.4vw + 1vh,30px);line-height:1;color:var(--ink);font-variant-numeric:tabular-nums}
+  .count-num b{color:var(--accent);font-size:1.3em;font-weight:400}
+  .count-goal{color:var(--ink-soft);font-weight:700;font-size:.55em}
+  .bar{width:100%;height:10px;border-radius:99px;background:rgba(58,47,42,.10);overflow:hidden;
+    box-shadow:inset 0 1px 2px rgba(58,47,42,.12)}
   .bar > i{display:block;height:100%;width:0;border-radius:99px;
-    background:linear-gradient(90deg,#ffd23f,#ff8a3d,#ff5a5f,#ff5da2,#9b5de5,#3a86ff);
-    background-size:600% 100%;transition:width .7s cubic-bezier(.2,.7,.3,1)}
-  .count-note{font-size:clamp(10px,1.3vh,12px);color:var(--ink-soft);font-weight:500}
+    background:linear-gradient(90deg,#ffd23f,#ff8a3d,#ff5a5f,#ff5da2,#9b5de5,#3a86ff,#12b3a6,#ffd23f);
+    background-size:400% 100%;animation:flow 14s linear infinite;
+    transition:width .7s cubic-bezier(.2,.7,.3,1)}
+  @keyframes flow{to{background-position:-400% 0}}
+  .count-note{font-size:clamp(10px,1.3vh,12px);color:var(--ink-soft);font-weight:700}
+  .count-note b{color:var(--accent2)}
+  .iconbtn{flex:0 0 auto;width:38px;height:38px;border-radius:50%;border:0;cursor:pointer;
+    font-family:var(--pop);font-size:17px;color:var(--ink-soft);background:rgba(255,255,255,.8);
+    box-shadow:var(--shadow-s);transition:transform .12s ease,color .12s ease}
+  .iconbtn:hover{transform:translateY(-2px) scale(1.06);color:var(--accent2)}
 
   /* ---------- board ---------- */
   #boardWrap{flex:1 1 auto;position:relative;display:flex;align-items:center;justify-content:center;
-    padding:6px clamp(10px,2.5vw,30px)}
+    padding:8px clamp(10px,2.5vw,30px)}
   #board{position:relative;width:100%;height:100%;max-width:min(100%,148vh);margin:0 auto;
-    border-radius:14px;overflow:hidden;
-    box-shadow:0 10px 40px rgba(80,50,30,.14), inset 0 0 0 1px rgba(255,255,255,.6)}
+    border-radius:16px;overflow:hidden;
+    box-shadow:0 18px 50px rgba(80,50,30,.18), 0 4px 12px rgba(80,50,30,.10),
+      inset 0 0 0 1px rgba(255,255,255,.65)}
   #boardCanvas,#fxCanvas{position:absolute;inset:0;width:100%;height:100%;display:block}
   #fxCanvas{pointer-events:none}
   #boardCanvas{cursor:pointer}
   .day-chip{
-    position:absolute;left:12px;top:12px;z-index:3;
-    background:rgba(255,255,255,.82);backdrop-filter:blur(3px);
-    border-radius:99px;padding:5px 12px;font-size:clamp(11px,1.5vh,13px);font-weight:700;
-    color:var(--ink);box-shadow:0 2px 8px rgba(80,50,30,.14);pointer-events:none}
-  .day-chip small{color:var(--ink-soft);font-weight:500}
+    position:absolute;left:12px;top:12px;z-index:3;display:flex;align-items:center;gap:8px;
+    background:rgba(255,255,255,.85);backdrop-filter:blur(4px);
+    border-radius:99px;padding:6px 13px;font-size:clamp(11px,1.5vh,13px);font-weight:700;
+    color:var(--ink);box-shadow:var(--shadow-s);pointer-events:none}
+  .dc-dots{display:flex;gap:4px}
+  .dc-dots i{width:7px;height:7px;border-radius:50%;background:rgba(58,47,42,.14);transition:background .4s,transform .4s}
+  .dc-dots i.on{background:linear-gradient(135deg,#ff8a3d,#ff5a5f);transform:scale(1.15)}
+  #emptyHint{position:absolute;inset:0;z-index:2;display:flex;align-items:center;justify-content:center;
+    pointer-events:none;opacity:0;transition:opacity .5s}
+  #emptyHint.on{opacity:1}
+  #emptyHint span{font-family:var(--pop);font-size:clamp(16px,2.6vh,22px);color:var(--ink-soft);
+    background:rgba(255,255,255,.75);padding:12px 22px;border-radius:99px;box-shadow:var(--shadow-s)}
+
+  /* finale overlay (8/6) */
+  #finale{position:absolute;inset:0;z-index:5;display:flex;flex-direction:column;align-items:center;justify-content:center;
+    gap:6px;pointer-events:none;opacity:0;background:radial-gradient(circle at 50% 46%, rgba(255,255,255,.88), rgba(255,255,255,.35) 58%, transparent 78%)}
+  #finale b{font-family:var(--pop);font-weight:400;font-size:clamp(44px,9vh,84px);line-height:1;
+    background:linear-gradient(120deg,#ff8a3d,#ff5a5f 55%,#ff5da2);
+    -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
+    filter:drop-shadow(0 4px 14px rgba(255,90,95,.35))}
+  #finale span{font-family:var(--pop);font-size:clamp(15px,2.6vh,22px);color:var(--ink);letter-spacing:.06em}
+  #finale.on{animation:finale 3s ease forwards}
+  @keyframes finale{0%{opacity:0;transform:scale(.94)}14%{opacity:1;transform:scale(1)}80%{opacity:1}100%{opacity:0;transform:scale(1.02)}}
 
   /* piece message popover */
   #pop{
-    position:absolute;z-index:6;max-width:230px;transform:translate(-50%,-108%);
-    background:var(--card);border-radius:14px;padding:11px 13px 12px;
-    box-shadow:0 10px 30px rgba(60,40,20,.24);opacity:0;pointer-events:none;
-    transition:opacity .18s ease, transform .18s ease}
-  #pop.on{opacity:1;transform:translate(-50%,-116%)}
+    position:absolute;z-index:6;max-width:250px;min-width:150px;transform:translate(-50%,-114%);
+    background:var(--card);border-radius:15px;padding:12px 30px 12px 14px;
+    box-shadow:0 12px 34px rgba(60,40,20,.26);opacity:0;pointer-events:none;
+    transition:opacity .16s ease}
+  #pop.on{opacity:1;pointer-events:auto}
+  #pop.below{transform:translate(-50%,16px)}
   #pop .chip{display:inline-flex;align-items:center;gap:6px;font-size:11px;color:var(--ink-soft);font-weight:700;margin-bottom:5px}
-  #pop .dot{width:12px;height:12px;border-radius:4px;box-shadow:inset 0 0 0 1px rgba(0,0,0,.12)}
-  #pop .msg{font-size:15px;font-weight:700;line-height:1.4;color:var(--ink);word-break:break-word}
-  #pop .who{margin-top:6px;font-size:12px;color:var(--ink-soft);font-weight:500}
+  #pop .dot{width:13px;height:13px;border-radius:4px;box-shadow:inset 0 0 0 1px rgba(0,0,0,.14)}
+  #pop .msg{font-size:15px;font-weight:700;line-height:1.45;color:var(--ink);word-break:break-word}
+  #pop .who{margin-top:6px;font-size:12px;color:var(--ink-soft);font-weight:700}
   #pop::after{content:"";position:absolute;left:50%;bottom:-8px;transform:translateX(-50%);
     border:8px solid transparent;border-top-color:var(--card);border-bottom:0}
+  #pop.below::after{bottom:auto;top:-8px;border-top:0;border-bottom:8px solid var(--card)}
+  #popClose{position:absolute;right:6px;top:6px;width:24px;height:24px;border:0;border-radius:50%;
+    cursor:pointer;background:rgba(58,47,42,.07);color:var(--ink-soft);font-size:13px;line-height:1;font-weight:700}
+  #popClose:hover{background:rgba(58,47,42,.14);color:var(--ink)}
 
   /* ---------- compose ---------- */
   .compose{
-    flex:0 0 auto;background:rgba(255,255,255,.72);backdrop-filter:blur(8px);
-    border-top:1px solid rgba(120,90,60,.12);
+    flex:0 0 auto;background:rgba(255,255,255,.74);backdrop-filter:blur(10px);
+    border-top:1px solid var(--line);
     padding:clamp(10px,1.8vh,16px) clamp(12px,3vw,30px) calc(clamp(10px,1.8vh,16px) + env(safe-area-inset-bottom));
     display:flex;flex-direction:column;gap:10px}
   .swatches{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .preview{width:30px;height:30px;flex:0 0 auto;filter:drop-shadow(0 2px 4px rgba(0,0,0,.18))}
+  .preview svg{width:100%;height:100%;display:block;overflow:visible}
   .swatches .lbl{font-size:12px;font-weight:700;color:var(--ink-soft);margin-right:2px}
-  .sw{width:26px;height:26px;border-radius:9px;border:2px solid rgba(255,255,255,.9);cursor:pointer;
-    box-shadow:0 1px 4px rgba(0,0,0,.16);transition:transform .12s ease;padding:0}
-  .sw:hover{transform:translateY(-2px) scale(1.06)}
-  .sw.sel{outline:3px solid var(--ink);outline-offset:1px;transform:translateY(-2px) scale(1.08)}
+  .sw{width:27px;height:27px;border-radius:9px;border:2px solid rgba(255,255,255,.92);cursor:pointer;
+    box-shadow:0 1px 4px rgba(0,0,0,.18);transition:transform .13s cubic-bezier(.3,1.6,.5,1);padding:0}
+  .sw:hover{transform:translateY(-2px) scale(1.1)}
+  .sw.sel{outline:3px solid var(--ink);outline-offset:1px;transform:translateY(-2px) scale(1.12)}
   .sw.custom{position:relative;overflow:hidden;
     background:conic-gradient(#ff5a5f,#ffd23f,#8ac926,#00bcd4,#3a86ff,#9b5de5,#ff5da2,#ff5a5f)}
   .sw.custom input{position:absolute;inset:-6px;opacity:0;cursor:pointer}
   .row{display:flex;align-items:center;gap:10px}
   .field{flex:1 1 auto;display:flex;align-items:center;gap:8px;
-    background:#fff;border-radius:13px;padding:4px 6px 4px 14px;
-    box-shadow:inset 0 0 0 1.5px rgba(120,90,60,.16)}
+    background:#fff;border-radius:13px;padding:4px 10px 4px 14px;
+    box-shadow:inset 0 0 0 1.5px rgba(120,90,60,.16);transition:box-shadow .15s}
   .field:focus-within{box-shadow:inset 0 0 0 2px var(--accent2)}
-  .field input{border:0;outline:0;background:transparent;font-family:var(--round);font-size:16px;color:var(--ink);flex:1 1 auto;min-width:0;font-weight:500}
-  .field input::placeholder{color:#bcae9f}
+  .field input{border:0;outline:0;background:transparent;font-family:var(--round);font-size:16px;color:var(--ink);flex:1 1 auto;min-width:0;font-weight:500;height:38px}
+  .field input::placeholder{color:var(--ink-faint)}
+  .cnt{flex:0 0 auto;font-size:10px;font-weight:700;color:var(--ink-faint);font-variant-numeric:tabular-nums}
   #nameInput{width:clamp(74px,20vw,120px);flex:0 0 auto;font-size:14px}
   .nameField{flex:0 0 auto}
   .place{
-    flex:0 0 auto;border:0;cursor:pointer;border-radius:13px;
+    flex:0 0 auto;border:0;cursor:pointer;border-radius:13px;position:relative;overflow:hidden;
     font-family:var(--pop);font-size:clamp(15px,1.9vh,17px);color:#fff;
     padding:0 clamp(16px,2.4vw,24px);height:46px;white-space:nowrap;
     background:linear-gradient(135deg,#ff7a3d,#ff5a5f 60%,#ff5da2);
     box-shadow:0 6px 16px rgba(255,90,95,.4);transition:transform .12s ease, box-shadow .2s ease}
+  .place::after{content:"";position:absolute;inset:0;
+    background:linear-gradient(115deg,transparent 30%,rgba(255,255,255,.4) 48%,transparent 62%);
+    transform:translateX(-120%);transition:transform .5s ease}
   .place:hover{transform:translateY(-1px);box-shadow:0 9px 22px rgba(255,90,95,.5)}
+  .place:hover::after{transform:translateX(120%)}
   .place:active{transform:translateY(1px) scale(.98)}
   .place:disabled{opacity:.5;cursor:default;box-shadow:none}
   .compose.shake .field{animation:shake .3s}
   @keyframes shake{25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
   .actions{display:flex;align-items:center;gap:10px;justify-content:flex-end;flex-wrap:wrap}
-  .ghost{border:0;background:transparent;cursor:pointer;font-family:var(--round);font-weight:700;
+  .credit{margin-right:auto;font-size:10px;font-weight:700;color:var(--ink-faint);letter-spacing:.08em}
+  .ghost{border:0;background:transparent;cursor:pointer;font-weight:700;
     font-size:13px;color:var(--ink-soft);padding:8px 12px;border-radius:10px}
   .ghost:hover{color:var(--ink);background:rgba(120,90,60,.08)}
   .assemble{border:0;cursor:pointer;font-family:var(--pop);font-size:14px;color:#2b2540;
     background:linear-gradient(135deg,#ffe36b,#ffd23f);border-radius:11px;padding:9px 15px;
-    box-shadow:0 4px 12px rgba(255,190,40,.45)}
+    box-shadow:0 4px 12px rgba(255,190,40,.45);transition:transform .12s ease}
   .assemble:hover{transform:translateY(-1px)}
   .assemble:disabled{opacity:.5;cursor:default}
 
-  #toast{position:fixed;left:50%;top:14px;transform:translate(-50%,-20px);z-index:20;
-    background:var(--ink);color:#fff;font-weight:700;font-size:13px;padding:8px 16px;border-radius:99px;
+  #toast{position:fixed;left:50%;top:16px;transform:translate(-50%,-24px);z-index:20;
+    background:var(--ink);color:#fff;font-weight:700;font-size:13px;padding:9px 18px;border-radius:99px;
+    box-shadow:0 8px 24px rgba(30,20,10,.3);
     opacity:0;pointer-events:none;transition:opacity .25s, transform .25s}
-  #toast.on{opacity:.96;transform:translate(-50%,0)}
+  #toast.on{opacity:.97;transform:translate(-50%,0)}
 
+  /* ---------- about modal ---------- */
+  #about{position:fixed;inset:0;z-index:30;display:none;align-items:center;justify-content:center;
+    background:rgba(56,48,42,.4);backdrop-filter:blur(5px);padding:18px}
+  #about.on{display:flex}
+  .sheet{width:min(560px,100%);max-height:min(86vh,720px);overflow:auto;background:var(--card);
+    border-radius:22px;padding:clamp(20px,4vh,32px) clamp(20px,4vw,32px) clamp(16px,3vh,24px);
+    box-shadow:0 30px 80px rgba(30,20,10,.35);position:relative;
+    animation:sheetIn .3s cubic-bezier(.2,.9,.3,1.2)}
+  @keyframes sheetIn{from{opacity:0;transform:translateY(18px) scale(.97)}}
+  .sheet h2{margin:0 0 4px;font-family:var(--pop);font-weight:400;font-size:24px}
+  .sheet h2 b{color:var(--accent);font-weight:400}
+  .sheet .tag{font-size:11px;font-weight:700;letter-spacing:.2em;color:var(--ink-soft);text-transform:uppercase}
+  .sheet p{font-size:14px;line-height:1.9;margin:14px 0;font-weight:500}
+  .sheet p b{color:var(--accent2)}
+  .steps{display:flex;flex-direction:column;gap:10px;margin:16px 0;padding:16px;
+    background:linear-gradient(135deg,#fff7ec,#fdeee2);border-radius:16px}
+  .steps div{display:flex;align-items:center;gap:12px;font-size:13.5px;font-weight:700}
+  .steps i{flex:0 0 auto;width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+    font-style:normal;font-family:var(--pop);font-size:13px;color:#fff;
+    background:linear-gradient(135deg,#ff8a3d,#ff5a5f)}
+  .sheet .note{font-size:11.5px;color:var(--ink-soft);line-height:1.7;border-top:1px dashed var(--line);
+    padding-top:12px;margin-top:18px;font-weight:500}
+  .sheet .cta{display:block;width:100%;margin-top:14px;border:0;cursor:pointer;border-radius:13px;
+    font-family:var(--pop);font-size:16px;color:#fff;padding:13px;
+    background:linear-gradient(135deg,#ff7a3d,#ff5a5f 60%,#ff5da2);
+    box-shadow:0 6px 16px rgba(255,90,95,.4)}
+  #aboutClose{position:absolute;right:14px;top:14px;width:32px;height:32px;border:0;border-radius:50%;
+    cursor:pointer;background:rgba(58,47,42,.07);color:var(--ink-soft);font-size:15px;font-weight:700}
+  #aboutClose:hover{background:rgba(58,47,42,.14);color:var(--ink)}
+
+  /* ---------- responsive / motion ---------- */
   @media (max-width:640px){
-    header{flex-wrap:wrap;gap:8px}
-    .brand h1{font-size:26px}
-    .counter{min-width:0;flex:1 1 100%;align-items:stretch}
-    .count-line{display:flex;align-items:baseline;justify-content:space-between}
+    header{flex-wrap:wrap;gap:8px 10px}
+    .brand h1{font-size:25px}
+    .eyebrow{max-width:56vw}
+    .counter{min-width:0;flex:1 1 100%;align-items:stretch;order:3}
+    .counter .count-line{justify-content:space-between;width:100%}
+    .spacer{display:none}
+    .iconbtn{margin-left:auto}
+    .logo{width:32px;height:32px}
     .nameField{display:none}
+    .credit{display:none}
     .field input{font-size:16px}
   }
+  @media (prefers-reduced-motion: reduce){
+    .bar>i,.logo svg{animation:none}
+    .place::after{display:none}
+    .sheet{animation:none}
+  }
+  .rm .bar>i,.rm .logo svg{animation:none}
+  .rm .place::after{display:none}
+  .rm #finale.on{animation:none;opacity:0}
 </style>
 </head>
 <body>
 <div id="app">
   <header>
+    <div class="logo" aria-hidden="true">
+      <svg viewBox="0 0 64 64"><defs>
+        <linearGradient id="lg" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stop-color="#ff8a3d"/><stop offset="1" stop-color="#ff5a5f"/>
+        </linearGradient></defs>
+        <path fill="url(#lg)" stroke="#fff" stroke-width="2.5"
+          d="M12 22q0-8 8-8h7c-1.2-7 11.2-7 10 0h7q8 0 8 8v7c7-1.2 7 11.2 0 10v7q0 8-8 8H20q-8 0-8-8V22z"/>
+      </svg>
+    </div>
     <div class="brand">
-      <h1>ピース<b>ウィーク</b></h1>
+      <span class="eyebrow">Hiroshima Peace Week 2026 <b>· 8/1–8/6 ベルパルク</b></span>
+      <h1><b>ピース</b>ウィーク</h1>
       <span class="sub">810のピースで、2045年の広島をつくる</span>
     </div>
     <div class="spacer"></div>
     <div class="counter" aria-live="polite">
       <div class="count-line"><span class="count-num"><b id="countNum">0</b><span class="count-goal"> / 810 ピース</span></span></div>
       <div class="bar"><i id="bar"></i></div>
-      <span class="count-note">2045年には 1000ピースへ・毎年みんなで育てる壁</span>
+      <span class="count-note">被爆100年の<b>2045年</b>には1000ピースへ ─ 毎年みんなで育てる壁</span>
     </div>
+    <button class="iconbtn" id="infoBtn" type="button" aria-haspopup="dialog" aria-label="ピースウィークとは？">？</button>
   </header>
 
   <div id="boardWrap">
     <div id="board">
-      <canvas id="boardCanvas"></canvas>
-      <canvas id="fxCanvas"></canvas>
-      <div class="day-chip" id="dayChip">組み上がり中 <small>8/1〜</small></div>
-      <div id="pop" role="status">
-        <span class="chip"><span class="dot" id="popDot"></span><span id="popTag">2045年へ</span></span>
-        <div class="msg" id="popMsg"></div>
-        <div class="who" id="popWho"></div>
-      </div>
+      <canvas id="boardCanvas" aria-label="みんなのピースの壁。ピースをタップするとメッセージが読めます"></canvas>
+      <canvas id="fxCanvas" aria-hidden="true"></canvas>
+      <div class="day-chip" id="dayChip"><span class="dc-dots" id="dayDots"></span><span id="dayLabel">8/1 · 組み上がり中</span></div>
+      <div id="emptyHint"><span>さいしょのピースを置いてみよう</span></div>
+      <div id="finale" aria-hidden="true"><b>8.6</b><span>810のピースが、ひとつの広島に。</span></div>
+    </div>
+    <div id="pop" role="status">
+      <button id="popClose" type="button" aria-label="とじる">×</button>
+      <span class="chip"><span class="dot" id="popDot"></span><span id="popTag">2045年へ</span></span>
+      <div class="msg" id="popMsg"></div>
+      <div class="who" id="popWho"></div>
     </div>
   </div>
 
   <form class="compose" id="compose" autocomplete="off">
-    <div class="swatches" id="swatches"><span class="lbl">好きな色</span></div>
+    <div class="swatches" id="swatches">
+      <span class="preview" aria-hidden="true">
+        <svg viewBox="0 0 56 56"><path id="previewPath" fill="#ff5a5f" stroke="#fff" stroke-width="2"
+          d="M8 18q0-8 8-8h6c-1.2-7 13.2-7 12 0h6q8 0 8 8v6c7-1.2 7 13.2 0 12v6q0 8-8 8H16q-8 0-8-8V18z"/></svg>
+      </span>
+      <span class="lbl" id="swLbl">好きな色</span>
+    </div>
     <div class="row">
       <div class="field">
         <input id="msgInput" maxlength="24" enterkeyhint="done" placeholder="2045年へのメッセージ（例：えがおがつづく街に）" aria-label="2045年へのメッセージ">
+        <span class="cnt" id="msgCnt">0/24</span>
       </div>
       <div class="field nameField"><input id="nameInput" maxlength="10" placeholder="なまえ（任意）" aria-label="なまえ（任意）"></div>
       <button class="place" id="placeBtn" type="submit">ピースを置く</button>
     </div>
     <div class="actions">
+      <span class="credit">HIROSHIMA PEACE WEEK '26 — CONCEPT DEMO</span>
+      <button class="ghost" id="shareBtn" type="button">リンクを共有</button>
       <button class="ghost" id="resetBtn" type="button">はじめから</button>
       <button class="assemble" id="assembleBtn" type="button">8月6日、いっきに組み上げる</button>
     </div>
   </form>
 </div>
-<div id="toast"></div>
+
+<div id="about" role="dialog" aria-modal="true" aria-labelledby="aboutTitle">
+  <div class="sheet">
+    <button id="aboutClose" type="button" aria-label="とじる">×</button>
+    <span class="tag">About</span>
+    <h2 id="aboutTitle"><b>ピース</b>ウィークとは？</h2>
+    <p>「ピース」は、平和の <b>Peace</b> と、パズルの <b>Piece</b>。<br>
+    あなたの<b>好きな色</b>と<b>2045年へのメッセージ</b>が、ひとつのピースになります。</p>
+    <p>8月1日から5日まで広島のまちでピースを集め、<b>8月6日、ベルパルクの壁で810のピースがいっせいに組み上がります</b>。その日から壁は毎年10ピースずつ育ち、被爆100年の<b>2045年に、1000ピース</b>で完成します。</p>
+    <div class="steps">
+      <div><i>1</i>好きな色をえらぶ</div>
+      <div><i>2</i>2045年へのメッセージをかく</div>
+      <div><i>3</i>「ピースを置く」でピースが壁にはまる</div>
+      <div><i>4</i>壁のピースをタップすると、みんなのメッセージが読める</div>
+    </div>
+    <p class="note">これはコンセプトデモです。入力はこの画面の中だけで完結し、どこにも送信されません。<br>
+    ヒント: 上の「8月6日、いっきに組み上げる」で、当日の一斉組み上げ演出をプレビューできます。</p>
+    <button class="cta" id="aboutCta" type="button">ピースを置きにいく</button>
+  </div>
+</div>
+<div id="toast" role="status"></div>
 
 <script>
 "use strict";
 /* =====================================================================
-   ピースウィーク — みんなの色ピースが集まって一枚の壁になる
-   Canvas2D。ジグソー形状は隣接ピースが必ず噛み合うよう生成。
+   ピースウィーク v2.0 — みんなの色ピースが集まって一枚の壁になる
+   Canvas2D。ジグソー形状は隣接ピースが必ず噛み合うよう生成（emitEdge）。
    色モザイク方式（完成絵は各自の色の集合で立ち上がる）。
    ===================================================================== */
 var Q = new URLSearchParams(location.search);
 var qn = function (k, d) { return Q.has(k) ? parseFloat(Q.get(k)) : d; };
 var reduceMQ = window.matchMedia('(prefers-reduced-motion: reduce)');
 var REDUCED = function () { return Q.has('rm') ? qn('rm', 0) > 0 : reduceMQ.matches; };
+function syncRM() { document.documentElement.classList.toggle('rm', REDUCED()); }
 
-var COLS = qn('cols', 30), ROWS = qn('rows', 27);         // 30*27 = 810
+/* 810ピースのグリッド。?cols=&rows= 指定時はそれを厳守。
+   未指定なら 810 の因数ペアから、セルが最も正方形に近くなる組を画面に合わせて選ぶ
+   （どの端末でも「ジグソーらしい」ピース形状になる）。セッション中は固定。 */
+var COLS, ROWS;
+(function chooseGrid() {
+  var qc = qn('cols', 0), qr = qn('rows', 0);
+  if (qc || qr) { COLS = qc || 30; ROWS = qr || 27; return; }
+  var el = document.getElementById('board');
+  var rc = el ? el.getBoundingClientRect() : { width: 0, height: 0 };
+  var aspect = (rc.width > 20 && rc.height > 20) ? rc.width / rc.height
+    : window.innerWidth / Math.max(1, window.innerHeight);
+  var pairs = [[15, 54], [18, 45], [27, 30], [30, 27], [45, 18], [54, 15]];
+  var best = null;
+  for (var i = 0; i < pairs.length; i++) {
+    var d = Math.abs(Math.log(aspect * pairs[i][1] / pairs[i][0]));
+    if (!best || d < best.d) best = { d: d, c: pairs[i][0], r: pairs[i][1] };
+  }
+  COLS = best.c; ROWS = best.r;
+})();
 var TARGET = COLS * ROWS;
 var SEED_COUNT = Math.round(qn('seed', 132));
 
@@ -209,6 +385,7 @@ var PALETTE = [
   '#ff5a5f','#ff8a3d','#ffd23f','#8ac926','#22c55e','#00bcd4',
   '#3a86ff','#5e5ce6','#9b5de5','#ff5da2','#ff99c8','#12b3a6'
 ];
+var COLOR_NAMES = ['あか','だいだい','きいろ','きみどり','みどり','みずいろ','あお','るり','むらさき','ピンク','さくら','ターコイズ'];
 var SEED_MESSAGES = [
   'えがおがつづく街に','せんそうのない世界へ','あおい空をずっと','みんなちがってすてき',
   'こどもが安心して眠れる夜を','手をつなげる未来へ','花いっぱいの広島に','平和があたりまえの毎日',
@@ -218,6 +395,12 @@ var SEED_MESSAGES = [
   'ゆめをあきらめない','平和のバトンをつなぐ','ここから世界へ','2045年も、この空の下で'
 ];
 var SEED_NAMES = ['ひろ','ゆき','そら','あい','けん','なな','みお','たく','りん','はると','ここ','—','—','—'];
+var PLACEHOLDERS = [
+  '2045年へのメッセージ（例：えがおがつづく街に）',
+  '2045年へのメッセージ（例：せんそうのない世界へ）',
+  '2045年へのメッセージ（例：川と空が、きれいなままで）',
+  '2045年へのメッセージ（例：だれもひとりにしない街に）'
+];
 
 /* ---------- board / canvas ---------- */
 var boardEl = document.getElementById('board');
@@ -234,18 +417,41 @@ var paths = [];   // Path2D per cell, in CSS px
 var cx0 = [], cy0 = []; // cell centers
 var rowGrad = []; // cached vertical sheen gradient per row
 
+var KNOB = 4; // unified knob size (px, set in buildPaths) — amplitude follows the SHORT side
+              // of a cell so pieces read as jigsaw at any aspect ratio.
+function sweepHits(a0, a1, t, ccw) { // does an arc a0->a1 (canvas dir, ccw flag) pass angle t?
+  var TWO = Math.PI * 2;
+  var d = ccw ? (a0 - a1) : (a1 - a0); d = ((d % TWO) + TWO) % TWO;
+  var dt = ccw ? (a0 - t) : (t - a0); dt = ((dt % TWO) + TWO) % TWO;
+  return dt <= d;
+}
+/* Mushroom-shaped knob: a circular bulb on a short neck. Same profile from both sides
+   (symmetric about the edge midpoint), so adjacent pieces always mesh exactly. */
 function emitEdge(p, ax, ay, bx, by, sign) {
   if (sign === 0) { p.lineTo(bx, by); return; }
   var dx = bx - ax, dy = by - ay, L = Math.hypot(dx, dy);
-  var ux = dx / L, uy = dy / L, nx = -uy, ny = ux;
-  var P = function (f, g) { return [ax + ux * L * f + nx * sign * L * g, ay + uy * L * f + ny * sign * L * g]; };
-  var k = 0.16;
-  p.lineTo(P(0.38, 0)[0], P(0.38, 0)[1]);
-  p.bezierCurveTo(P(0.46, 0)[0], P(0.46, 0)[1], P(0.46, k)[0], P(0.46, k)[1], P(0.50, k)[0], P(0.50, k)[1]);
-  p.bezierCurveTo(P(0.54, k)[0], P(0.54, k)[1], P(0.54, 0)[0], P(0.54, 0)[1], P(0.62, 0)[0], P(0.62, 0)[1]);
+  var ux = dx / L, uy = dy / L;
+  var nx = -uy * sign, ny = ux * sign;            // outward normal for this knob
+  var R = KNOB * 0.62, v0 = KNOB - R;             // bulb radius / center height (tip = KNOB)
+  var mX = (ax + bx) / 2, mY = (ay + by) / 2;
+  var oX = mX + nx * v0, oY = mY + ny * v0;       // bulb center
+  var c30 = 0.8660254, s30 = 0.5;                 // neck attaches 30° below bulb equator
+  var plX = oX - ux * R * c30 - nx * R * s30, plY = oY - uy * R * c30 - ny * R * s30;
+  var prX = oX + ux * R * c30 - nx * R * s30, prY = oY + uy * R * c30 - ny * R * s30;
+  var app = Math.min(1.6 * R, 0.45 * L);
+  var aX = mX - ux * app, aY = mY - uy * app;
+  var b2X = mX + ux * app, b2Y = mY + uy * app;
+  var a0 = Math.atan2(plY - oY, plX - oX), a1 = Math.atan2(prY - oY, prX - oX);
+  var tip = Math.atan2(mY + ny * KNOB - oY, mX + nx * KNOB - oX);
+  var ccw = !sweepHits(a0, a1, tip, false);
+  p.lineTo(aX, aY);
+  p.lineTo(plX, plY);
+  p.arc(oX, oY, R, a0, a1, ccw);
+  p.lineTo(b2X, b2Y);
   p.lineTo(bx, by);
 }
 function buildPaths() {
+  KNOB = 0.24 * Math.min(cw, ch);
   paths = new Array(COLS * ROWS);
   cx0 = new Array(COLS * ROWS); cy0 = new Array(COLS * ROWS);
   for (var r = 0; r < ROWS; r++) {
@@ -267,9 +473,9 @@ function buildPaths() {
   rowGrad = [];
   for (var rr = 0; rr < ROWS; rr++) {
     var yy = rr * ch, g = bctx.createLinearGradient(0, yy - ch * 0.18, 0, yy + ch * 1.05);
-    g.addColorStop(0, 'rgba(255,255,255,0.40)');
+    g.addColorStop(0, 'rgba(255,255,255,0.42)');
     g.addColorStop(0.48, 'rgba(255,255,255,0.04)');
-    g.addColorStop(1, 'rgba(0,0,0,0.16)');
+    g.addColorStop(1, 'rgba(0,0,0,0.15)');
     rowGrad[rr] = g;
   }
 }
@@ -281,6 +487,7 @@ function resize() {
   cw = W / COLS; ch = H / ROWS;
   [bc, fc].forEach(function (cv) { cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr); });
   buildPaths();
+  hidePop();
   drawBoard();
 }
 
@@ -300,15 +507,19 @@ var animActive = false;
 function drawBoard() {
   bctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   bctx.clearRect(0, 0, W, H);
-  bctx.fillStyle = 'rgba(255,255,255,0.5)';
+  bctx.fillStyle = 'rgba(255,255,255,0.55)';
   bctx.fillRect(0, 0, W, H);
+  var lg = bctx.createLinearGradient(0, 0, 0, H);
+  lg.addColorStop(0, 'rgba(255,255,255,0.35)');
+  lg.addColorStop(1, 'rgba(160,120,80,0.07)');
+  bctx.fillStyle = lg; bctx.fillRect(0, 0, W, H);
 
   var now = performance.now();
   var stillAnimating = false;
 
   // unfilled outlines (faint) — the puzzle waiting to be filled
   bctx.lineWidth = Math.max(1, cw * 0.03);
-  bctx.strokeStyle = 'rgba(150,120,90,0.16)';
+  bctx.strokeStyle = 'rgba(150,120,90,0.15)';
   for (var u = 0; u < paths.length; u++) if (!pieces[u]) bctx.stroke(paths[u]);
 
   // filled pieces
@@ -328,7 +539,7 @@ function drawBoard() {
     bctx.fillStyle = pc.color; bctx.fill(paths[i]);      // body
     bctx.fillStyle = rowGrad[r]; bctx.fill(paths[i]);    // cached sheen (no clip)
     bctx.lineWidth = Math.max(1, cw * 0.05);
-    bctx.strokeStyle = 'rgba(255,255,255,0.72)';
+    bctx.strokeStyle = 'rgba(255,255,255,0.74)';
     bctx.stroke(paths[i]);                                // grout
     if (s !== 1) bctx.restore();
   }
@@ -343,7 +554,8 @@ function burst(px, py, n, spread) {
     var a = Math.random() * Math.PI * 2, sp = (0.5 + Math.random()) * (spread || 4);
     confetti.push({ x: px, y: py, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 3,
       g: 0.14 + Math.random() * 0.06, life: 0, max: 70 + Math.random() * 40,
-      c: PALETTE[(Math.random() * PALETTE.length) | 0], s: 4 + Math.random() * 5, rot: Math.random() * 6.28, vr: (Math.random() - .5) * .4 });
+      c: PALETTE[(Math.random() * PALETTE.length) | 0], s: 4 + Math.random() * 5,
+      rot: Math.random() * 6.28, vr: (Math.random() - .5) * .4, o: Math.random() < 0.3 });
   }
 }
 function fxLoop() {
@@ -355,8 +567,12 @@ function fxLoop() {
     if (p.life > p.max || p.y > H + 20) { confetti.splice(i, 1); continue; }
     var a = 1 - p.life / p.max;
     fctx.save(); fctx.translate(p.x, p.y); fctx.rotate(p.rot); fctx.globalAlpha = a;
-    fctx.fillStyle = p.c; fctx.fillRect(-p.s / 2, -p.s / 2, p.s, p.s * 0.62); fctx.restore();
+    fctx.fillStyle = p.c;
+    if (p.o) { fctx.beginPath(); fctx.arc(0, 0, p.s * 0.42, 0, 6.29); fctx.fill(); }
+    else fctx.fillRect(-p.s / 2, -p.s / 2, p.s, p.s * 0.62);
+    fctx.restore();
   }
+  tickCount();
   if (animActive) drawBoard();
   requestAnimationFrame(fxLoop);
 }
@@ -377,26 +593,45 @@ function nextEmpty() {
   return emptyBag.length ? emptyBag[emptyBag.length - 1] : null;
 }
 
-/* ---------- counter / day ---------- */
-var countNum = document.getElementById('countNum'), bar = document.getElementById('bar'), dayChip = document.getElementById('dayChip');
+/* ---------- counter / day chip ---------- */
+var countNum = document.getElementById('countNum'), bar = document.getElementById('bar');
+var dayLabel = document.getElementById('dayLabel'), dayDots = document.getElementById('dayDots');
+var emptyHint = document.getElementById('emptyHint');
+for (var dd = 0; dd < 6; dd++) dayDots.appendChild(document.createElement('i'));
+var shownCount = 0;
+function renderCount(v) { countNum.textContent = Math.round(v).toLocaleString('en-US'); }
+function tickCount() {
+  if (shownCount === placed) return;
+  if (REDUCED()) { shownCount = placed; renderCount(shownCount); return; }
+  var d = placed - shownCount;
+  shownCount = Math.abs(d) < 1 ? placed : shownCount + d * 0.18 + (d > 0 ? 0.6 : -0.6);
+  if ((d > 0 && shownCount > placed) || (d < 0 && shownCount < placed)) shownCount = placed;
+  renderCount(shownCount);
+}
 function updateCounter() {
-  countNum.textContent = placed.toLocaleString('en-US');
   var frac = placed / TARGET;
   bar.style.width = Math.min(100, frac * 100) + '%';
-  var d = '8/1', label = '組み上がり中';
-  if (frac >= 1) { d = '8/6'; label = '完成！'; }
-  else if (frac > 0.8) d = '8/5';
-  else if (frac > 0.6) d = '8/4';
-  else if (frac > 0.4) d = '8/3';
-  else if (frac > 0.2) d = '8/2';
-  dayChip.innerHTML = label + ' <small>' + d + '〜</small>';
+  var dIdx, label;
+  if (frac >= 1) { dIdx = 6; label = '8/6 · 完成！'; }
+  else if (frac > 0.8) { dIdx = 5; label = '8/5 · 組み上がり中'; }
+  else if (frac > 0.6) { dIdx = 4; label = '8/4 · 組み上がり中'; }
+  else if (frac > 0.4) { dIdx = 3; label = '8/3 · 組み上がり中'; }
+  else if (frac > 0.2) { dIdx = 2; label = '8/2 · 組み上がり中'; }
+  else { dIdx = 1; label = '8/1 · 組み上がり中'; }
+  dayLabel.textContent = label;
+  var dots = dayDots.children;
+  for (var i = 0; i < 6; i++) dots[i].className = i < dIdx ? 'on' : '';
+  emptyHint.classList.toggle('on', placed === 0);
+  if (REDUCED()) { shownCount = placed; renderCount(placed); }
 }
 
 /* ---------- popover (tap a piece → message) ---------- */
+var boardWrap = document.getElementById('boardWrap');
 var pop = document.getElementById('pop'), popMsg = document.getElementById('popMsg'),
-    popWho = document.getElementById('popWho'), popDot = document.getElementById('popDot');
+    popWho = document.getElementById('popWho'), popDot = document.getElementById('popDot'),
+    popClose = document.getElementById('popClose');
 var popOpen = false;
-function hidePop() { pop.classList.remove('on'); popOpen = false; }
+function hidePop() { if (pop) { pop.classList.remove('on'); popOpen = false; } }
 function hitTest(clientX, clientY) {
   var rect = bc.getBoundingClientRect();
   var x = clientX - rect.left, y = clientY - rect.top;
@@ -416,33 +651,68 @@ bc.addEventListener('click', function (e) {
   popMsg.textContent = pc.msg || '（メッセージなし）';
   popWho.textContent = (pc.name && pc.name !== '—') ? pc.name + ' さんのピース' : 'あなたたちのピース';
   popDot.style.background = pc.color;
-  pop.style.left = hit.x + 'px';
-  pop.style.top = hit.y + 'px';
+  var bx = boardEl.offsetLeft, by = boardEl.offsetTop;
+  pop.classList.toggle('below', hit.y < Math.max(95, ch * 3));
+  pop.style.left = (bx + Math.max(80, Math.min(W - 80, hit.x))) + 'px';
+  pop.style.top = (by + hit.y) + 'px';
   pop.classList.add('on'); popOpen = true;
 });
+popClose.addEventListener('click', function (e) { e.stopPropagation(); hidePop(); });
 document.addEventListener('click', function (e) { if (popOpen && !pop.contains(e.target) && e.target !== bc) hidePop(); });
 
 /* ---------- compose UI ---------- */
 var chosen = PALETTE[0];
 var swBox = document.getElementById('swatches');
+var previewPath = document.getElementById('previewPath');
+var swLbl = document.getElementById('swLbl');
+function setChosen(color, el, name) {
+  chosen = color;
+  document.querySelectorAll('.sw').forEach(function (s) { s.classList.remove('sel'); });
+  if (el) el.classList.add('sel');
+  previewPath.setAttribute('fill', color);
+  swLbl.textContent = name ? '好きな色 · ' + name : '好きな色';
+}
 PALETTE.forEach(function (col, i) {
   var b = document.createElement('button');
   b.type = 'button'; b.className = 'sw' + (i === 0 ? ' sel' : ''); b.style.background = col;
-  b.setAttribute('aria-label', '色を選ぶ');
-  b.addEventListener('click', function () { chosen = col; document.querySelectorAll('.sw').forEach(function (s) { s.classList.remove('sel'); }); b.classList.add('sel'); });
+  b.setAttribute('aria-label', '色を選ぶ: ' + COLOR_NAMES[i]);
+  b.title = COLOR_NAMES[i];
+  b.addEventListener('click', function () { setChosen(col, b, COLOR_NAMES[i]); });
   swBox.appendChild(b);
 });
 var custom = document.createElement('label');
-custom.className = 'sw custom'; custom.title = 'すきな色';
+custom.className = 'sw custom'; custom.title = 'すきな色をつくる';
 var ci = document.createElement('input'); ci.type = 'color'; ci.value = '#7c5cff';
-ci.addEventListener('input', function () { chosen = ci.value; document.querySelectorAll('.sw').forEach(function (s) { s.classList.remove('sel'); }); custom.classList.add('sel'); });
+ci.setAttribute('aria-label', 'すきな色をつくる');
+ci.addEventListener('input', function () { setChosen(ci.value, custom, 'カスタム'); });
 custom.appendChild(ci); swBox.appendChild(custom);
 
 var compose = document.getElementById('compose'), msgInput = document.getElementById('msgInput'),
-    nameInput = document.getElementById('nameInput'), placeBtn = document.getElementById('placeBtn');
+    nameInput = document.getElementById('nameInput'), placeBtn = document.getElementById('placeBtn'),
+    msgCnt = document.getElementById('msgCnt');
 var composing = false;
 msgInput.addEventListener('compositionstart', function () { composing = true; });
-msgInput.addEventListener('compositionend', function () { composing = false; });
+msgInput.addEventListener('compositionend', function () { composing = false; updateCnt(); });
+function updateCnt() { msgCnt.textContent = msgInput.value.length + '/24'; }
+msgInput.addEventListener('input', updateCnt);
+
+/* rotating placeholder examples (paused while typing / reduced motion) */
+var phIdx = 0;
+setInterval(function () {
+  if (REDUCED() || document.activeElement === msgInput || msgInput.value) return;
+  phIdx = (phIdx + 1) % PLACEHOLDERS.length;
+  msgInput.placeholder = PLACEHOLDERS[phIdx];
+}, 5000);
+
+/* milestones (manual placements only) */
+var lastMS = 0;
+function msLevel() { var f = placed / TARGET; return f >= 0.75 ? 3 : f >= 0.5 ? 2 : f >= 0.25 ? 1 : 0; }
+function msCheck() {
+  if (assembling) return;
+  var m = msLevel();
+  if (m > lastMS) { lastMS = m; toast('壁の' + ['25', '50', '75'][m - 1] + '%が埋まりました！'); }
+}
+
 compose.addEventListener('submit', function (e) {
   e.preventDefault();
   if (composing) return;
@@ -451,13 +721,27 @@ compose.addEventListener('submit', function (e) {
   var idx = nextEmpty();
   if (idx == null) { toast('壁がいっぱい！ 2045年までみんなで育てよう'); return; }
   placePiece(idx, chosen, msg, nameInput.value.trim(), true);
-  msgInput.value = ''; msgInput.focus();
+  msgInput.value = ''; updateCnt(); msgInput.focus();
   toast('ピースを置きました');
+  msCheck();
+});
+
+/* ---------- share ---------- */
+var shareBtn = document.getElementById('shareBtn');
+shareBtn.addEventListener('click', function () {
+  var url = location.origin + location.pathname;
+  var data = { title: 'ピースウィーク', text: '810のピースで、2045年の広島をつくる', url: url };
+  if (navigator.share) { navigator.share(data).catch(function () {}); return; }
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(url).then(function () { toast('リンクをコピーしました'); },
+      function () { toast(url); });
+  } else toast(url);
 });
 
 /* ---------- assemble (8/6) ---------- */
 var assembleBtn = document.getElementById('assembleBtn'), resetBtn = document.getElementById('resetBtn');
-var assembling = false, placedWave = 0;
+var finale = document.getElementById('finale');
+var assembling = false, placedWave = 0, finaleT;
 function assemble() {
   if (assembling) return;
   hidePop();
@@ -486,7 +770,12 @@ function assemble() {
 }
 function finishAssemble() {
   placedWave = 0; assembling = false; assembleBtn.disabled = false; placeBtn.disabled = false;
+  lastMS = msLevel();
   for (var k = 0; k < 8; k++) (function (kk) { setTimeout(function () { burst(Math.random() * W, H * 0.3 + Math.random() * H * 0.3, 26, 7); }, kk * 90); })(k);
+  if (!REDUCED()) {
+    finale.classList.remove('on'); void finale.offsetWidth; finale.classList.add('on');
+    clearTimeout(finaleT); finaleT = setTimeout(function () { finale.classList.remove('on'); }, 3200);
+  }
   toast('8月6日 — 810のピースが、ひとつの広島に');
 }
 resetBtn.addEventListener('click', function () { hidePop(); seed(true); toast('はじめからにしました'); });
@@ -496,10 +785,27 @@ assembleBtn.addEventListener('click', assemble);
 var toastT, toastEl = document.getElementById('toast');
 function toast(m) { toastEl.textContent = m; toastEl.classList.add('on'); clearTimeout(toastT); toastT = setTimeout(function () { toastEl.classList.remove('on'); }, 1900); }
 
+/* ---------- about modal ---------- */
+var about = document.getElementById('about'), infoBtn = document.getElementById('infoBtn'),
+    aboutClose = document.getElementById('aboutClose'), aboutCta = document.getElementById('aboutCta');
+var lastFocus = null;
+function openAbout() { lastFocus = document.activeElement; about.classList.add('on'); aboutClose.focus(); }
+function closeAbout() {
+  about.classList.remove('on');
+  if (lastFocus && lastFocus.focus) lastFocus.focus();
+}
+infoBtn.addEventListener('click', openAbout);
+aboutClose.addEventListener('click', closeAbout);
+aboutCta.addEventListener('click', function () { closeAbout(); msgInput.focus(); });
+about.addEventListener('click', function (e) { if (e.target === about) closeAbout(); });
+document.addEventListener('keydown', function (e) {
+  if (e.key === 'Escape') { if (about.classList.contains('on')) closeAbout(); else hidePop(); }
+});
+
 /* ---------- seed ---------- */
 function seed(reset) {
   for (var i = 0; i < pieces.length; i++) pieces[i] = null;
-  placed = 0;
+  placed = 0; lastMS = 0;
   reshuffleBag();
   var n = Math.min(SEED_COUNT, TARGET);
   for (var k = 0; k < n; k++) {
@@ -510,19 +816,23 @@ function seed(reset) {
     placed++;
   }
   reshuffleBag();
+  lastMS = msLevel();
+  shownCount = placed; renderCount(placed);
   updateCounter(); drawBoard();
 }
 
 /* ---------- boot ---------- */
 var rt;
 window.addEventListener('resize', function () { clearTimeout(rt); rt = setTimeout(resize, 150); });
-reduceMQ.addEventListener ? reduceMQ.addEventListener('change', drawBoard) : reduceMQ.addListener(drawBoard);
-function boot() { resize(); seed(false); requestAnimationFrame(fxLoop); }
+var onRMChange = function () { syncRM(); drawBoard(); };
+reduceMQ.addEventListener ? reduceMQ.addEventListener('change', onRMChange) : reduceMQ.addListener(onRMChange);
+function boot() { syncRM(); resize(); seed(false); requestAnimationFrame(fxLoop); }
 boot();
 if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { resize(); });
 
 /* test hooks */
 window.PW = {
+  version: '2.0',
   place: function (c, m, n) { return placePiece(nextEmpty(), c || PALETTE[0], m || 'テスト', n || '', true); },
   assemble: assemble, reset: function () { seed(true); }, count: function () { return placed; }, target: TARGET,
   fill: function (k) {
