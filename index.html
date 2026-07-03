@@ -1,0 +1,536 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ピースウィーク｜810のピースで2045年をつくる</title>
+<meta name="description" content="好きな色と2045年へのメッセージを、ひとつのピースに。みんなのピースが集まって、未来の広島の一枚になる。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@500;700;900&family=Yusei+Magic&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg1:#fff7ec; --bg2:#ffeede; --bg3:#eaf6ff;
+    --ink:#3a2f2a; --ink-soft:#8a7d72;
+    --card:#ffffff;
+    --accent:#ff5a5f; --accent2:#3a86ff; --accent3:#ffd23f;
+    --round:'Zen Maru Gothic','Hiragino Maru Gothic ProN','Yu Gothic',system-ui,sans-serif;
+    --pop:'Yusei Magic','Zen Maru Gothic',sans-serif;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%;overflow:hidden;font-family:var(--round);color:var(--ink);
+    -webkit-font-smoothing:antialiased;-webkit-tap-highlight-color:transparent}
+  body{
+    background:
+      radial-gradient(circle at 12% 18%, rgba(255,210,63,.16), transparent 42%),
+      radial-gradient(circle at 88% 82%, rgba(58,134,255,.14), transparent 46%),
+      radial-gradient(circle at 50% 120%, rgba(255,90,95,.12), transparent 55%),
+      linear-gradient(160deg, var(--bg1), var(--bg2) 55%, var(--bg3));
+  }
+  #app{position:fixed;inset:0;display:flex;flex-direction:column}
+
+  /* ---------- header ---------- */
+  header{
+    flex:0 0 auto;display:flex;align-items:center;gap:14px;
+    padding:clamp(10px,2vh,20px) clamp(14px,3vw,34px) 4px;
+  }
+  .brand{display:flex;flex-direction:column;line-height:1;gap:4px}
+  .brand h1{
+    margin:0;font-family:var(--pop);font-weight:400;
+    font-size:clamp(24px,3.4vw + 1vh,40px);letter-spacing:.02em;color:var(--ink);
+  }
+  .brand h1 b{color:var(--accent)}
+  .brand .sub{font-size:clamp(11px,1.5vh,13px);color:var(--ink-soft);letter-spacing:.04em;font-weight:500}
+  .spacer{flex:1 1 auto}
+  .counter{
+    display:flex;flex-direction:column;align-items:flex-end;gap:6px;min-width:clamp(150px,26vw,240px)
+  }
+  .count-num{font-family:var(--pop);font-size:clamp(20px,2.4vw + 1vh,30px);line-height:1;color:var(--ink)}
+  .count-num b{color:var(--accent);font-size:1.28em}
+  .count-goal{color:var(--ink-soft);font-weight:500}
+  .bar{width:100%;height:9px;border-radius:99px;background:rgba(58,47,42,.10);overflow:hidden}
+  .bar > i{display:block;height:100%;width:0;border-radius:99px;
+    background:linear-gradient(90deg,#ffd23f,#ff8a3d,#ff5a5f,#ff5da2,#9b5de5,#3a86ff);
+    background-size:600% 100%;transition:width .7s cubic-bezier(.2,.7,.3,1)}
+  .count-note{font-size:clamp(10px,1.3vh,12px);color:var(--ink-soft);font-weight:500}
+
+  /* ---------- board ---------- */
+  #boardWrap{flex:1 1 auto;position:relative;display:flex;align-items:center;justify-content:center;
+    padding:6px clamp(10px,2.5vw,30px)}
+  #board{position:relative;width:100%;height:100%;max-width:min(100%,148vh);margin:0 auto;
+    border-radius:14px;overflow:hidden;
+    box-shadow:0 10px 40px rgba(80,50,30,.14), inset 0 0 0 1px rgba(255,255,255,.6)}
+  #boardCanvas,#fxCanvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+  #fxCanvas{pointer-events:none}
+  #boardCanvas{cursor:pointer}
+  .day-chip{
+    position:absolute;left:12px;top:12px;z-index:3;
+    background:rgba(255,255,255,.82);backdrop-filter:blur(3px);
+    border-radius:99px;padding:5px 12px;font-size:clamp(11px,1.5vh,13px);font-weight:700;
+    color:var(--ink);box-shadow:0 2px 8px rgba(80,50,30,.14);pointer-events:none}
+  .day-chip small{color:var(--ink-soft);font-weight:500}
+
+  /* piece message popover */
+  #pop{
+    position:absolute;z-index:6;max-width:230px;transform:translate(-50%,-108%);
+    background:var(--card);border-radius:14px;padding:11px 13px 12px;
+    box-shadow:0 10px 30px rgba(60,40,20,.24);opacity:0;pointer-events:none;
+    transition:opacity .18s ease, transform .18s ease}
+  #pop.on{opacity:1;transform:translate(-50%,-116%)}
+  #pop .chip{display:inline-flex;align-items:center;gap:6px;font-size:11px;color:var(--ink-soft);font-weight:700;margin-bottom:5px}
+  #pop .dot{width:12px;height:12px;border-radius:4px;box-shadow:inset 0 0 0 1px rgba(0,0,0,.12)}
+  #pop .msg{font-size:15px;font-weight:700;line-height:1.4;color:var(--ink);word-break:break-word}
+  #pop .who{margin-top:6px;font-size:12px;color:var(--ink-soft);font-weight:500}
+  #pop::after{content:"";position:absolute;left:50%;bottom:-8px;transform:translateX(-50%);
+    border:8px solid transparent;border-top-color:var(--card);border-bottom:0}
+
+  /* ---------- compose ---------- */
+  .compose{
+    flex:0 0 auto;background:rgba(255,255,255,.72);backdrop-filter:blur(8px);
+    border-top:1px solid rgba(120,90,60,.12);
+    padding:clamp(10px,1.8vh,16px) clamp(12px,3vw,30px) calc(clamp(10px,1.8vh,16px) + env(safe-area-inset-bottom));
+    display:flex;flex-direction:column;gap:10px}
+  .swatches{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .swatches .lbl{font-size:12px;font-weight:700;color:var(--ink-soft);margin-right:2px}
+  .sw{width:26px;height:26px;border-radius:9px;border:2px solid rgba(255,255,255,.9);cursor:pointer;
+    box-shadow:0 1px 4px rgba(0,0,0,.16);transition:transform .12s ease;padding:0}
+  .sw:hover{transform:translateY(-2px) scale(1.06)}
+  .sw.sel{outline:3px solid var(--ink);outline-offset:1px;transform:translateY(-2px) scale(1.08)}
+  .sw.custom{position:relative;overflow:hidden;
+    background:conic-gradient(#ff5a5f,#ffd23f,#8ac926,#00bcd4,#3a86ff,#9b5de5,#ff5da2,#ff5a5f)}
+  .sw.custom input{position:absolute;inset:-6px;opacity:0;cursor:pointer}
+  .row{display:flex;align-items:center;gap:10px}
+  .field{flex:1 1 auto;display:flex;align-items:center;gap:8px;
+    background:#fff;border-radius:13px;padding:4px 6px 4px 14px;
+    box-shadow:inset 0 0 0 1.5px rgba(120,90,60,.16)}
+  .field:focus-within{box-shadow:inset 0 0 0 2px var(--accent2)}
+  .field input{border:0;outline:0;background:transparent;font-family:var(--round);font-size:16px;color:var(--ink);flex:1 1 auto;min-width:0;font-weight:500}
+  .field input::placeholder{color:#bcae9f}
+  #nameInput{width:clamp(74px,20vw,120px);flex:0 0 auto;font-size:14px}
+  .nameField{flex:0 0 auto}
+  .place{
+    flex:0 0 auto;border:0;cursor:pointer;border-radius:13px;
+    font-family:var(--pop);font-size:clamp(15px,1.9vh,17px);color:#fff;
+    padding:0 clamp(16px,2.4vw,24px);height:46px;white-space:nowrap;
+    background:linear-gradient(135deg,#ff7a3d,#ff5a5f 60%,#ff5da2);
+    box-shadow:0 6px 16px rgba(255,90,95,.4);transition:transform .12s ease, box-shadow .2s ease}
+  .place:hover{transform:translateY(-1px);box-shadow:0 9px 22px rgba(255,90,95,.5)}
+  .place:active{transform:translateY(1px) scale(.98)}
+  .place:disabled{opacity:.5;cursor:default;box-shadow:none}
+  .compose.shake .field{animation:shake .3s}
+  @keyframes shake{25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
+  .actions{display:flex;align-items:center;gap:10px;justify-content:flex-end;flex-wrap:wrap}
+  .ghost{border:0;background:transparent;cursor:pointer;font-family:var(--round);font-weight:700;
+    font-size:13px;color:var(--ink-soft);padding:8px 12px;border-radius:10px}
+  .ghost:hover{color:var(--ink);background:rgba(120,90,60,.08)}
+  .assemble{border:0;cursor:pointer;font-family:var(--pop);font-size:14px;color:#2b2540;
+    background:linear-gradient(135deg,#ffe36b,#ffd23f);border-radius:11px;padding:9px 15px;
+    box-shadow:0 4px 12px rgba(255,190,40,.45)}
+  .assemble:hover{transform:translateY(-1px)}
+  .assemble:disabled{opacity:.5;cursor:default}
+
+  #toast{position:fixed;left:50%;top:14px;transform:translate(-50%,-20px);z-index:20;
+    background:var(--ink);color:#fff;font-weight:700;font-size:13px;padding:8px 16px;border-radius:99px;
+    opacity:0;pointer-events:none;transition:opacity .25s, transform .25s}
+  #toast.on{opacity:.96;transform:translate(-50%,0)}
+
+  @media (max-width:640px){
+    header{flex-wrap:wrap;gap:8px}
+    .brand h1{font-size:26px}
+    .counter{min-width:0;flex:1 1 100%;align-items:stretch}
+    .count-line{display:flex;align-items:baseline;justify-content:space-between}
+    .nameField{display:none}
+    .field input{font-size:16px}
+  }
+</style>
+</head>
+<body>
+<div id="app">
+  <header>
+    <div class="brand">
+      <h1>ピース<b>ウィーク</b></h1>
+      <span class="sub">810のピースで、2045年の広島をつくる</span>
+    </div>
+    <div class="spacer"></div>
+    <div class="counter" aria-live="polite">
+      <div class="count-line"><span class="count-num"><b id="countNum">0</b><span class="count-goal"> / 810 ピース</span></span></div>
+      <div class="bar"><i id="bar"></i></div>
+      <span class="count-note">2045年には 1000ピースへ・毎年みんなで育てる壁</span>
+    </div>
+  </header>
+
+  <div id="boardWrap">
+    <div id="board">
+      <canvas id="boardCanvas"></canvas>
+      <canvas id="fxCanvas"></canvas>
+      <div class="day-chip" id="dayChip">組み上がり中 <small>8/1〜</small></div>
+      <div id="pop" role="status">
+        <span class="chip"><span class="dot" id="popDot"></span><span id="popTag">2045年へ</span></span>
+        <div class="msg" id="popMsg"></div>
+        <div class="who" id="popWho"></div>
+      </div>
+    </div>
+  </div>
+
+  <form class="compose" id="compose" autocomplete="off">
+    <div class="swatches" id="swatches"><span class="lbl">好きな色</span></div>
+    <div class="row">
+      <div class="field">
+        <input id="msgInput" maxlength="24" enterkeyhint="done" placeholder="2045年へのメッセージ（例：えがおがつづく街に）" aria-label="2045年へのメッセージ">
+      </div>
+      <div class="field nameField"><input id="nameInput" maxlength="10" placeholder="なまえ（任意）" aria-label="なまえ（任意）"></div>
+      <button class="place" id="placeBtn" type="submit">ピースを置く</button>
+    </div>
+    <div class="actions">
+      <button class="ghost" id="resetBtn" type="button">はじめから</button>
+      <button class="assemble" id="assembleBtn" type="button">8月6日、いっきに組み上げる</button>
+    </div>
+  </form>
+</div>
+<div id="toast"></div>
+
+<script>
+"use strict";
+/* =====================================================================
+   ピースウィーク — みんなの色ピースが集まって一枚の壁になる
+   Canvas2D。ジグソー形状は隣接ピースが必ず噛み合うよう生成。
+   色モザイク方式（完成絵は各自の色の集合で立ち上がる）。
+   ===================================================================== */
+var Q = new URLSearchParams(location.search);
+var qn = function (k, d) { return Q.has(k) ? parseFloat(Q.get(k)) : d; };
+var reduceMQ = window.matchMedia('(prefers-reduced-motion: reduce)');
+var REDUCED = function () { return Q.has('rm') ? qn('rm', 0) > 0 : reduceMQ.matches; };
+
+var COLS = qn('cols', 30), ROWS = qn('rows', 27);         // 30*27 = 810
+var TARGET = COLS * ROWS;
+var SEED_COUNT = Math.round(qn('seed', 132));
+
+var PALETTE = [
+  '#ff5a5f','#ff8a3d','#ffd23f','#8ac926','#22c55e','#00bcd4',
+  '#3a86ff','#5e5ce6','#9b5de5','#ff5da2','#ff99c8','#12b3a6'
+];
+var SEED_MESSAGES = [
+  'えがおがつづく街に','せんそうのない世界へ','あおい空をずっと','みんなちがってすてき',
+  'こどもが安心して眠れる夜を','手をつなげる未来へ','花いっぱいの広島に','平和があたりまえの毎日',
+  'ちがいを認め合おう','だれもひとりにしない','しあわせのおすそわけ','学びたい人が学べる世界',
+  'やさしさが循環する街','川がきれいなままで','笑い声がひびく通りに','いのちを大切に',
+  '国をこえて友だちに','未来のこどもへ、ありがとう','希望はここにある','小さな親切をたくさん',
+  'ゆめをあきらめない','平和のバトンをつなぐ','ここから世界へ','2045年も、この空の下で'
+];
+var SEED_NAMES = ['ひろ','ゆき','そら','あい','けん','なな','みお','たく','りん','はると','ここ','—','—','—'];
+
+/* ---------- board / canvas ---------- */
+var boardEl = document.getElementById('board');
+var bc = document.getElementById('boardCanvas'), bctx = bc.getContext('2d');
+var fc = document.getElementById('fxCanvas'), fctx = fc.getContext('2d');
+var dpr = 1, cw = 10, ch = 10, W = 0, H = 0;
+
+/* signs for interior edges (fixed once so shapes are stable across resizes) */
+var V = [], Hs = [];
+for (var c0 = 0; c0 <= COLS; c0++) { V[c0] = []; for (var r0 = 0; r0 < ROWS; r0++) V[c0][r0] = Math.random() < 0.5 ? 1 : -1; }
+for (var c1 = 0; c1 < COLS; c1++) { Hs[c1] = []; for (var r1 = 0; r1 <= ROWS; r1++) Hs[c1][r1] = Math.random() < 0.5 ? 1 : -1; }
+
+var paths = [];   // Path2D per cell, in CSS px
+var cx0 = [], cy0 = []; // cell centers
+var rowGrad = []; // cached vertical sheen gradient per row
+
+function emitEdge(p, ax, ay, bx, by, sign) {
+  if (sign === 0) { p.lineTo(bx, by); return; }
+  var dx = bx - ax, dy = by - ay, L = Math.hypot(dx, dy);
+  var ux = dx / L, uy = dy / L, nx = -uy, ny = ux;
+  var P = function (f, g) { return [ax + ux * L * f + nx * sign * L * g, ay + uy * L * f + ny * sign * L * g]; };
+  var k = 0.16;
+  p.lineTo(P(0.38, 0)[0], P(0.38, 0)[1]);
+  p.bezierCurveTo(P(0.46, 0)[0], P(0.46, 0)[1], P(0.46, k)[0], P(0.46, k)[1], P(0.50, k)[0], P(0.50, k)[1]);
+  p.bezierCurveTo(P(0.54, k)[0], P(0.54, k)[1], P(0.54, 0)[0], P(0.54, 0)[1], P(0.62, 0)[0], P(0.62, 0)[1]);
+  p.lineTo(bx, by);
+}
+function buildPaths() {
+  paths = new Array(COLS * ROWS);
+  cx0 = new Array(COLS * ROWS); cy0 = new Array(COLS * ROWS);
+  for (var r = 0; r < ROWS; r++) {
+    for (var c = 0; c < COLS; c++) {
+      var i = r * COLS + c;
+      var x = c * cw, y = r * ch;
+      var TLx = x, TLy = y, TRx = x + cw, TRy = y, BRx = x + cw, BRy = y + ch, BLx = x, BLy = y + ch;
+      var p = new Path2D();
+      p.moveTo(TLx, TLy);
+      emitEdge(p, TLx, TLy, TRx, TRy, r === 0 ? 0 : -Hs[c][r]);          // top
+      emitEdge(p, TRx, TRy, BRx, BRy, c === COLS - 1 ? 0 : V[c + 1][r]); // right
+      emitEdge(p, BRx, BRy, BLx, BLy, r === ROWS - 1 ? 0 : Hs[c][r + 1]);// bottom
+      emitEdge(p, BLx, BLy, TLx, TLy, c === 0 ? 0 : -V[c][r]);           // left
+      p.closePath();
+      paths[i] = p;
+      cx0[i] = x + cw / 2; cy0[i] = y + ch / 2;
+    }
+  }
+  rowGrad = [];
+  for (var rr = 0; rr < ROWS; rr++) {
+    var yy = rr * ch, g = bctx.createLinearGradient(0, yy - ch * 0.18, 0, yy + ch * 1.05);
+    g.addColorStop(0, 'rgba(255,255,255,0.40)');
+    g.addColorStop(0.48, 'rgba(255,255,255,0.04)');
+    g.addColorStop(1, 'rgba(0,0,0,0.16)');
+    rowGrad[rr] = g;
+  }
+}
+
+function resize() {
+  var rect = boardEl.getBoundingClientRect();
+  dpr = Math.min(window.devicePixelRatio || 1, 2);
+  W = rect.width; H = rect.height;
+  cw = W / COLS; ch = H / ROWS;
+  [bc, fc].forEach(function (cv) { cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr); });
+  buildPaths();
+  drawBoard();
+}
+
+/* ---------- state ---------- */
+var pieces = new Array(COLS * ROWS).fill(null); // {color, msg, name, t0}
+var placed = 0;
+var emptyBag = [];
+function reshuffleBag() {
+  emptyBag = [];
+  for (var i = 0; i < pieces.length; i++) if (!pieces[i]) emptyBag.push(i);
+  for (var j = emptyBag.length - 1; j > 0; j--) { var m = (Math.random() * (j + 1)) | 0; var t = emptyBag[j]; emptyBag[j] = emptyBag[m]; emptyBag[m] = t; }
+}
+
+/* ---------- drawing ---------- */
+var easeOutBack = function (t) { var c1 = 1.70158, c3 = c1 + 1; return 1 + c3 * Math.pow(t - 1, 3) + c1 * Math.pow(t - 1, 2); };
+var animActive = false;
+function drawBoard() {
+  bctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  bctx.clearRect(0, 0, W, H);
+  bctx.fillStyle = 'rgba(255,255,255,0.5)';
+  bctx.fillRect(0, 0, W, H);
+
+  var now = performance.now();
+  var stillAnimating = false;
+
+  // unfilled outlines (faint) — the puzzle waiting to be filled
+  bctx.lineWidth = Math.max(1, cw * 0.03);
+  bctx.strokeStyle = 'rgba(150,120,90,0.16)';
+  for (var u = 0; u < paths.length; u++) if (!pieces[u]) bctx.stroke(paths[u]);
+
+  // filled pieces
+  bctx.lineJoin = 'round';
+  var red = REDUCED();
+  for (var i = 0; i < paths.length; i++) {
+    var pc = pieces[i];
+    if (!pc) continue;
+    var s = 1;
+    if (pc.t0 != null && !red) {
+      var kk = (now - pc.t0) / 460;
+      if (kk < 1) { s = Math.max(0.001, easeOutBack(Math.min(kk, 1))); stillAnimating = true; }
+      else pc.t0 = null;
+    }
+    var r = (i / COLS) | 0;
+    if (s !== 1) { bctx.save(); bctx.translate(cx0[i], cy0[i]); bctx.scale(s, s); bctx.translate(-cx0[i], -cy0[i]); }
+    bctx.fillStyle = pc.color; bctx.fill(paths[i]);      // body
+    bctx.fillStyle = rowGrad[r]; bctx.fill(paths[i]);    // cached sheen (no clip)
+    bctx.lineWidth = Math.max(1, cw * 0.05);
+    bctx.strokeStyle = 'rgba(255,255,255,0.72)';
+    bctx.stroke(paths[i]);                                // grout
+    if (s !== 1) bctx.restore();
+  }
+  animActive = stillAnimating;
+}
+
+/* ---------- confetti ---------- */
+var confetti = [];
+function burst(px, py, n, spread) {
+  if (REDUCED()) return;
+  for (var i = 0; i < n; i++) {
+    var a = Math.random() * Math.PI * 2, sp = (0.5 + Math.random()) * (spread || 4);
+    confetti.push({ x: px, y: py, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 3,
+      g: 0.14 + Math.random() * 0.06, life: 0, max: 70 + Math.random() * 40,
+      c: PALETTE[(Math.random() * PALETTE.length) | 0], s: 4 + Math.random() * 5, rot: Math.random() * 6.28, vr: (Math.random() - .5) * .4 });
+  }
+}
+function fxLoop() {
+  fctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  fctx.clearRect(0, 0, W, H);
+  for (var i = confetti.length - 1; i >= 0; i--) {
+    var p = confetti[i]; p.life++;
+    p.vy += p.g; p.x += p.vx; p.y += p.vy; p.rot += p.vr;
+    if (p.life > p.max || p.y > H + 20) { confetti.splice(i, 1); continue; }
+    var a = 1 - p.life / p.max;
+    fctx.save(); fctx.translate(p.x, p.y); fctx.rotate(p.rot); fctx.globalAlpha = a;
+    fctx.fillStyle = p.c; fctx.fillRect(-p.s / 2, -p.s / 2, p.s, p.s * 0.62); fctx.restore();
+  }
+  if (animActive) drawBoard();
+  requestAnimationFrame(fxLoop);
+}
+
+/* ---------- placing ---------- */
+function placePiece(idx, color, msg, name, animate) {
+  if (idx == null || pieces[idx]) return false;
+  pieces[idx] = { color: color, msg: msg || '', name: name || '', t0: (animate && !REDUCED()) ? performance.now() : null };
+  placed++;
+  updateCounter();
+  if (animate) { burst(cx0[idx], cy0[idx], 14, 4); animActive = true; }
+  drawBoard();
+  return true;
+}
+function nextEmpty() {
+  while (emptyBag.length && pieces[emptyBag[emptyBag.length - 1]]) emptyBag.pop();
+  if (!emptyBag.length) reshuffleBag();
+  return emptyBag.length ? emptyBag[emptyBag.length - 1] : null;
+}
+
+/* ---------- counter / day ---------- */
+var countNum = document.getElementById('countNum'), bar = document.getElementById('bar'), dayChip = document.getElementById('dayChip');
+function updateCounter() {
+  countNum.textContent = placed.toLocaleString('en-US');
+  var frac = placed / TARGET;
+  bar.style.width = Math.min(100, frac * 100) + '%';
+  var d = '8/1', label = '組み上がり中';
+  if (frac >= 1) { d = '8/6'; label = '完成！'; }
+  else if (frac > 0.8) d = '8/5';
+  else if (frac > 0.6) d = '8/4';
+  else if (frac > 0.4) d = '8/3';
+  else if (frac > 0.2) d = '8/2';
+  dayChip.innerHTML = label + ' <small>' + d + '〜</small>';
+}
+
+/* ---------- popover (tap a piece → message) ---------- */
+var pop = document.getElementById('pop'), popMsg = document.getElementById('popMsg'),
+    popWho = document.getElementById('popWho'), popDot = document.getElementById('popDot');
+var popOpen = false;
+function hidePop() { pop.classList.remove('on'); popOpen = false; }
+function hitTest(clientX, clientY) {
+  var rect = bc.getBoundingClientRect();
+  var x = clientX - rect.left, y = clientY - rect.top;
+  var c0 = Math.floor(x / cw), r0 = Math.floor(y / ch);
+  bctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  for (var r = r0 - 1; r <= r0 + 1; r++) for (var c = c0 - 1; c <= c0 + 1; c++) {
+    if (c < 0 || r < 0 || c >= COLS || r >= ROWS) continue;
+    var i = r * COLS + c;
+    if (pieces[i] && bctx.isPointInPath(paths[i], x, y)) return { i: i, x: x, y: y };
+  }
+  return null;
+}
+bc.addEventListener('click', function (e) {
+  var hit = hitTest(e.clientX, e.clientY);
+  if (!hit) { hidePop(); return; }
+  var pc = pieces[hit.i];
+  popMsg.textContent = pc.msg || '（メッセージなし）';
+  popWho.textContent = (pc.name && pc.name !== '—') ? pc.name + ' さんのピース' : 'あなたたちのピース';
+  popDot.style.background = pc.color;
+  pop.style.left = hit.x + 'px';
+  pop.style.top = hit.y + 'px';
+  pop.classList.add('on'); popOpen = true;
+});
+document.addEventListener('click', function (e) { if (popOpen && !pop.contains(e.target) && e.target !== bc) hidePop(); });
+
+/* ---------- compose UI ---------- */
+var chosen = PALETTE[0];
+var swBox = document.getElementById('swatches');
+PALETTE.forEach(function (col, i) {
+  var b = document.createElement('button');
+  b.type = 'button'; b.className = 'sw' + (i === 0 ? ' sel' : ''); b.style.background = col;
+  b.setAttribute('aria-label', '色を選ぶ');
+  b.addEventListener('click', function () { chosen = col; document.querySelectorAll('.sw').forEach(function (s) { s.classList.remove('sel'); }); b.classList.add('sel'); });
+  swBox.appendChild(b);
+});
+var custom = document.createElement('label');
+custom.className = 'sw custom'; custom.title = 'すきな色';
+var ci = document.createElement('input'); ci.type = 'color'; ci.value = '#7c5cff';
+ci.addEventListener('input', function () { chosen = ci.value; document.querySelectorAll('.sw').forEach(function (s) { s.classList.remove('sel'); }); custom.classList.add('sel'); });
+custom.appendChild(ci); swBox.appendChild(custom);
+
+var compose = document.getElementById('compose'), msgInput = document.getElementById('msgInput'),
+    nameInput = document.getElementById('nameInput'), placeBtn = document.getElementById('placeBtn');
+var composing = false;
+msgInput.addEventListener('compositionstart', function () { composing = true; });
+msgInput.addEventListener('compositionend', function () { composing = false; });
+compose.addEventListener('submit', function (e) {
+  e.preventDefault();
+  if (composing) return;
+  var msg = msgInput.value.trim();
+  if (!msg) { compose.classList.remove('shake'); void compose.offsetWidth; compose.classList.add('shake'); msgInput.focus(); return; }
+  var idx = nextEmpty();
+  if (idx == null) { toast('壁がいっぱい！ 2045年までみんなで育てよう'); return; }
+  placePiece(idx, chosen, msg, nameInput.value.trim(), true);
+  msgInput.value = ''; msgInput.focus();
+  toast('ピースを置きました');
+});
+
+/* ---------- assemble (8/6) ---------- */
+var assembleBtn = document.getElementById('assembleBtn'), resetBtn = document.getElementById('resetBtn');
+var assembling = false, placedWave = 0;
+function assemble() {
+  if (assembling) return;
+  hidePop();
+  var empties = [];
+  for (var i = 0; i < pieces.length; i++) if (!pieces[i]) empties.push(i);
+  if (!empties.length) { toast('もう完成しています'); return; }
+  assembling = true; assembleBtn.disabled = true; placeBtn.disabled = true;
+  if (REDUCED()) {
+    for (var e = 0; e < empties.length; e++) pieces[empties[e]] = { color: PALETTE[(Math.random() * PALETTE.length) | 0], msg: SEED_MESSAGES[(Math.random() * SEED_MESSAGES.length) | 0], name: '', t0: null };
+    placed = TARGET; updateCounter(); drawBoard(); finishAssemble(); return;
+  }
+  empties.sort(function (a, b) { return ((a % COLS) + ((a / COLS) | 0)) - ((b % COLS) + ((b / COLS) | 0)); });
+  var total = empties.length, dur = 2200, t0 = performance.now();
+  (function step() {
+    var t = performance.now() - t0, frac = Math.min(t / dur, 1);
+    var should = Math.floor(frac * total);
+    while (placedWave < should) {
+      var i = empties[placedWave++];
+      pieces[i] = { color: PALETTE[(Math.random() * PALETTE.length) | 0], msg: SEED_MESSAGES[(Math.random() * SEED_MESSAGES.length) | 0], name: '', t0: performance.now() };
+      placed++;
+      if (placedWave % 12 === 0) burst(cx0[i], cy0[i], 5, 3);
+    }
+    updateCounter(); animActive = true; drawBoard();
+    if (frac < 1) requestAnimationFrame(step); else finishAssemble();
+  })();
+}
+function finishAssemble() {
+  placedWave = 0; assembling = false; assembleBtn.disabled = false; placeBtn.disabled = false;
+  for (var k = 0; k < 8; k++) (function (kk) { setTimeout(function () { burst(Math.random() * W, H * 0.3 + Math.random() * H * 0.3, 26, 7); }, kk * 90); })(k);
+  toast('8月6日 — 810のピースが、ひとつの広島に');
+}
+resetBtn.addEventListener('click', function () { hidePop(); seed(true); toast('はじめからにしました'); });
+assembleBtn.addEventListener('click', assemble);
+
+/* ---------- toast ---------- */
+var toastT, toastEl = document.getElementById('toast');
+function toast(m) { toastEl.textContent = m; toastEl.classList.add('on'); clearTimeout(toastT); toastT = setTimeout(function () { toastEl.classList.remove('on'); }, 1900); }
+
+/* ---------- seed ---------- */
+function seed(reset) {
+  for (var i = 0; i < pieces.length; i++) pieces[i] = null;
+  placed = 0;
+  reshuffleBag();
+  var n = Math.min(SEED_COUNT, TARGET);
+  for (var k = 0; k < n; k++) {
+    var idx = nextEmpty(); if (idx == null) break;
+    pieces[idx] = { color: PALETTE[(Math.random() * PALETTE.length) | 0],
+      msg: SEED_MESSAGES[(Math.random() * SEED_MESSAGES.length) | 0],
+      name: SEED_NAMES[(Math.random() * SEED_NAMES.length) | 0], t0: null };
+    placed++;
+  }
+  reshuffleBag();
+  updateCounter(); drawBoard();
+}
+
+/* ---------- boot ---------- */
+var rt;
+window.addEventListener('resize', function () { clearTimeout(rt); rt = setTimeout(resize, 150); });
+reduceMQ.addEventListener ? reduceMQ.addEventListener('change', drawBoard) : reduceMQ.addListener(drawBoard);
+function boot() { resize(); seed(false); requestAnimationFrame(fxLoop); }
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(boot); else boot();
+setTimeout(function () { if (!paths.length) boot(); }, 500);
+
+/* test hooks */
+window.PW = {
+  place: function (c, m, n) { return placePiece(nextEmpty(), c || PALETTE[0], m || 'テスト', n || '', true); },
+  assemble: assemble, reset: function () { seed(true); }, count: function () { return placed; }, target: TARGET,
+  fill: function (k) {
+    for (var i = 0; i < k; i++) { var idx = nextEmpty(); if (idx == null) break;
+      pieces[idx] = { color: PALETTE[(Math.random() * PALETTE.length) | 0], msg: SEED_MESSAGES[(Math.random() * SEED_MESSAGES.length) | 0], name: '', t0: null }; placed++; }
+    updateCounter(); drawBoard(); return placed;
+  }
+};
+</script>
+</body>
+</html>
