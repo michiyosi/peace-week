@@ -518,8 +518,8 @@ var rt;
 window.addEventListener('resize', function () { clearTimeout(rt); rt = setTimeout(resize, 150); });
 reduceMQ.addEventListener ? reduceMQ.addEventListener('change', drawBoard) : reduceMQ.addListener(drawBoard);
 function boot() { resize(); seed(false); requestAnimationFrame(fxLoop); }
-if (document.fonts && document.fonts.ready) document.fonts.ready.then(boot); else boot();
-setTimeout(function () { if (!paths.length) boot(); }, 500);
+boot();
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { resize(); });
 
 /* test hooks */
 window.PW = {
