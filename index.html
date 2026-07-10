@@ -356,6 +356,8 @@
   .rm .place::after{display:none}
   .rm #finale.on{animation:none;opacity:0}
   .rm #auroraCanvas{opacity:.5}
+#miniBoard{display:block;margin:12px auto;border-radius:50%;touch-action:none;cursor:pointer}
+.mini-hint{text-align:center;font-size:.82rem;color:#7ba5b8;margin-bottom:8px}
 </style>
 </head>
 <body>
@@ -461,7 +463,9 @@
         <div class="pvmsg" id="pvMsg"></div>
         <div class="pvwho" id="pvWho"></div>
       </div>
-      <button class="place wcta" id="wPlace" type="button">パズルに置く</button>
+      <p class="mini-hint">置きたい場所をタップしてください</p>
+      <canvas id="miniBoard" width="280" height="280"></canvas>
+      <button class="place wcta" id="wPlace" disabled type="button">パズルに置く</button>
       <button class="tskip" id="wBack" type="button">← 色とメッセージをなおす</button>
     </section>
     <section class="wstep" id="wp3">
@@ -570,6 +574,8 @@
    ほぼ正面の円盤（KY=0.95）＋わずかな厚み。透明感のあるパステルピース、
    中心は太陽の光。幾何はフラット座標で構築し描画時に一括変換。
    ===================================================================== */
+var selectedIdx = -1;
+var miniCtx = null;
 var TWO_PI = Math.PI * 2;
 var KY = 0.95;
 var Q = new URLSearchParams(location.search);
@@ -1134,6 +1140,71 @@ function closeWiz() { wiz.classList.remove('on'); }
 drawBtn.addEventListener('click', openWiz);
 wizClose.addEventListener('click', closeWiz);
 wBack.addEventListener('click', function () { wizShow(0); msgInput.focus(); });
+function drawMiniBoard(){
+  var c=document.getElementById('miniBoard');
+  if(!c)return;
+  miniCtx=c.getContext('2d');
+  var cx=140,cy=140,scale=140/rOut[14];
+  miniCtx.clearRect(0,0,280,280);
+  var idx=0;
+  for(var r=0;r<15;r++){
+    var n=RING_PH[r],aStep=2*Math.PI/n;
+    for(var s=0;s<n;s++){
+      var a1=-Math.PI/2+s*aStep,a2=a1+aStep;
+      miniCtx.beginPath();
+      miniCtx.arc(cx,cy,rOut[r]*scale,a1,a2);
+      miniCtx.arc(cx,cy,rIn[r]*scale,a2,a1,true);
+      miniCtx.closePath();
+      if(pieces[idx]){
+        miniCtx.fillStyle=hexA(pieces[idx].c,.7);
+      }else if(idx===selectedIdx){
+        miniCtx.fillStyle=hexA(chosen,.5);
+      }else{
+        miniCtx.fillStyle='rgba(200,210,220,.35)';
+      }
+      miniCtx.fill();
+      miniCtx.strokeStyle='rgba(255,255,255,.6)';
+      miniCtx.lineWidth=.5;
+      miniCtx.stroke();
+      if(idx===selectedIdx){
+        miniCtx.strokeStyle='#2196F3';
+        miniCtx.lineWidth=2;
+        miniCtx.stroke();
+      }
+      idx++;
+    }
+  }
+}
+
+function onMiniTap(e){
+  var c=document.getElementById('miniBoard');
+  var rect=c.getBoundingClientRect();
+  var x=(e.touches?e.touches[0].clientX:e.clientX)-rect.left;
+  var y=(e.touches?e.touches[0].clientY:e.clientY)-rect.top;
+  var cx=140,cy=140,scale=140/rOut[14];
+  var dx=x-cx,dy=y-cy,dist=Math.sqrt(dx*dx+dy*dy);
+  var ang=Math.atan2(dy,dx);
+  if(ang<-Math.PI/2)ang+=2*Math.PI;
+  ang+=Math.PI/2;
+  if(ang>=2*Math.PI)ang-=2*Math.PI;
+  var idx=0;
+  for(var r=0;r<15;r++){
+    if(dist>=rIn[r]*scale&&dist<=rOut[r]*scale){
+      var n=RING_PH[r],sIdx=Math.floor(ang/(2*Math.PI/n));
+      if(sIdx>=n)sIdx=n-1;
+      var target=0;
+      for(var i=0;i<r;i++)target+=RING_PH[i];
+      target+=sIdx;
+      if(!pieces[target]){
+        selectedIdx=target;
+        document.getElementById('wPlace').disabled=false;
+        drawMiniBoard();
+      }
+      return;
+    }
+  }
+}
+
 function goPreview() {
   if (composing) return;
   var msg = msgInput.value.trim();
@@ -1147,6 +1218,11 @@ function goPreview() {
   var nm = nameInput.value.trim();
   pvWho.textContent = (nm ? nm + ' · ' : '') + chosenName + 'のピース';
   wizShow(1);
+  selectedIdx=-1;
+  document.getElementById('wPlace').disabled=true;
+  drawMiniBoard();
+  document.getElementById('miniBoard').addEventListener('click',onMiniTap);
+  document.getElementById('miniBoard').addEventListener('touchstart',function(e){e.preventDefault();onMiniTap(e);});
 }
 wNext1.addEventListener('click', goPreview);
 msgInput.addEventListener('keydown', function (e) {
@@ -1154,7 +1230,8 @@ msgInput.addEventListener('keydown', function (e) {
 });
 wPlace.addEventListener('click', function () {
   var msg = msgInput.value.trim();
-  var idx = nextEmpty();
+  var idx = selectedIdx;
+    if(idx<0)return;
   if (idx == null) { toast('円がいっぱいです。2045年までみんなで育てましょう'); closeWiz(); return; }
   placePiece(idx, chosen, msg, nameInput.value.trim(), true);
   msCheck();
