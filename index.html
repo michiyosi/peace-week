@@ -3,36 +3,35 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>ピースウィーク｜810のピースで、2045年の広島をつくる</title>
-<meta name="description" content="好きな色と2045年へのメッセージを、ひとつのピースに。中心の光から、みんなのピースが円になって広がっていく。完成した絵は8/6のお披露目会で。">
-<meta name="theme-color" content="#F4F8FC">
+<title>Piece Project｜8月6日、人々が思う“2045年の広島”を形に。</title>
+<meta name="description" content="一つひとつの想いがピースになり、青空の下、太陽のような810ピースの円形アートが完成していく。完成した“2045年の広島”は8/6のお披露目会で。">
+<meta name="theme-color" content="#5FA8E8">
 <link rel="canonical" href="https://michiyosi.github.io/peace-week/">
 <meta property="og:type" content="website">
-<meta property="og:title" content="ピースウィーク｜810のピースで、2045年の広島をつくる">
-<meta property="og:description" content="好きな色と2045年へのメッセージを、ひとつのピースに。みんなのピースが円になって広がり、8/6に一枚の絵になる。">
+<meta property="og:title" content="Piece Project｜8月6日、人々が思う“2045年の広島”を形に。">
+<meta property="og:description" content="一つひとつの想いがピースになり、太陽のような810ピースの円形アートが完成していく。">
 <meta property="og:url" content="https://michiyosi.github.io/peace-week/">
 <meta property="og:locale" content="ja_JP">
 <meta name="twitter:card" content="summary">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath fill='%23C9A24B' d='M12 22q0-8 8-8h7c-1-7 11-7 10 0h7q8 0 8 8v7c7-1 7 11 0 10v7q0 8-8 8H20q-8 0-8-8V22z'/%3E%3C/svg%3E">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath fill='%235FA8E8' d='M12 22q0-8 8-8h7c-1-7 11-7 10 0h7q8 0 8 8v7c7-1 7 11 0 10v7q0 8-8 8H20q-8 0-8-8V22z'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;600;700&family=EB+Garamond:ital,wght@1,500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;600;700&family=EB+Garamond:ital,wght@0,500;1,500&display=swap" rel="stylesheet">
 <!-- =====================================================================
-     ピースウィーク v4.0 (2026-07-04) — きれいめ・希望感バージョン
-     擬似3D（チルト0.62・ピースの厚み・浮遊ピース）＋オーロラ＋光の粒。
-     明朝体・空色の余白・ジュエルパステル。トーンは「静かな希望」。
+     Piece Project（ピースウィーク） v5.0 (2026-07-04) — 青空・発光バージョン
+     青空の下、太陽のような810ピースの円形アートが中心の光から広がっていく。
+     「平和を願う」ではなく「未来を一緒に作る」世界観。透明感＋発光感。
      単一HTML・外部依存は Google Fonts のみ・データ送信なし
      URLパラメータ: ?rm=1 / ?seed=N
      テストフック:  window.PW.place / .assemble / .reset / .fill / .count
      ===================================================================== -->
 <style>
   :root{
-    --ink:#2E3A45; --ink-soft:#6E7E8C; --ink-faint:#A9B7C2;
+    --ink:#1F4B73; --ink-soft:#54779A; --ink-faint:#93AFC8;
     --card:#ffffff;
-    --gold:#B9893B; --gold-soft:#C9A24B; --gold-line:rgba(185,137,59,.4);
-    --blue:#4A7BB5;
-    --line:rgba(110,130,150,.16);
-    --shadow-s:0 2px 10px rgba(46,58,69,.08);
+    --sky:#4E9BE0; --teal:#3FC6C0; --sun:#F7D97C;
+    --line:rgba(84,119,154,.18);
+    --shadow-s:0 2px 12px rgba(31,75,115,.10);
     --serif:'Shippori Mincho','Yu Mincho','Hiragino Mincho ProN',serif;
     --latin:'EB Garamond','Shippori Mincho',serif;
   }
@@ -41,87 +40,70 @@
     -webkit-font-smoothing:antialiased;-webkit-tap-highlight-color:transparent}
   body{
     background:
-      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.35 0 0 0 0 0.42 0 0 0 0 0.52 0 0 0 0.04 0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E"),
-      radial-gradient(circle at 50% 34%, rgba(255,233,185,.42), transparent 46%),
-      radial-gradient(circle at 14% 12%, rgba(214,232,248,.8), transparent 44%),
-      radial-gradient(circle at 88% 88%, rgba(233,242,250,.9), transparent 50%),
-      linear-gradient(168deg,#F7FAFD 0%, #EFF5FB 48%, #E9F1F9 100%);
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.025 0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E"),
+      radial-gradient(circle at 86% 6%, rgba(255,255,255,.95), rgba(255,255,255,0) 16%),
+      linear-gradient(118deg, transparent 42%, rgba(255,255,255,.13) 49%, transparent 56%),
+      linear-gradient(104deg, transparent 56%, rgba(255,255,255,.09) 61%, transparent 67%),
+      radial-gradient(circle at 12% 78%, rgba(255,255,255,.34), transparent 24%),
+      radial-gradient(circle at 82% 66%, rgba(255,255,255,.28), transparent 22%),
+      radial-gradient(ellipse at 50% 112%, rgba(255,255,255,.9), transparent 52%),
+      linear-gradient(180deg,#3F8FD8 0%, #63ACE8 26%, #93C8F2 58%, #CDE7F9 86%, #EAF5FC 100%);
   }
   button,input{font-family:var(--serif)}
-  :focus-visible{outline:2px solid var(--blue);outline-offset:2px;border-radius:6px}
+  :focus-visible{outline:2px solid #fff;outline-offset:2px;border-radius:6px}
   #app{position:fixed;inset:0;display:flex;flex-direction:column}
 
   /* ---------- header ---------- */
   header{
-    flex:0 0 auto;display:flex;align-items:center;gap:clamp(10px,1.6vw,18px);
-    padding:clamp(10px,2vh,22px) clamp(16px,3.2vw,38px) 4px;
+    flex:0 0 auto;display:flex;align-items:flex-start;gap:clamp(10px,1.6vw,16px);
+    padding:clamp(10px,2vh,20px) clamp(16px,3.2vw,40px) 0;
   }
-  .logo{flex:0 0 auto;width:clamp(32px,4.4vh,44px);height:clamp(32px,4.4vh,44px);
-    filter:drop-shadow(0 3px 8px rgba(185,137,59,.3))}
+  .logo{flex:0 0 auto;width:clamp(30px,4.2vh,40px);height:clamp(30px,4.2vh,40px);margin-top:2px;
+    filter:drop-shadow(0 3px 10px rgba(20,60,110,.3))}
   .logo svg{width:100%;height:100%;display:block;animation:bob 7s ease-in-out infinite}
   @keyframes bob{0%,100%{transform:rotate(-2deg)}50%{transform:rotate(3deg) translateY(-2px)}}
   .brand{display:flex;flex-direction:column;line-height:1;gap:6px;min-width:0}
-  .eyebrow{font-family:var(--latin);font-style:italic;font-size:clamp(10px,1.3vh,12px);font-weight:500;
-    letter-spacing:.24em;color:var(--ink-soft);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .eyebrow b{color:var(--gold);font-weight:500}
-  .brand h1{
-    margin:0;font-weight:600;
-    font-size:clamp(23px,3vw + 1vh,38px);letter-spacing:.06em;color:var(--ink);white-space:nowrap;
-  }
-  .brand h1 b{font-weight:600;
-    background:linear-gradient(120deg,#C89B4E,#A87830 70%);
-    -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:var(--gold)}
-  .brand .sub{font-size:clamp(11px,1.5vh,13px);color:var(--ink-soft);letter-spacing:.14em;font-weight:500}
+  .brand h1{margin:0;font-family:var(--latin);font-weight:500;
+    font-size:clamp(24px,3vw + 1vh,38px);letter-spacing:.04em;color:#fff;white-space:nowrap;
+    text-shadow:0 2px 14px rgba(20,60,110,.25)}
+  .brand .sub{font-size:clamp(12px,1.7vh,15px);color:#fff;letter-spacing:.1em;font-weight:600;
+    text-shadow:0 1px 8px rgba(20,60,110,.3)}
+  .brand .sub2{font-size:clamp(10px,1.4vh,12px);color:rgba(255,255,255,.85);letter-spacing:.12em;font-weight:500}
   .spacer{flex:1 1 auto}
-  .counter{display:flex;flex-direction:column;align-items:flex-end;gap:7px;min-width:clamp(150px,25vw,250px)}
-  .count-line{display:flex;align-items:baseline;gap:2px}
-  .count-num{font-size:clamp(19px,2.3vw + 1vh,29px);line-height:1;color:var(--ink);font-variant-numeric:tabular-nums;font-weight:600}
-  .count-num b{color:var(--gold);font-size:1.32em;font-weight:600}
-  .count-num .now{font-size:.48em;color:var(--ink-soft);font-weight:500;margin-right:4px;letter-spacing:.1em}
-  .count-goal{color:var(--ink-soft);font-weight:500;font-size:.52em;letter-spacing:.08em}
-  .bar{width:100%;height:7px;border-radius:99px;background:rgba(46,58,69,.08);overflow:hidden;
-    box-shadow:inset 0 1px 2px rgba(46,58,69,.08)}
-  .bar > i{display:block;height:100%;width:0;border-radius:99px;
-    background:linear-gradient(90deg,#F4D06F,#F2A0A5,#B08BD9,#6D9EE8,#66C6D2,#F4D06F);
-    background-size:400% 100%;animation:flow 22s linear infinite;
-    transition:width .8s cubic-bezier(.2,.7,.3,1)}
-  @keyframes flow{to{background-position:-400% 0}}
-  .count-note{font-size:clamp(10px,1.3vh,12px);color:var(--ink-soft);font-weight:500;letter-spacing:.04em}
-  .count-note b{color:var(--gold)}
-  .iconbtn{flex:0 0 auto;width:37px;height:37px;border-radius:50%;border:1px solid var(--line);cursor:pointer;
-    font-family:var(--latin);font-style:italic;font-size:16px;color:var(--ink-soft);background:rgba(255,255,255,.86);
-    box-shadow:var(--shadow-s);transition:transform .15s ease,color .15s ease}
-  .iconbtn:hover{transform:translateY(-2px);color:var(--gold)}
+  .iconbtn{flex:0 0 auto;width:37px;height:37px;border-radius:50%;border:1px solid rgba(255,255,255,.6);cursor:pointer;
+    font-family:var(--latin);font-style:italic;font-size:16px;color:#fff;background:rgba(255,255,255,.18);
+    backdrop-filter:blur(4px);transition:transform .15s ease,background .15s ease}
+  .iconbtn:hover{transform:translateY(-2px);background:rgba(255,255,255,.32)}
 
   /* ---------- stage ---------- */
   #boardWrap{flex:1 1 auto;position:relative;display:flex;align-items:center;justify-content:center;
-    padding:2px clamp(10px,2.5vw,30px);min-height:0}
+    padding:0 clamp(10px,2.5vw,30px);min-height:0}
   #board{position:relative}
   #boardCanvas,#auroraCanvas,#fxCanvas{position:absolute;inset:0;width:100%;height:100%;display:block}
-  #auroraCanvas{pointer-events:none;mix-blend-mode:soft-light;opacity:.9}
+  #auroraCanvas{pointer-events:none;mix-blend-mode:soft-light;opacity:.85}
   #fxCanvas{pointer-events:none}
   #boardCanvas{cursor:pointer}
   .day-chip{
-    position:absolute;left:2px;top:2px;z-index:3;display:flex;align-items:center;gap:9px;
-    background:rgba(255,255,255,.88);backdrop-filter:blur(4px);border:1px solid var(--line);
+    position:absolute;left:0;top:2px;z-index:3;display:flex;align-items:center;gap:9px;
+    background:rgba(255,255,255,.85);backdrop-filter:blur(4px);border:1px solid rgba(255,255,255,.7);
     border-radius:99px;padding:6px 14px;font-size:clamp(11px,1.5vh,13px);font-weight:600;letter-spacing:.06em;
     color:var(--ink);box-shadow:var(--shadow-s);pointer-events:none;white-space:nowrap}
   .dc-dots{display:flex;gap:4px}
-  .dc-dots i{width:6px;height:6px;border-radius:50%;background:rgba(46,58,69,.14);transition:background .4s,transform .4s}
-  .dc-dots i.on{background:linear-gradient(135deg,#E8C57A,#B9893B);transform:scale(1.2)}
+  .dc-dots i{width:6px;height:6px;border-radius:50%;background:rgba(31,75,115,.16);transition:background .4s,transform .4s}
+  .dc-dots i.on{background:linear-gradient(135deg,#5BC8F0,#3E8EE8);transform:scale(1.2)}
   #emptyHint{position:absolute;left:50%;bottom:1%;transform:translateX(-50%);z-index:2;
     pointer-events:none;opacity:0;transition:opacity .5s;white-space:nowrap}
   #emptyHint.on{opacity:1}
-  #emptyHint span{font-size:clamp(13px,2.2vh,17px);color:var(--ink-soft);letter-spacing:.1em;
-    background:rgba(255,255,255,.8);border:1px solid var(--line);padding:9px 20px;border-radius:99px;box-shadow:var(--shadow-s)}
+  #emptyHint span{font-size:clamp(13px,2.2vh,16px);color:var(--ink);letter-spacing:.1em;
+    background:rgba(255,255,255,.85);border:1px solid rgba(255,255,255,.7);padding:9px 20px;border-radius:99px;box-shadow:var(--shadow-s)}
 
-  /* finale overlay (8/6 unveiling preview) */
+  /* finale overlay */
   #finale{position:absolute;inset:-4%;z-index:5;display:flex;flex-direction:column;align-items:center;justify-content:center;
-    gap:10px;pointer-events:none;opacity:0;background:radial-gradient(circle at 50% 50%, rgba(255,255,255,.94), rgba(247,250,253,.55) 52%, transparent 76%)}
+    gap:10px;pointer-events:none;opacity:0;background:radial-gradient(circle at 50% 50%, rgba(255,255,255,.96), rgba(255,255,255,.6) 52%, transparent 76%)}
   #finale b{font-family:var(--latin);font-style:italic;font-weight:500;font-size:clamp(40px,8.4vh,78px);line-height:1;
-    background:linear-gradient(120deg,#D9AE5F,#B9893B 60%);
+    background:linear-gradient(120deg,#3E8EE8,#3FC6C0 60%);
     -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
-    filter:drop-shadow(0 4px 16px rgba(185,137,59,.3))}
+    filter:drop-shadow(0 4px 16px rgba(62,142,232,.3))}
   #finale span{font-size:clamp(15px,2.5vh,21px);color:var(--ink);letter-spacing:.14em;font-weight:600}
   #finale small{font-size:clamp(11px,1.6vh,13px);color:var(--ink-soft);font-weight:500;letter-spacing:.08em}
   #finale.on{animation:finale 3.6s ease forwards}
@@ -130,59 +112,102 @@
   /* piece message popover */
   #pop{
     position:absolute;z-index:6;max-width:255px;min-width:150px;transform:translate(-50%,-114%);
-    background:var(--card);border-radius:14px;padding:12px 30px 13px 15px;border:1px solid var(--line);
-    box-shadow:0 14px 38px rgba(46,58,69,.18);opacity:0;pointer-events:none;
+    background:var(--card);border-radius:14px;padding:12px 30px 13px 15px;border:1px solid rgba(255,255,255,.8);
+    box-shadow:0 14px 40px rgba(20,60,110,.25);opacity:0;pointer-events:none;
     transition:opacity .16s ease}
   #pop.on{opacity:1;pointer-events:auto}
   #pop.below{transform:translate(-50%,16px)}
   #pop .chip{display:inline-flex;align-items:center;gap:6px;font-size:10.5px;color:var(--ink-soft);font-weight:600;letter-spacing:.1em;margin-bottom:6px}
-  #pop .dot{width:12px;height:12px;border-radius:4px;box-shadow:inset 0 0 0 1px rgba(0,0,0,.12)}
+  #pop .dot{width:12px;height:12px;border-radius:4px;box-shadow:inset 0 0 0 1px rgba(0,0,0,.1)}
   #pop .msg{font-size:15px;font-weight:600;line-height:1.55;color:var(--ink);word-break:break-word}
   #pop .who{margin-top:7px;font-size:11.5px;color:var(--ink-soft);font-weight:500;letter-spacing:.06em}
   #pop::after{content:"";position:absolute;left:50%;bottom:-8px;transform:translateX(-50%);
     border:8px solid transparent;border-top-color:var(--card);border-bottom:0}
   #pop.below::after{bottom:auto;top:-8px;border-top:0;border-bottom:8px solid var(--card)}
   #popClose{position:absolute;right:7px;top:7px;width:24px;height:24px;border:0;border-radius:50%;
-    cursor:pointer;background:rgba(46,58,69,.06);color:var(--ink-soft);font-size:13px;line-height:1;font-weight:600}
-  #popClose:hover{background:rgba(46,58,69,.12);color:var(--ink)}
+    cursor:pointer;background:rgba(31,75,115,.06);color:var(--ink-soft);font-size:13px;line-height:1;font-weight:600}
+  #popClose:hover{background:rgba(31,75,115,.12);color:var(--ink)}
+
+  /* ---------- progress (パズルの下) ---------- */
+  #progress{flex:0 0 auto;display:flex;flex-direction:column;align-items:center;gap:5px;
+    padding:2px 16px clamp(6px,1.2vh,12px);text-align:center}
+  .p-label{font-size:clamp(10px,1.4vh,12px);color:var(--ink);letter-spacing:.22em;font-weight:600;
+    text-shadow:0 1px 8px rgba(255,255,255,.8)}
+  .p-num{color:var(--ink);font-weight:600;font-variant-numeric:tabular-nums;line-height:1;
+    font-size:clamp(15px,2vh,18px);text-shadow:0 1px 10px rgba(255,255,255,.85);letter-spacing:.06em}
+  .p-num b{font-family:var(--latin);font-size:clamp(30px,4.6vh,42px);font-weight:500}
+  .p-num .p-goal{font-family:var(--latin);font-size:clamp(14px,2vh,18px);color:var(--ink-soft)}
+  .pbar{width:min(380px,72vw);height:9px;border-radius:99px;background:rgba(31,75,115,.16);overflow:hidden;
+    box-shadow:inset 0 1px 3px rgba(20,60,110,.2), 0 0 0 1px rgba(255,255,255,.5);margin:3px 0 2px}
+  .pbar > i{display:block;height:100%;width:0;border-radius:99px;
+    background:linear-gradient(90deg,#2F7CD6,#5BC8F0,#8FE9E2,#F7D97C);
+    background-size:220% 100%;animation:flow 12s ease-in-out infinite alternate;
+    box-shadow:0 0 12px rgba(140,220,255,.9), 0 0 4px rgba(255,255,255,.9);
+    transition:width .8s cubic-bezier(.2,.7,.3,1)}
+  @keyframes flow{to{background-position:100% 0}}
+  .p-left{font-size:clamp(11px,1.6vh,13px);color:var(--ink);font-weight:600;letter-spacing:.14em;
+    text-shadow:0 1px 8px rgba(255,255,255,.8)}
+  .p-left b{font-family:var(--latin);font-size:1.25em;font-weight:500}
+  .p-note{font-size:clamp(10.5px,1.5vh,12.5px);color:var(--ink-soft);font-weight:500;letter-spacing:.08em;
+    text-shadow:0 1px 8px rgba(255,255,255,.8)}
+  .p-hint{font-size:clamp(9.5px,1.35vh,11px);color:var(--ink-faint);font-weight:500;letter-spacing:.06em;
+    text-shadow:0 1px 6px rgba(255,255,255,.7)}
 
   /* ---------- compose ---------- */
   .compose{
-    flex:0 0 auto;background:rgba(255,255,255,.78);backdrop-filter:blur(12px);
-    border-top:1px solid var(--line);
-    padding:clamp(10px,1.8vh,16px) clamp(14px,3.2vw,34px) calc(clamp(10px,1.8vh,16px) + env(safe-area-inset-bottom));
-    display:flex;flex-direction:column;gap:10px}
+    flex:0 0 auto;background:rgba(255,255,255,.88);backdrop-filter:blur(14px);
+    border-top:1px solid rgba(255,255,255,.9);
+    padding:clamp(8px,1.5vh,14px) clamp(14px,3.2vw,34px) calc(clamp(8px,1.5vh,14px) + env(safe-area-inset-bottom));
+    display:flex;flex-direction:column;gap:8px}
+  .tut{display:flex;align-items:center;justify-content:center;gap:10px}
+  .tstep{display:flex;align-items:center;gap:7px;font-size:11px;font-weight:600;color:var(--ink-faint);letter-spacing:.08em;
+    transition:color .3s}
+  .tstep i{width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+    font-style:normal;font-family:var(--latin);font-size:11px;color:#fff;background:var(--ink-faint);transition:background .3s,transform .3s}
+  .tstep.cur{color:var(--ink)}
+  .tstep.cur i{background:linear-gradient(135deg,#3E8EE8,#3FC6C0);transform:scale(1.12)}
+  .tstep.done{color:var(--ink-soft)}
+  .tstep.done i{background:#8FCDEB}
+  .tline{width:clamp(18px,4vw,44px);height:1.5px;background:var(--line)}
   .swatches{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-  .preview{width:29px;height:29px;flex:0 0 auto;filter:drop-shadow(0 2px 5px rgba(46,58,69,.2))}
+  .preview{width:28px;height:28px;flex:0 0 auto;filter:drop-shadow(0 2px 5px rgba(31,75,115,.25))}
   .preview svg{width:100%;height:100%;display:block;overflow:visible}
   .swatches .lbl{font-size:12px;font-weight:600;color:var(--ink-soft);margin-right:2px;letter-spacing:.08em}
   .sw{width:26px;height:26px;border-radius:8px;border:2px solid rgba(255,255,255,.95);cursor:pointer;
-    box-shadow:0 1px 5px rgba(46,58,69,.18);transition:transform .18s ease;padding:0}
+    box-shadow:0 1px 5px rgba(31,75,115,.2);transition:transform .18s ease;padding:0}
   .sw:hover{transform:translateY(-2px) scale(1.07)}
   .sw.sel{outline:2.5px solid var(--ink);outline-offset:1px;transform:translateY(-2px) scale(1.09)}
   .sw.custom{position:relative;overflow:hidden;
-    background:conic-gradient(#F2777C,#F4D06F,#A8CF74,#66C6D2,#6D9EE8,#B08BD9,#EF8FBB,#F2777C)}
+    background:conic-gradient(#F49A93,#F7D97C,#A8E3B0,#7FD8DC,#7CC4F0,#A98BD8,#F5A8C8,#F49A93)}
   .sw.custom input{position:absolute;inset:-6px;opacity:0;cursor:pointer}
+  .chips{display:flex;align-items:center;gap:7px;overflow-x:auto;scrollbar-width:none;padding-bottom:1px}
+  .chips::-webkit-scrollbar{display:none}
+  .chips .ex{flex:0 0 auto;font-size:10.5px;font-weight:600;color:var(--ink-soft);letter-spacing:.06em;
+    background:rgba(84,150,210,.1);border:1px solid var(--line);border-radius:99px;padding:5px 11px}
+  .chips button.chip{flex:0 0 auto;border:1px solid var(--line);background:#fff;cursor:pointer;border-radius:99px;
+    font-size:11.5px;font-weight:600;color:var(--ink);letter-spacing:.04em;padding:5px 12px;
+    transition:transform .12s ease,box-shadow .12s ease}
+  .chips button.chip:hover{transform:translateY(-1px);box-shadow:var(--shadow-s)}
   .row{display:flex;align-items:center;gap:10px}
   .field{flex:1 1 auto;display:flex;align-items:center;gap:8px;
     background:#fff;border-radius:12px;padding:4px 10px 4px 15px;
-    box-shadow:inset 0 0 0 1px rgba(110,130,150,.28);transition:box-shadow .15s}
-  .field:focus-within{box-shadow:inset 0 0 0 1.5px var(--gold-soft)}
-  .field input{border:0;outline:0;background:transparent;font-size:16px;color:var(--ink);flex:1 1 auto;min-width:0;font-weight:500;height:38px}
+    box-shadow:inset 0 0 0 1px rgba(84,119,154,.3);transition:box-shadow .15s}
+  .field:focus-within{box-shadow:inset 0 0 0 1.5px #3E8EE8}
+  .field input{border:0;outline:0;background:transparent;font-size:16px;color:var(--ink);flex:1 1 auto;min-width:0;font-weight:500;height:36px}
   .field input::placeholder{color:var(--ink-faint)}
-  .cnt{flex:0 0 auto;font-size:10px;font-weight:600;color:var(--ink-faint);font-variant-numeric:tabular-nums}
+  .cnt{flex:0 0 auto;font-size:10px;font-weight:600;color:var(--ink-faint);font-variant-numeric:tabular-nums;letter-spacing:.06em}
   #nameInput{width:clamp(74px,20vw,120px);flex:0 0 auto;font-size:14px}
   .nameField{flex:0 0 auto}
   .place{
-    flex:0 0 auto;border:0;cursor:pointer;border-radius:12px;position:relative;overflow:hidden;
-    font-size:clamp(14px,1.8vh,16px);color:#4A3A1E;font-weight:700;letter-spacing:.12em;
-    padding:0 clamp(18px,2.6vw,26px);height:46px;white-space:nowrap;
-    background:linear-gradient(135deg,#F0CE8B,#DBAA5E);
-    box-shadow:0 6px 18px rgba(200,160,80,.35);transition:transform .15s ease, box-shadow .2s ease}
+    flex:0 0 auto;border:0;cursor:pointer;border-radius:99px;position:relative;overflow:hidden;
+    font-size:clamp(14px,1.8vh,16px);color:#fff;font-weight:700;letter-spacing:.14em;
+    padding:0 clamp(20px,2.8vw,30px);height:44px;white-space:nowrap;
+    background:linear-gradient(135deg,#3E8EE8,#3FC6C0);
+    box-shadow:0 6px 20px rgba(62,142,232,.4);transition:transform .15s ease, box-shadow .2s ease}
   .place::after{content:"";position:absolute;inset:0;
-    background:linear-gradient(115deg,transparent 30%,rgba(255,255,255,.5) 48%,transparent 62%);
+    background:linear-gradient(115deg,transparent 30%,rgba(255,255,255,.45) 48%,transparent 62%);
     transform:translateX(-120%);transition:transform .6s ease}
-  .place:hover{transform:translateY(-1px);box-shadow:0 9px 24px rgba(200,160,80,.45)}
+  .place:hover{transform:translateY(-1px);box-shadow:0 9px 26px rgba(62,142,232,.5)}
   .place:hover::after{transform:translateX(120%)}
   .place:active{transform:translateY(1px)}
   .place:disabled{opacity:.5;cursor:default;box-shadow:none}
@@ -192,130 +217,138 @@
   .credit{margin-right:auto;font-family:var(--latin);font-style:italic;font-size:10px;font-weight:500;color:var(--ink-faint);letter-spacing:.18em}
   .ghost{border:0;background:transparent;cursor:pointer;font-weight:600;
     font-size:12.5px;color:var(--ink-soft);padding:8px 12px;border-radius:9px;letter-spacing:.08em}
-  .ghost:hover{color:var(--ink);background:rgba(110,130,150,.08)}
-  .assemble{border:1px solid var(--gold-line);cursor:pointer;font-size:13px;color:#8A6A2F;font-weight:700;letter-spacing:.08em;
-    background:rgba(255,255,255,.9);border-radius:10px;padding:10px 16px;
+  .ghost:hover{color:var(--ink);background:rgba(84,119,154,.08)}
+  .assemble{border:1px solid rgba(62,142,232,.45);cursor:pointer;font-size:13px;color:#2F6FB5;font-weight:700;letter-spacing:.08em;
+    background:rgba(255,255,255,.92);border-radius:99px;padding:10px 16px;
     box-shadow:var(--shadow-s);transition:transform .15s ease, box-shadow .2s ease}
-  .assemble:hover{transform:translateY(-1px);box-shadow:0 6px 16px rgba(185,137,59,.2)}
+  .assemble:hover{transform:translateY(-1px);box-shadow:0 6px 16px rgba(62,142,232,.25)}
   .assemble:disabled{opacity:.5;cursor:default}
 
   #toast{position:fixed;left:50%;top:16px;transform:translate(-50%,-24px);z-index:20;
-    background:rgba(46,58,69,.96);color:#fff;font-weight:600;font-size:12.5px;letter-spacing:.1em;padding:10px 20px;border-radius:99px;
-    box-shadow:0 8px 26px rgba(46,58,69,.3);
+    background:rgba(31,75,115,.96);color:#fff;font-weight:600;font-size:12.5px;letter-spacing:.1em;padding:10px 20px;border-radius:99px;
+    box-shadow:0 8px 26px rgba(20,60,110,.35);
     opacity:0;pointer-events:none;transition:opacity .3s, transform .3s}
   #toast.on{opacity:.98;transform:translate(-50%,0)}
 
   /* ---------- about modal ---------- */
   #about{position:fixed;inset:0;z-index:30;display:none;align-items:center;justify-content:center;
-    background:rgba(46,58,69,.36);backdrop-filter:blur(6px);padding:18px}
+    background:rgba(31,75,115,.4);backdrop-filter:blur(6px);padding:18px}
   #about.on{display:flex}
   .sheet{width:min(560px,100%);max-height:min(86vh,720px);overflow:auto;background:var(--card);
     border-radius:20px;padding:clamp(22px,4vh,34px) clamp(22px,4vw,34px) clamp(16px,3vh,26px);
-    box-shadow:0 30px 90px rgba(30,40,50,.3);position:relative;
+    box-shadow:0 30px 90px rgba(15,45,80,.35);position:relative;
     animation:sheetIn .35s cubic-bezier(.2,.8,.3,1.1)}
   @keyframes sheetIn{from{opacity:0;transform:translateY(16px) scale(.98)}}
-  .sheet h2{margin:0 0 6px;font-weight:600;font-size:23px;letter-spacing:.06em}
-  .sheet h2 b{color:var(--gold);font-weight:600}
+  .sheet h2{margin:0 0 6px;font-weight:600;font-size:22px;letter-spacing:.05em}
+  .sheet h2 b{font-family:var(--latin);color:#3E8EE8;font-weight:500}
   .sheet .tag{font-family:var(--latin);font-style:italic;font-size:11px;font-weight:500;letter-spacing:.26em;color:var(--ink-soft)}
   .sheet p{font-size:13.5px;line-height:2.05;margin:14px 0;font-weight:500}
-  .sheet p b{color:var(--blue);font-weight:600}
+  .sheet p b{color:#2F6FB5;font-weight:600}
   .steps{display:flex;flex-direction:column;gap:11px;margin:16px 0;padding:17px;
-    background:linear-gradient(135deg,#F7FAFD,#F0F5FA);border:1px solid var(--line);border-radius:14px}
+    background:linear-gradient(135deg,#F2F8FD,#EAF3FB);border:1px solid var(--line);border-radius:14px}
   .steps div{display:flex;align-items:center;gap:12px;font-size:13px;font-weight:600;letter-spacing:.04em}
   .steps i{flex:0 0 auto;width:25px;height:25px;border-radius:50%;display:flex;align-items:center;justify-content:center;
     font-style:normal;font-family:var(--latin);font-size:12px;color:#fff;
-    background:linear-gradient(135deg,#E8C57A,#B9893B)}
+    background:linear-gradient(135deg,#3E8EE8,#3FC6C0)}
   .sheet .note{font-size:11.5px;color:var(--ink-soft);line-height:1.9;border-top:1px dashed var(--line);
     padding-top:12px;margin-top:18px;font-weight:500}
-  .sheet .cta{display:block;width:100%;margin-top:14px;border:0;cursor:pointer;border-radius:12px;
-    font-family:var(--serif);font-size:15px;color:#4A3A1E;font-weight:700;letter-spacing:.14em;padding:13px;
-    background:linear-gradient(135deg,#F0CE8B,#DBAA5E);
-    box-shadow:0 6px 18px rgba(200,160,80,.35)}
+  .sheet .cta{display:block;width:100%;margin-top:14px;border:0;cursor:pointer;border-radius:99px;
+    font-family:var(--serif);font-size:15px;color:#fff;font-weight:700;letter-spacing:.14em;padding:13px;
+    background:linear-gradient(135deg,#3E8EE8,#3FC6C0);
+    box-shadow:0 6px 20px rgba(62,142,232,.4)}
   #aboutClose{position:absolute;right:14px;top:14px;width:32px;height:32px;border:0;border-radius:50%;
-    cursor:pointer;background:rgba(46,58,69,.06);color:var(--ink-soft);font-size:15px;font-weight:600}
-  #aboutClose:hover{background:rgba(46,58,69,.12);color:var(--ink)}
+    cursor:pointer;background:rgba(31,75,115,.06);color:var(--ink-soft);font-size:15px;font-weight:600}
+  #aboutClose:hover{background:rgba(31,75,115,.12);color:var(--ink)}
 
   /* ---------- responsive / motion ---------- */
   @media (max-width:640px){
-    header{flex-wrap:wrap;gap:8px 10px}
+    header{flex-wrap:wrap;gap:6px 10px}
     .brand h1{font-size:24px}
-    .eyebrow{max-width:56vw}
-    .counter{min-width:0;flex:1 1 100%;align-items:stretch;order:3}
-    .counter .count-line{justify-content:space-between;width:100%}
+    .brand .sub{font-size:11.5px}
+    .brand .sub2{display:none}
     .spacer{display:none}
     .iconbtn{margin-left:auto}
-    .logo{width:30px;height:30px}
+    .logo{width:28px;height:28px}
     .nameField{display:none}
     .credit{display:none}
+    .tline{width:14px}
     .field input{font-size:16px}
+    .pbar{width:82vw}
   }
   @media (prefers-reduced-motion: reduce){
-    .bar>i,.logo svg{animation:none}
+    .pbar>i,.logo svg{animation:none}
     .place::after{display:none}
     .sheet{animation:none}
-    #auroraCanvas{opacity:.55}
+    #auroraCanvas{opacity:.5}
   }
-  .rm .bar>i,.rm .logo svg{animation:none}
+  .rm .pbar>i,.rm .logo svg{animation:none}
   .rm .place::after{display:none}
   .rm #finale.on{animation:none;opacity:0}
-  .rm #auroraCanvas{opacity:.55}
+  .rm #auroraCanvas{opacity:.5}
 </style>
 </head>
 <body>
 <div id="app">
   <header>
     <div class="logo" aria-hidden="true">
-      <svg viewBox="0 0 64 64"><defs>
-        <linearGradient id="lg" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0" stop-color="#E8C57A"/><stop offset="1" stop-color="#B9893B"/>
-        </linearGradient></defs>
-        <path fill="url(#lg)" stroke="#fff" stroke-width="2.5"
+      <svg viewBox="0 0 64 64">
+        <path fill="rgba(255,255,255,.96)"
           d="M12 22q0-8 8-8h7c-1.2-7 11.2-7 10 0h7q8 0 8 8v7c7-1.2 7 11.2 0 10v7q0 8-8 8H20q-8 0-8-8V22z"/>
       </svg>
     </div>
     <div class="brand">
-      <span class="eyebrow">Piece Project <b>· Hiroshima Peace Week 2026</b> — 8/1–8/6 ベルパルク</span>
-      <h1><b>ピース</b>ウィーク</h1>
-      <span class="sub">810のピースで、2045年の広島をつくる</span>
+      <h1>Piece Project</h1>
+      <span class="sub">8月6日、人々が思う“2045年の広島”を形に。</span>
+      <span class="sub2">一つひとつの想いが、未来の広島をつくっていきます — Hiroshima Peace Week 2026 · 8/1–8/6 · メルパルク</span>
     </div>
     <div class="spacer"></div>
-    <div class="counter" aria-live="polite">
-      <div class="count-line"><span class="count-num"><span class="now">いま</span><b id="countNum">0</b><span class="count-goal"> / 810 ピース</span></span></div>
-      <div class="bar"><i id="bar"></i></div>
-      <span class="count-note" id="countNote">あと 810 ピース ─ 8/6 お披露目</span>
-    </div>
-    <button class="iconbtn" id="infoBtn" type="button" aria-haspopup="dialog" aria-label="ピースウィークとは？">?</button>
+    <button class="iconbtn" id="infoBtn" type="button" aria-haspopup="dialog" aria-label="Piece Projectとは？">?</button>
   </header>
 
   <div id="boardWrap">
     <div id="board">
-      <canvas id="boardCanvas" aria-label="みんなのピースの円。中心から外へ広がっていきます。ピースをタップするとメッセージが読めます"></canvas>
+      <canvas id="boardCanvas" aria-label="みんなのピースの円。中心の光から外へ広がっていきます。ピースをタップすると想いが読めます"></canvas>
       <canvas id="auroraCanvas" aria-hidden="true"></canvas>
       <canvas id="fxCanvas" aria-hidden="true"></canvas>
       <div class="day-chip" id="dayChip"><span class="dc-dots" id="dayDots"></span><span id="dayLabel">8/1 · あつまり中</span></div>
       <div id="emptyHint"><span>さいしょのピースを置いてみよう</span></div>
-      <div id="finale" aria-hidden="true"><b>8.6</b><span>みんなの思いが、ひとつの絵になる。</span><small>完成した「2045年の広島」は、お披露目会で。</small></div>
+      <div id="finale" aria-hidden="true"><b>8.6</b><span>みんなの想いが、ひとつの未来に。</span><small>完成した「2045年の広島」は、8月6日、メルパルクにて。</small></div>
     </div>
     <div id="pop" role="status">
       <button id="popClose" type="button" aria-label="とじる">×</button>
-      <span class="chip"><span class="dot" id="popDot"></span><span id="popTag">2045年へ</span></span>
+      <span class="chip"><span class="dot" id="popDot"></span><span id="popTag">2045年の広島へ</span></span>
       <div class="msg" id="popMsg"></div>
       <div class="who" id="popWho"></div>
     </div>
   </div>
 
+  <div id="progress" aria-live="polite">
+    <span class="p-label">未来を描いたピース</span>
+    <div class="p-num">🧩 <b id="countNum">0</b><span class="p-goal"> / 810 Pieces</span></div>
+    <div class="pbar"><i id="bar"></i></div>
+    <span class="p-left">あと <b id="leftNum">810</b> ピース</span>
+    <span class="p-note" id="countNote">あと810人の想いで、2045年の広島が完成します。</span>
+    <span class="p-hint">ピースをタップすると、一人ひとりが描く「2045年の広島」を見ることができます</span>
+  </div>
+
   <form class="compose" id="compose" autocomplete="off">
+    <div class="tut" aria-hidden="true">
+      <div class="tstep cur" id="ts1"><i>1</i>色を選ぶ</div><span class="tline"></span>
+      <div class="tstep" id="ts2"><i>2</i>想いを描く</div><span class="tline"></span>
+      <div class="tstep" id="ts3"><i>3</i>ピースを置く</div>
+    </div>
     <div class="swatches" id="swatches">
       <span class="preview" aria-hidden="true">
-        <svg viewBox="0 0 56 56"><path id="previewPath" fill="#F2777C" stroke="#fff" stroke-width="2"
+        <svg viewBox="0 0 56 56"><path id="previewPath" fill="#7CC4F0" stroke="#fff" stroke-width="2"
           d="M8 18q0-8 8-8h6c-1.2-7 13.2-7 12 0h6q8 0 8 8v6c7-1.2 7 13.2 0 12v6q0 8-8 8H16q-8 0-8-8V18z"/></svg>
       </span>
-      <span class="lbl" id="swLbl">好きな色</span>
+      <span class="lbl" id="swLbl">ピースの色</span>
     </div>
+    <div class="chips" id="chips"><span class="ex">例</span></div>
     <div class="row">
       <div class="field">
-        <input id="msgInput" maxlength="24" enterkeyhint="done" placeholder="2045年へのメッセージ（例：えがおがつづく街に）" aria-label="2045年へのメッセージ">
-        <span class="cnt" id="msgCnt">0/24</span>
+        <input id="msgInput" maxlength="24" enterkeyhint="done" placeholder="2045年の広島への想いを描こう" aria-label="2045年の広島への想い">
+        <span class="cnt" id="msgCnt">のこり24</span>
       </div>
       <div class="field nameField"><input id="nameInput" maxlength="10" placeholder="なまえ（任意）" aria-label="なまえ（任意）"></div>
       <button class="place" id="placeBtn" type="submit">ピースを置く</button>
@@ -332,20 +365,21 @@
 <div id="about" role="dialog" aria-modal="true" aria-labelledby="aboutTitle">
   <div class="sheet">
     <button id="aboutClose" type="button" aria-label="とじる">×</button>
-    <span class="tag">About — Piece Project</span>
-    <h2 id="aboutTitle"><b>ピース</b>ウィークとは</h2>
+    <span class="tag">About</span>
+    <h2 id="aboutTitle"><b>Piece Project</b>（ピースウィーク）とは</h2>
     <p>「ピース」は、平和の <b>Peace</b> と、パズルの <b>Piece</b>。<br>
-    あなたの<b>好きな色</b>と<b>2045年へのメッセージ</b>が、ひとつのピースになります。</p>
-    <p>8月1日から、みんなのピースが<b>中心の光から円になって外へ広がっていきます</b>。810ピースがそろったら、みんなの思いをもとにした一枚の絵「2045年の広島」が、<b>8月6日のお披露目会</b>で初めて公開されます。その後も円は毎年10ピースずつ育ち、被爆100年の<b>2045年に、1000ピース</b>で完成します。</p>
+    あなたの<b>好きな色</b>と<b>2045年の広島への想い</b>が、ひとつのピースになります。<br>
+    平和を願うだけでなく、<b>未来を一緒に作る</b>プロジェクトです。</p>
+    <p>8月1日から、みんなのピースが<b>中心の光から円になって外へ広がっていきます</b>。810ピースがそろったら、みんなの想いをもとにした一枚の絵「2045年の広島」が、<b>8月6日のお披露目会（メルパルク）</b>で初めて公開されます。その後も円は毎年10ピースずつ育ち、被爆100年の<b>2045年に、1000ピース</b>で完成します。</p>
     <div class="steps">
       <div><i>1</i>好きな色をえらぶ</div>
-      <div><i>2</i>2045年へのメッセージをかく</div>
+      <div><i>2</i>2045年の広島への想いを描く</div>
       <div><i>3</i>「ピースを置く」でピースが円にはまる</div>
-      <div><i>4</i>円のピースをタップすると、みんなのメッセージが読める</div>
+      <div><i>4</i>円のピースをタップすると、みんなの想いが読める</div>
     </div>
     <p class="note">これはコンセプトデモです。入力はこの画面の中だけで完結し、どこにも送信されません。<br>
     ヒント: 「8月6日、いっきにお披露目」ボタンで、当日の演出をプレビューできます。</p>
-    <button class="cta" id="aboutCta" type="button">ピースを置きにいく</button>
+    <button class="cta" id="aboutCta" type="button">私も未来を描く</button>
   </div>
 </div>
 <div id="toast" role="status"></div>
@@ -353,12 +387,12 @@
 <script>
 "use strict";
 /* =====================================================================
-   ピースウィーク v4.0 — きれいめ・希望感（擬似3D＋オーロラ）
-   円盤をチルト（縦0.62）した楕円に投影し、ピースに厚みを与える。
-   幾何は「フラット座標」で構築し、描画時に一括変換（判定は逆変換）。
+   Piece Project v5.0 — 青空・発光（太陽の円形パズル）
+   ほぼ正面の円盤（KY=0.95）＋わずかな厚み。透明感のあるパステルピース、
+   中心は太陽の光。幾何はフラット座標で構築し描画時に一括変換。
    ===================================================================== */
 var TWO_PI = Math.PI * 2;
-var KY = 0.62;              // チルト（縦スケール）
+var KY = 0.95;
 var Q = new URLSearchParams(location.search);
 var qn = function (k, d) { return Q.has(k) ? parseFloat(Q.get(k)) : d; };
 var reduceMQ = window.matchMedia('(prefers-reduced-motion: reduce)');
@@ -380,12 +414,12 @@ var TARGET = 0;
 })(); // TARGET === 810
 var SEED_COUNT = Math.round(qn('seed', 132));
 
-/* ジュエルパステル 12色（彩度を落とし上品に） */
+/* 空のパステル12色（水色・黄緑・黄色・オレンジ・ピンク・紫 系、透明感重視） */
 var PALETTE = [
-  '#F2777C','#F49A62','#F4D06F','#A8CF74','#6FC98E','#66C6D2',
-  '#6D9EE8','#8B8BE0','#B08BD9','#EF8FBB','#F5B8CD','#5FBFB2'
+  '#7CC4F0','#7FD8DC','#A8E3B0','#BADC7E','#F7D97C','#F7B26E',
+  '#F49A93','#F5A8C8','#F8C6D8','#C3A8E8','#A98BD8','#92A8E8'
 ];
-var COLOR_NAMES = ['あか','だいだい','きいろ','きみどり','みどり','みずいろ','あお','るり','むらさき','ピンク','さくら','ターコイズ'];
+var COLOR_NAMES = ['そらいろ','みずいろ','ミント','きみどり','きいろ','オレンジ','コーラル','ピンク','さくら','ラベンダー','むらさき','ふじいろ'];
 var SEED_MESSAGES = [
   'えがおがつづく街に','せんそうのない世界へ','あおい空をずっと','みんなちがってすてき',
   'こどもが安心して眠れる夜を','手をつなげる未来へ','花いっぱいの広島に','平和があたりまえの毎日',
@@ -396,11 +430,12 @@ var SEED_MESSAGES = [
 ];
 var SEED_NAMES = ['ひろ','ゆき','そら','あい','けん','なな','みお','たく','りん','はると','ここ','—','—','—'];
 var PLACEHOLDERS = [
-  '2045年へのメッセージ（例：えがおがつづく街に）',
-  '2045年へのメッセージ（例：せんそうのない世界へ）',
-  '2045年へのメッセージ（例：川と空が、きれいなままで）',
-  '2045年へのメッセージ（例：だれもひとりにしない街に）'
+  '2045年の広島への想いを描こう',
+  '例：自然と人が共に生きるまちに',
+  '例：笑顔があふれるまちに',
+  '例：川と空が、きれいなままで'
 ];
+var EXAMPLES = ['平和な世界に','みんなが助け合えるまちに','自然豊かな未来に','子どもたちの笑顔のために'];
 
 /* ---------- stage / canvases ---------- */
 var boardWrap = document.getElementById('boardWrap');
@@ -409,10 +444,10 @@ var bc = document.getElementById('boardCanvas'), bctx = bc.getContext('2d');
 var ac = document.getElementById('auroraCanvas'), actx = ac.getContext('2d');
 var fc = document.getElementById('fxCanvas'), fctx = fc.getContext('2d');
 var dpr = 1, W = 0, H = 0;
-var CX = 0, CYf = 0, CYv = 0;   // フラット中心 / 表示中心
-var t = 16, TH = 5;             // セル基準サイズ / ピースの厚み(画面px)
+var CX = 0, CYf = 0, CYv = 0;
+var t = 16, TH = 4;
 var rIn = [], rOut = [], coreR = 20, outerR = 100;
-var auroraR = 30;               // オーロラ・輝きの届く半径（＝埋まった半径）
+var auroraR = 30;
 
 var paths = [], cx0 = [], cy0 = [], cellRing = [], drawOrder = [];
 var ringGrad = [];
@@ -423,14 +458,18 @@ function applyT(ctx, dy) {
   ctx.translate(0, CYv - CYf * KY);
   ctx.scale(1, KY);
 }
-function shade(hex) { // 厚み面用の陰色（少し青みに寄せる）
+function hexRGB(hex) {
   var c = String(hex).replace('#', '');
   if (c.length === 3) c = c[0] + c[0] + c[1] + c[1] + c[2] + c[2];
-  var r = parseInt(c.substr(0, 2), 16) || 120, g = parseInt(c.substr(2, 2), 16) || 120, b = parseInt(c.substr(4, 2), 16) || 120;
-  return 'rgb(' + ((r * 0.62) | 0) + ',' + ((g * 0.66) | 0) + ',' + ((b * 0.74) | 0) + ')';
+  return [parseInt(c.substr(0, 2), 16) || 140, parseInt(c.substr(2, 2), 16) || 170, parseInt(c.substr(4, 2), 16) || 200];
 }
+function shade(hex) {
+  var v = hexRGB(hex);
+  return 'rgb(' + ((v[0] * 0.6) | 0) + ',' + ((v[1] * 0.68) | 0) + ',' + ((v[2] * 0.8) | 0) + ')';
+}
+function hexA(hex, a) { var v = hexRGB(hex); return 'rgba(' + v[0] + ',' + v[1] + ',' + v[2] + ',' + a + ')'; }
 function mkPiece(color, msg, name, animate) {
-  return { color: color, dark: shade(color), msg: msg || '', name: name || '',
+  return { color: color, fill: hexA(color, 0.92), dark: shade(color), msg: msg || '', name: name || '',
     t0: (animate && !REDUCED()) ? performance.now() : null };
 }
 
@@ -491,14 +530,14 @@ function buildPaths() {
       cx0[idx] = CX + rm * Math.cos(tm); cy0[idx] = CYf + rm * Math.sin(tm);
     }
     var g = bctx.createRadialGradient(CX, CYf, r1, CX, CYf, r2);
-    g.addColorStop(0, 'rgba(255,255,255,0.4)');
-    g.addColorStop(0.55, 'rgba(255,255,255,0.06)');
-    g.addColorStop(1, 'rgba(20,35,60,0.13)');
+    g.addColorStop(0, 'rgba(255,255,255,0.5)');
+    g.addColorStop(0.55, 'rgba(255,255,255,0.08)');
+    g.addColorStop(1, 'rgba(30,60,110,0.1)');
     ringGrad[ri] = g;
   }
   drawOrder = [];
   for (var k = 0; k < TARGET; k++) drawOrder.push(k);
-  drawOrder.sort(function (a, b) { return cy0[a] - cy0[b]; }); // 奥→手前の順で描く
+  drawOrder.sort(function (a, b) { return cy0[a] - cy0[b]; });
   buildDecor();
   buildSparkles();
 }
@@ -506,14 +545,14 @@ function buildPaths() {
 function resize() {
   var rect = boardWrap.getBoundingClientRect();
   var availW = Math.max(220, rect.width - 66);
-  var availH = Math.max(170, rect.height - 12);
-  var R = Math.min(availW / 2, (availH - 48) / (2 * KY));
-  W = Math.round(R * 2 + 60); H = Math.round(R * 2 * KY + 62);
+  var availH = Math.max(170, rect.height - 8);
+  var R = Math.min(availW / 2, (availH - 26) / (2 * KY));
+  W = Math.round(R * 2 + 56); H = Math.round(R * 2 * KY + 34);
   boardEl.style.width = W + 'px'; boardEl.style.height = H + 'px';
   dpr = Math.min(window.devicePixelRatio || 1, 2);
-  CX = W / 2; CYf = W / 2; CYv = H / 2 - 3;
+  CX = W / 2; CYf = W / 2; CYv = H / 2;
   t = R / 16.45;
-  TH = Math.max(2.5, t * 0.42 * KY);
+  TH = Math.max(2, t * 0.22);
   [bc, ac, fc].forEach(function (cv) { cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr); });
   buildPaths();
   hidePop();
@@ -548,23 +587,13 @@ function drawBoard() {
   bctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   bctx.clearRect(0, 0, W, H);
 
-  // 接地の淡い影（3枚重ねでソフトに）
-  var gy = devYf(CYf) + outerR * KY + TH * 3.2;
-  bctx.fillStyle = 'rgba(46,58,69,0.045)';
-  for (var sh = 0; sh < 3; sh++) {
-    var f = 1 - sh * 0.24;
-    bctx.beginPath();
-    bctx.ellipse(CX, gy, outerR * 0.92 * f, outerR * 0.12 * f, 0, 0, TWO_PI);
-    bctx.fill();
-  }
-
-  // 中心からの光（埋まった半径に追従）
+  // 中心の光（埋まった半径に追従）— 太陽のイメージ
   auroraR = (curMaxRing >= 0 ? rOut[curMaxRing] : coreR) + t * 0.9;
   applyT(bctx);
   var gg = bctx.createRadialGradient(CX, CYf, 0, CX, CYf, auroraR);
-  gg.addColorStop(0, 'rgba(255,242,206,0.9)');
-  gg.addColorStop(0.55, 'rgba(255,226,166,0.32)');
-  gg.addColorStop(1, 'rgba(255,220,160,0)');
+  gg.addColorStop(0, 'rgba(255,252,235,0.95)');
+  gg.addColorStop(0.5, 'rgba(255,240,190,0.4)');
+  gg.addColorStop(1, 'rgba(255,240,200,0)');
   bctx.fillStyle = gg;
   bctx.beginPath(); bctx.arc(CX, CYf, auroraR, 0, TWO_PI); bctx.fill();
 
@@ -572,7 +601,7 @@ function drawBoard() {
   var stillAnimating = false;
   var i, pc, o;
 
-  // 厚み（側面）— 奥から手前へ。ポップイン中のピースは省略
+  // 厚み（側面）
   applyT(bctx, TH);
   for (o = 0; o < drawOrder.length; o++) {
     i = drawOrder[o]; pc = pieces[i];
@@ -582,8 +611,8 @@ function drawBoard() {
 
   // 上面
   applyT(bctx);
-  bctx.lineWidth = Math.max(1, t * 0.04);
-  bctx.strokeStyle = 'rgba(110,130,150,0.15)';
+  bctx.lineWidth = Math.max(1, t * 0.05);
+  bctx.strokeStyle = 'rgba(255,255,255,0.55)';
   for (var u = 0; u < paths.length; u++) if (!pieces[u]) bctx.stroke(paths[u]);
 
   bctx.lineJoin = 'round';
@@ -598,33 +627,27 @@ function drawBoard() {
       else { pc.t0 = null; k = 1; }
     } else if (pc.t0 != null) pc.t0 = null;
     if (s !== 1) { bctx.save(); bctx.translate(cx0[i], cy0[i]); bctx.scale(s, s); bctx.translate(-cx0[i], -cy0[i]); bctx.globalAlpha = Math.min(1, k * 2.2); }
-    bctx.fillStyle = pc.color; bctx.fill(paths[i]);
+    bctx.fillStyle = pc.fill; bctx.fill(paths[i]);
     bctx.fillStyle = ringGrad[cellRing[i]]; bctx.fill(paths[i]);
-    bctx.lineWidth = Math.max(1, t * 0.06);
-    bctx.strokeStyle = 'rgba(255,255,255,0.78)';
+    bctx.lineWidth = Math.max(1, t * 0.065);
+    bctx.strokeStyle = 'rgba(255,255,255,0.85)';
     bctx.stroke(paths[i]);
     if (s !== 1) {
       bctx.lineWidth = t * 0.16;
-      bctx.strokeStyle = 'rgba(255,238,200,' + (0.85 * (1 - k)) + ')';
+      bctx.strokeStyle = 'rgba(255,255,255,' + (0.9 * (1 - k)) + ')';
       bctx.stroke(paths[i]);
       bctx.globalAlpha = 1; bctx.restore();
     }
   }
 
-  // 中心コア（8/6にみんなの絵が生まれる場所）
-  var cg = bctx.createRadialGradient(CX, CYf, 0, CX, CYf, coreR);
-  cg.addColorStop(0, 'rgba(255,255,255,0.98)');
-  cg.addColorStop(0.55, 'rgba(255,233,190,0.96)');
-  cg.addColorStop(1, 'rgba(242,201,140,0.9)');
+  // 太陽のコア（8/6にみんなの絵が生まれる場所）— まぶしい白の光
+  var cg = bctx.createRadialGradient(CX, CYf, 0, CX, CYf, coreR * 2.1);
+  cg.addColorStop(0, 'rgba(255,255,255,1)');
+  cg.addColorStop(0.35, 'rgba(255,252,235,0.85)');
+  cg.addColorStop(0.6, 'rgba(255,246,210,0.4)');
+  cg.addColorStop(1, 'rgba(255,246,215,0)');
   bctx.fillStyle = cg;
-  bctx.beginPath(); bctx.arc(CX, CYf, coreR, 0, TWO_PI); bctx.fill();
-
-  // コアの文字は潰さず等倍で
-  bctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-  bctx.fillStyle = 'rgba(255,255,255,0.96)';
-  bctx.font = '600 ' + Math.max(9, Math.round(coreR * 0.46)) + 'px "Shippori Mincho", serif';
-  bctx.textAlign = 'center'; bctx.textBaseline = 'middle';
-  bctx.fillText('2045', CX, devYf(CYf) + 1);
+  bctx.beginPath(); bctx.arc(CX, CYf, coreR * 2.1, 0, TWO_PI); bctx.fill();
 
   animActive = stillAnimating;
 }
@@ -647,9 +670,8 @@ function drawAurora(now) {
   actx.fillStyle = g;
   actx.fillRect(0, 0, W, H);
   actx.globalAlpha = 1;
-  // 中心は薄く、外周ほど色づく（絵の生まれる中心を澄ませる）
   var fade = actx.createRadialGradient(CX, devYf(CYf), coreR * 1.1, CX, devYf(CYf), auroraR);
-  fade.addColorStop(0, 'rgba(0,0,0,0.12)');
+  fade.addColorStop(0, 'rgba(0,0,0,0.1)');
   fade.addColorStop(0.55, 'rgba(0,0,0,0.5)');
   fade.addColorStop(1, 'rgba(0,0,0,0.92)');
   actx.globalCompositeOperation = 'destination-in';
@@ -677,7 +699,7 @@ function buildDecor() {
       a: Math.random() * TWO_PI, d: 1.02 + Math.random() * 0.1,
       rot: (Math.random() - .5) * 0.9, va: 0.0003 + Math.random() * 0.0003,
       vr: (Math.random() - .5) * 0.0016, col: PALETTE[(Math.random() * PALETTE.length) | 0],
-      al: 0.22 + Math.random() * 0.2, ph: Math.random() * TWO_PI
+      al: 0.55 + Math.random() * 0.25, ph: Math.random() * TWO_PI
     });
   }
 }
@@ -691,14 +713,14 @@ function buildSparkles() {
       s: 0.7 + Math.random() * 1.2, gold: Math.random() < 0.3 });
   }
 }
-function burst(px, py, n, spread) { // 光の粒（device座標）
+function burst(px, py, n, spread) {
   if (REDUCED()) return;
   for (var i = 0; i < n; i++) {
     var a = Math.random() * TWO_PI, sp = (0.3 + Math.random() * 0.7) * (spread || 3);
     motes.push({ x: px + Math.cos(a) * 3, y: py + Math.sin(a) * 2,
       vx: Math.cos(a) * sp * 0.35, vy: -0.35 - Math.random() * 1.05,
       life: 0, max: 75 + Math.random() * 55, r: 1.4 + Math.random() * 2.4,
-      c: Math.random() < 0.55 ? '255,246,220' : (Math.random() < 0.5 ? '255,226,150' : '210,230,255') });
+      c: Math.random() < 0.55 ? '255,255,255' : (Math.random() < 0.5 ? '255,240,180' : '200,230,255') });
   }
 }
 function fxLoop() {
@@ -709,7 +731,6 @@ function fxLoop() {
 
   drawAurora(now);
 
-  // 浮遊ピース（円盤のまわりを漂う）
   if (decorPath) {
     for (var k = 0; k < decor.length; k++) {
       var dd = decor[k];
@@ -722,36 +743,33 @@ function fxLoop() {
       fctx.rotate(dd.rot); fctx.scale(1, KY);
       fctx.globalAlpha = dd.al;
       fctx.fillStyle = dd.col; fctx.fill(decorPath);
-      fctx.lineWidth = 1.3; fctx.strokeStyle = 'rgba(255,255,255,0.85)'; fctx.stroke(decorPath);
+      fctx.lineWidth = 1.3; fctx.strokeStyle = 'rgba(255,255,255,0.9)'; fctx.stroke(decorPath);
       fctx.restore();
     }
   }
 
-  // きらめき（埋まった円の上で明滅）
   for (var q = 0; q < sparkles.length; q++) {
     var sk = sparkles[q];
     if (sk.rr > auroraR) continue;
     var al = red ? 0.3 : 0.16 + 0.34 * (0.5 + 0.5 * Math.sin(now / 1000 * sk.sp + sk.ph));
     fctx.globalAlpha = al;
-    fctx.fillStyle = sk.gold ? '#F4DFAE' : '#FFFFFF';
+    fctx.fillStyle = sk.gold ? '#FFF2C4' : '#FFFFFF';
     fctx.beginPath();
     fctx.arc(sk.x, devYf(sk.y), sk.s, 0, TWO_PI);
     fctx.fill();
   }
   fctx.globalAlpha = 1;
 
-  // 光のリング（お披露目）
   for (var f = flashes.length - 1; f >= 0; f--) {
     var fl = flashes[f]; fl.r += fl.vr; fl.a *= 0.945;
     if (fl.a < 0.02 || fl.r > W) { flashes.splice(f, 1); continue; }
     fctx.beginPath();
     fctx.ellipse(CX, devYf(CYf), fl.r, fl.r * KY, 0, 0, TWO_PI);
     fctx.lineWidth = t * 0.4;
-    fctx.strokeStyle = 'rgba(232,197,122,' + fl.a + ')';
+    fctx.strokeStyle = 'rgba(255,255,255,' + fl.a + ')';
     fctx.stroke();
   }
 
-  // 光の粒
   for (var i = motes.length - 1; i >= 0; i--) {
     var p = motes[i]; p.life++;
     p.x += p.vx; p.y += p.vy; p.vx *= 0.992;
@@ -781,6 +799,7 @@ function placePiece(idx, color, msg, name, animate) {
 
 /* ---------- counter / day chip ---------- */
 var countNum = document.getElementById('countNum'), bar = document.getElementById('bar');
+var leftNum = document.getElementById('leftNum');
 var countNote = document.getElementById('countNote');
 var dayLabel = document.getElementById('dayLabel'), dayDots = document.getElementById('dayDots');
 var emptyHint = document.getElementById('emptyHint');
@@ -798,9 +817,11 @@ function tickCount() {
 function updateCounter() {
   var frac = placed / TARGET, remaining = TARGET - placed;
   bar.style.width = Math.min(100, frac * 100) + '%';
-  countNote.innerHTML = remaining > 0
-    ? 'あと <b>' + remaining.toLocaleString('en-US') + '</b> ピースで一枚の絵に ─ 8/6 お披露目'
-    : '810ピース、そろいました ─ <b>2045年</b>には1000ピースへ';
+  leftNum.textContent = remaining.toLocaleString('en-US');
+  leftNum.parentElement.style.display = remaining > 0 ? '' : 'none';
+  countNote.textContent = remaining > 0
+    ? 'あと' + remaining.toLocaleString('en-US') + '人の想いで、2045年の広島が完成します。'
+    : '810人の想いがそろいました。8月6日、メルパルクで“未来”をお披露目。';
   var dIdx, label;
   if (frac >= 1) { dIdx = 6; label = '8/6 · お披露目'; }
   else if (frac > 0.8) { dIdx = 5; label = '8/5 · あつまり中'; }
@@ -823,8 +844,8 @@ var popOpen = false;
 function hidePop() { if (pop) { pop.classList.remove('on'); popOpen = false; } }
 function hitTest(clientX, clientY) {
   var rect = bc.getBoundingClientRect();
-  var x = clientX - rect.left, y = clientY - rect.top;   // device(css)座標
-  var xf = x, yf = CYf + (y - CYv) / KY;                 // フラット座標へ逆変換
+  var x = clientX - rect.left, y = clientY - rect.top;
+  var xf = x, yf = CYf + (y - CYv) / KY;
   var dx = xf - CX, dy = yf - CYf, r = Math.hypot(dx, dy);
   if (r < rIn[0] || r >= rOut[RINGS - 1]) return null;
   var i = 0; while (i < RINGS && r >= rOut[i]) i++;
@@ -861,7 +882,7 @@ function setChosen(color, el, name) {
   document.querySelectorAll('.sw').forEach(function (s) { s.classList.remove('sel'); });
   if (el) el.classList.add('sel');
   previewPath.setAttribute('fill', color);
-  swLbl.textContent = name ? '好きな色 · ' + name : '好きな色';
+  swLbl.textContent = name ? 'ピースの色 · ' + name : 'ピースの色';
 }
 PALETTE.forEach(function (col, i) {
   var b = document.createElement('button');
@@ -873,7 +894,7 @@ PALETTE.forEach(function (col, i) {
 });
 var custom = document.createElement('label');
 custom.className = 'sw custom'; custom.title = 'すきな色をつくる';
-var ci = document.createElement('input'); ci.type = 'color'; ci.value = '#8B8BE0';
+var ci = document.createElement('input'); ci.type = 'color'; ci.value = '#F7D97C';
 ci.setAttribute('aria-label', 'すきな色をつくる');
 ci.addEventListener('input', function () { setChosen(ci.value, custom, 'カスタム'); });
 custom.appendChild(ci); swBox.appendChild(custom);
@@ -884,8 +905,34 @@ var compose = document.getElementById('compose'), msgInput = document.getElement
 var composing = false;
 msgInput.addEventListener('compositionstart', function () { composing = true; });
 msgInput.addEventListener('compositionend', function () { composing = false; updateCnt(); });
-function updateCnt() { msgCnt.textContent = msgInput.value.length + '/24'; }
+function updateCnt() { msgCnt.textContent = 'のこり' + Math.max(0, 24 - msgInput.value.length); updateTut(); }
 msgInput.addEventListener('input', updateCnt);
+
+/* ---------- 3ステップチュートリアル表示 ---------- */
+var ts1 = document.getElementById('ts1'), ts2 = document.getElementById('ts2'), ts3 = document.getElementById('ts3');
+var placedFlashT = null, placedFlash = false;
+function updateTut() {
+  ts1.className = 'tstep'; ts2.className = 'tstep'; ts3.className = 'tstep';
+  if (placedFlash) { ts1.classList.add('done'); ts2.classList.add('done'); ts3.classList.add('cur'); return; }
+  if (msgInput.value.length > 0) { ts1.classList.add('done'); ts2.classList.add('cur'); }
+  else ts1.classList.add('cur');
+}
+function flashPlaced() {
+  placedFlash = true; updateTut();
+  clearTimeout(placedFlashT);
+  placedFlashT = setTimeout(function () { placedFlash = false; updateTut(); }, 2200);
+}
+
+/* 記入例チップ（タップで入力欄へ） */
+var chipsBox = document.getElementById('chips');
+EXAMPLES.forEach(function (ex) {
+  var b = document.createElement('button');
+  b.type = 'button'; b.className = 'chip'; b.textContent = ex;
+  b.addEventListener('click', function () {
+    msgInput.value = ex.slice(0, 24); updateCnt(); msgInput.focus();
+  });
+  chipsBox.appendChild(b);
+});
 
 /* rotating placeholder examples */
 var phIdx = 0;
@@ -913,7 +960,8 @@ compose.addEventListener('submit', function (e) {
   if (idx == null) { toast('円がいっぱいです。2045年までみんなで育てましょう'); return; }
   placePiece(idx, chosen, msg, nameInput.value.trim(), true);
   msgInput.value = ''; updateCnt(); msgInput.focus();
-  toast('ピースを置きました');
+  toast('あなたの想いを受け取りました。');
+  flashPlaced();
   msCheck();
 });
 
@@ -921,7 +969,7 @@ compose.addEventListener('submit', function (e) {
 var shareBtn = document.getElementById('shareBtn');
 shareBtn.addEventListener('click', function () {
   var url = location.origin + location.pathname;
-  var data = { title: 'ピースウィーク', text: '810のピースで、2045年の広島をつくる', url: url };
+  var data = { title: 'Piece Project', text: '8月6日、人々が思う“2045年の広島”を形に。', url: url };
   if (navigator.share) { navigator.share(data).catch(function () {}); return; }
   if (navigator.clipboard && navigator.clipboard.writeText) {
     navigator.clipboard.writeText(url).then(function () { toast('リンクをコピーしました'); },
@@ -944,7 +992,7 @@ function assemble() {
     for (var e = 0; e < empties.length; e++) { pieces[empties[e]] = mkPiece(PALETTE[(Math.random() * PALETTE.length) | 0], SEED_MESSAGES[(Math.random() * SEED_MESSAGES.length) | 0], '', false); markFilled(empties[e]); }
     placed = TARGET; updateCounter(); drawBoard(); finishAssemble(); return;
   }
-  empties.sort(function (a, b) { return a - b; }); // 内側から渦状に
+  empties.sort(function (a, b) { return a - b; });
   var total = empties.length, dur = 2800, t0 = performance.now();
   (function step() {
     var tt = performance.now() - t0, frac = Math.min(tt / dur, 1);
@@ -963,12 +1011,12 @@ function finishAssemble() {
   placedWave = 0; assembling = false; assembleBtn.disabled = false; placeBtn.disabled = false;
   lastMS = msLevel();
   if (!REDUCED()) {
-    for (var k = 0; k < 3; k++) (function (kk) { setTimeout(function () { flashes.push({ r: coreR, vr: t * 0.55, a: 0.6 }); }, kk * 300); })(k);
+    for (var k = 0; k < 3; k++) (function (kk) { setTimeout(function () { flashes.push({ r: coreR, vr: t * 0.55, a: 0.7 }); }, kk * 300); })(k);
     for (var c = 0; c < 7; c++) (function (cc) { setTimeout(function () { burst(CX + (Math.random() - .5) * W * 0.6, devYf(CYf) + (Math.random() - .5) * H * 0.4, 16, 5); }, cc * 110); })(c);
     finale.classList.remove('on'); void finale.offsetWidth; finale.classList.add('on');
     clearTimeout(finaleT); finaleT = setTimeout(function () { finale.classList.remove('on'); }, 3600);
   }
-  toast('8月6日 — 810の思いが、ひとつの円に。');
+  toast('8月6日 — 810の想いが、ひとつの未来に。');
 }
 resetBtn.addEventListener('click', function () { hidePop(); seed(true); toast('はじめからにしました'); });
 assembleBtn.addEventListener('click', assemble);
@@ -1017,13 +1065,13 @@ var rt;
 window.addEventListener('resize', function () { clearTimeout(rt); rt = setTimeout(resize, 150); });
 var onRMChange = function () { syncRM(); drawBoard(); };
 reduceMQ.addEventListener ? reduceMQ.addEventListener('change', onRMChange) : reduceMQ.addListener(onRMChange);
-function boot() { syncRM(); resize(); seed(false); requestAnimationFrame(fxLoop); }
+function boot() { syncRM(); resize(); seed(false); updateTut(); requestAnimationFrame(fxLoop); }
 boot();
 if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { resize(); });
 
 /* test hooks */
 window.PW = {
-  version: '4.0',
+  version: '5.0',
   place: function (c, m, n) { return placePiece(nextEmpty(), c || PALETTE[0], m || 'テスト', n || '', true); },
   assemble: assemble, reset: function () { seed(true); }, count: function () { return placed; }, target: TARGET,
   fill: function (k) {
