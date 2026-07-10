@@ -1415,7 +1415,7 @@ var c=document.getElementById('boardCanvas'),ctx=c.getContext('2d');
 var cx=300,cy=300,sc=295/rOut[14];
 ctx.clearRect(0,0,600,600);
 var idx=0;
-for(var r=0;r<15;r++){var n=RING_PH[r],as=2*Math.PI/n;
+for(var r=0;r<15;r++){var n=RING_N[r],as=2*Math.PI/n;
 for(var s=0;s<n;s++){var a1=-Math.PI/2+s*as,a2=a1+as;
 ctx.beginPath();ctx.arc(cx,cy,rOut[r]*sc,a1,a2);ctx.arc(cx,cy,rIn[r]*sc,a2,a1,true);ctx.closePath();
 if(pieces[idx])ctx.fillStyle=hexA(pieces[idx].c,.7);
@@ -1432,8 +1432,8 @@ var cx=300,cy=300,sc=295/rOut[14];
 var dx=x-cx,dy=y-cy,dist=Math.sqrt(dx*dx+dy*dy);
 var ang=Math.atan2(dy,dx)+Math.PI/2;if(ang<0)ang+=2*Math.PI;if(ang>=2*Math.PI)ang-=2*Math.PI;
 for(var r=0;r<15;r++){if(dist>=rIn[r]*sc&&dist<=rOut[r]*sc){
-var n=RING_PH[r],si=Math.floor(ang/(2*Math.PI/n));if(si>=n)si=n-1;
-var t=0;for(var i=0;i<r;i++)t+=RING_PH[i];t+=si;
+var n=RING_N[r],si=Math.floor(ang/(2*Math.PI/n));if(si>=n)si=n-1;
+var t=0;for(var i=0;i<r;i++)t+=RING_N[i];t+=si;
 if(!pieces[t]){selectedIdx=t;document.getElementById('confirmPlace').classList.add('enabled');drawBoardFull();}
 return;}}
 }
