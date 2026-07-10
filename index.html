@@ -1232,6 +1232,7 @@ function goPreview() {
   document.getElementById('wPlace').disabled=true;
   drawMiniBoard();
 
+}
 wNext1.addEventListener('click', goPreview);
 msgInput.addEventListener('keydown', function (e) {
   if (e.key === 'Enter' && !composing && wizStep === 0) { e.preventDefault(); goPreview(); }
