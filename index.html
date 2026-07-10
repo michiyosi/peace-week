@@ -1231,9 +1231,7 @@ function goPreview() {
   selectedIdx=-1;
   document.getElementById('wPlace').disabled=true;
   drawMiniBoard();
-  var mb=document.getElementById('miniBoard'); if(mb){mb.addEventListener('click',onMiniTap);}
-  if(mb){mb.addEventListener('touchstart',function(e){e.preventDefault();}onMiniTap(e);});
-}
+
 wNext1.addEventListener('click', goPreview);
 msgInput.addEventListener('keydown', function (e) {
   if (e.key === 'Enter' && !composing && wizStep === 0) { e.preventDefault(); goPreview(); }
