@@ -256,9 +256,80 @@
     font-family:var(--serif);font-size:15px;color:#fff;font-weight:700;letter-spacing:.14em;padding:13px;
     background:linear-gradient(135deg,#3E8EE8,#3FC6C0);
     box-shadow:0 6px 20px rgba(62,142,232,.4)}
-  #aboutClose{position:absolute;right:14px;top:14px;width:32px;height:32px;border:0;border-radius:50%;
+  #aboutClose,#tutClose{position:absolute;right:14px;top:14px;width:32px;height:32px;border:0;border-radius:50%;
     cursor:pointer;background:rgba(31,75,115,.06);color:var(--ink-soft);font-size:15px;font-weight:600}
-  #aboutClose:hover{background:rgba(31,75,115,.12);color:var(--ink)}
+  #aboutClose:hover,#tutClose:hover{background:rgba(31,75,115,.12);color:var(--ink)}
+
+  /* ---------- home bar ---------- */
+  #homeBar{flex:0 0 auto;display:flex;flex-direction:column;align-items:center;gap:7px;
+    padding:2px 16px calc(clamp(10px,1.8vh,16px) + env(safe-area-inset-bottom))}
+  .place.wide{height:48px;font-size:clamp(15px,2vh,17px);padding:0 clamp(34px,6vw,58px)}
+  .homeLinks{display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:center}
+  #homeBar .credit{margin:0}
+
+  /* ---------- wizard（段階的に変遷するステップ画面） ---------- */
+  #wiz{position:fixed;inset:0;z-index:28;display:none;flex-direction:column;
+    background:rgba(238,247,253,.78);backdrop-filter:blur(12px)}
+  #wiz.on{display:flex}
+  .wtop{flex:0 0 auto;display:flex;align-items:center;justify-content:space-between;
+    padding:14px clamp(16px,3vw,28px) 0}
+  .wbrand{font-family:var(--latin);font-size:16px;color:var(--ink);letter-spacing:.06em}
+  #wizClose{width:34px;height:34px;border:0;border-radius:50%;cursor:pointer;
+    background:rgba(31,75,115,.07);color:var(--ink-soft);font-size:15px;font-weight:600}
+  #wizClose:hover{background:rgba(31,75,115,.14);color:var(--ink)}
+  .wsteps{flex:0 0 auto;display:flex;align-items:center;justify-content:center;gap:10px;
+    padding:clamp(8px,1.6vh,16px) 16px 0}
+  .wview{flex:1 1 auto;overflow:auto;padding:clamp(8px,1.8vh,18px) 18px 24px}
+  .wstep{display:none;width:min(560px,100%);margin:0 auto;text-align:center}
+  .wstep.on{display:block;animation:wIn .38s cubic-bezier(.2,.8,.3,1)}
+  @keyframes wIn{from{opacity:0;transform:translateX(34px)}to{opacity:1;transform:none}}
+  .wh{margin:clamp(4px,1vh,12px) 0 4px;font-size:clamp(19px,2.9vh,25px);font-weight:600;
+    letter-spacing:.08em;line-height:1.55;color:var(--ink)}
+  .wsub{margin:0 0 clamp(8px,1.6vh,16px);font-size:clamp(11.5px,1.6vh,13px);color:var(--ink-soft);
+    font-weight:500;letter-spacing:.06em;line-height:1.9}
+  .wsub b{color:#2F6FB5}
+  .wcard{background:rgba(255,255,255,.92);border:1px solid rgba(255,255,255,.9);border-radius:16px;
+    box-shadow:var(--shadow-s);padding:clamp(12px,1.8vh,18px) clamp(14px,2.4vw,20px);
+    margin-bottom:clamp(8px,1.4vh,14px);text-align:left}
+  .wcap{display:flex;align-items:center;justify-content:space-between;gap:8px;
+    font-size:12.5px;font-weight:600;color:var(--ink);letter-spacing:.08em;margin-bottom:10px}
+  .swatches.wizsw{justify-content:center;gap:9px}
+  .swatches.wizsw .sw{width:33px;height:33px;border-radius:10px}
+  .swatches.wizsw .preview{width:33px;height:33px}
+  .wname{text-align:center;font-size:12px;font-weight:600;color:#2F9E98;letter-spacing:.12em;margin-top:9px}
+  .wcard .field{margin-bottom:9px}
+  .wcard .nameField{margin-bottom:0}
+  .wcta{display:inline-block;margin-top:clamp(4px,1vh,10px);height:48px;
+    padding:0 clamp(38px,7vw,64px);font-size:clamp(14.5px,1.9vh,16px)}
+  .wshake .field{animation:shake .3s}
+  .wpv{text-align:center}
+  .wpv .wcap{justify-content:center}
+  .pvdot{width:11px;height:11px;border-radius:4px;display:inline-block;background:#7CC4F0}
+  .pvpiece{width:64px;height:64px;margin:6px auto;filter:drop-shadow(0 3px 8px rgba(31,75,115,.25))}
+  .pvpiece svg{width:100%;height:100%;overflow:visible}
+  .pvmsg{font-size:16.5px;font-weight:600;line-height:1.8;color:var(--ink);letter-spacing:.04em;
+    padding:2px 8px;word-break:break-word}
+  .pvwho{margin-top:6px;font-size:11.5px;color:var(--ink-soft);font-weight:500;letter-spacing:.1em}
+  .wmark{width:58px;height:58px;margin:clamp(6px,2vh,18px) auto 2px}
+  .wmark svg{width:100%;height:100%}
+
+  /* ---------- tutorial modal（初回に開く「つかいかた」） ---------- */
+  #tut{position:fixed;inset:0;z-index:31;display:none;align-items:center;justify-content:center;
+    background:rgba(31,75,115,.42);backdrop-filter:blur(6px);padding:18px}
+  #tut.on{display:flex}
+  .tsheet{width:min(430px,100%);text-align:center}
+  .tsl{display:none}
+  .tsl.on{display:block;animation:sheetIn .3s ease}
+  .tart{display:flex;align-items:center;justify-content:center;height:100px;margin:12px 0 4px}
+  .tart svg{height:100%;max-width:100%}
+  .tsl h3{margin:6px 0 2px;font-size:17px;font-weight:600;letter-spacing:.08em;color:var(--ink)}
+  .tsl p{font-size:12.5px;line-height:1.95;color:var(--ink-soft);font-weight:500;margin:6px 0 0}
+  .tdots{display:flex;gap:7px;justify-content:center;margin:16px 0 2px}
+  .tdots i{width:7px;height:7px;border-radius:50%;background:rgba(31,75,115,.18);transition:background .3s,transform .3s}
+  .tdots i.on{background:linear-gradient(135deg,#3E8EE8,#3FC6C0);transform:scale(1.25)}
+  .tskip{border:0;background:transparent;cursor:pointer;font-size:11.5px;color:var(--ink-faint);
+    font-weight:600;letter-spacing:.1em;margin-top:10px;padding:6px 10px}
+  .tskip:hover{color:var(--ink-soft)}
 
   /* ---------- responsive / motion ---------- */
   @media (max-width:640px){
@@ -331,35 +402,78 @@
     <span class="p-hint">ピースをタップすると、一人ひとりが描く「2045年の広島」を見ることができます</span>
   </div>
 
-  <form class="compose" id="compose" autocomplete="off">
-    <div class="tut" aria-hidden="true">
-      <div class="tstep cur" id="ts1"><i>1</i>色を選ぶ</div><span class="tline"></span>
-      <div class="tstep" id="ts2"><i>2</i>想いを描く</div><span class="tline"></span>
-      <div class="tstep" id="ts3"><i>3</i>ピースを置く</div>
-    </div>
-    <div class="swatches" id="swatches">
-      <span class="preview" aria-hidden="true">
-        <svg viewBox="0 0 56 56"><path id="previewPath" fill="#7CC4F0" stroke="#fff" stroke-width="2"
-          d="M8 18q0-8 8-8h6c-1.2-7 13.2-7 12 0h6q8 0 8 8v6c7-1.2 7 13.2 0 12v6q0 8-8 8H16q-8 0-8-8V18z"/></svg>
-      </span>
-      <span class="lbl" id="swLbl">ピースの色</span>
-    </div>
-    <div class="chips" id="chips"><span class="ex">例</span></div>
-    <div class="row">
-      <div class="field">
-        <input id="msgInput" maxlength="24" enterkeyhint="done" placeholder="2045年の広島への想いを描こう" aria-label="2045年の広島への想い">
-        <span class="cnt" id="msgCnt">のこり24</span>
-      </div>
-      <div class="field nameField"><input id="nameInput" maxlength="10" placeholder="なまえ（任意）" aria-label="なまえ（任意）"></div>
-      <button class="place" id="placeBtn" type="submit">ピースを置く</button>
-    </div>
-    <div class="actions">
-      <span class="credit">PIECE PROJECT — HIROSHIMA 2045 · CONCEPT DEMO</span>
+  <div id="homeBar">
+    <button class="place wide" id="drawBtn" type="button">＋ 私も未来を描く</button>
+    <div class="homeLinks">
+      <button class="ghost" id="howBtn" type="button">つかいかた</button>
       <button class="ghost" id="shareBtn" type="button">リンクを共有</button>
       <button class="ghost" id="resetBtn" type="button">はじめから</button>
       <button class="assemble" id="assembleBtn" type="button">8月6日、いっきにお披露目</button>
     </div>
-  </form>
+    <span class="credit">PIECE PROJECT — HIROSHIMA 2045 · CONCEPT DEMO</span>
+  </div>
+</div>
+
+<!-- ステップ型ウィザード（段階的に画面が変遷） -->
+<div id="wiz" role="dialog" aria-modal="true" aria-label="ピースをつくる">
+  <div class="wtop">
+    <span class="wbrand">Piece Project</span>
+    <button id="wizClose" type="button" aria-label="とじる">×</button>
+  </div>
+  <div class="wsteps">
+    <div class="tstep cur" id="ws1"><i>1</i>色を選ぶ</div><span class="tline"></span>
+    <div class="tstep" id="ws2"><i>2</i>想いを描く</div><span class="tline"></span>
+    <div class="tstep" id="ws3"><i>3</i>ピースを置く</div>
+  </div>
+  <div class="wview">
+    <section class="wstep on" id="wp1">
+      <h2 class="wh">あなたの想いが、<br>2045年の広島をつくります。</h2>
+      <p class="wsub">好きな色を選んで、未来へのメッセージを描きましょう。</p>
+      <div class="wcard">
+        <div class="wcap">ピースの色を選ぶ</div>
+        <div class="swatches wizsw" id="swatches">
+          <span class="preview" aria-hidden="true">
+            <svg viewBox="0 0 56 56"><path id="previewPath" fill="#7CC4F0" stroke="#fff" stroke-width="2"
+              d="M8 18q0-8 8-8h6c-1.2-7 13.2-7 12 0h6q8 0 8 8v6c7-1.2 7 13.2 0 12v6q0 8-8 8H16q-8 0-8-8V18z"/></svg>
+          </span>
+        </div>
+        <div class="wname" id="swLbl">そらいろ</div>
+      </div>
+      <div class="wcard">
+        <div class="wcap">2045年の広島への想いを描こう <span class="cnt" id="msgCnt">のこり24文字</span></div>
+        <div class="field">
+          <input id="msgInput" maxlength="24" enterkeyhint="done" placeholder="例：自然と人が共に生きるまちに" aria-label="2045年の広島への想い">
+        </div>
+        <div class="chips" id="chips"><span class="ex">例</span></div>
+        <div class="field nameField"><input id="nameInput" maxlength="10" placeholder="なまえ（任意）" aria-label="なまえ（任意）"></div>
+      </div>
+      <button class="place wcta" id="wNext1" type="button">つぎへ →</button>
+    </section>
+    <section class="wstep" id="wp2">
+      <h2 class="wh">あなたのピースを、<br>パズルに置きましょう。</h2>
+      <p class="wsub">置くと、みんなの想いとつながっていきます。</p>
+      <div class="wcard wpv">
+        <div class="wcap"><span class="pvdot" id="pvDot"></span>あなたのピース</div>
+        <div class="pvpiece">
+          <svg viewBox="0 0 56 56"><path id="pvPath" fill="#7CC4F0" stroke="#fff" stroke-width="2"
+            d="M8 18q0-8 8-8h6c-1.2-7 13.2-7 12 0h6q8 0 8 8v6c7-1.2 7 13.2 0 12v6q0 8-8 8H16q-8 0-8-8V18z"/></svg>
+        </div>
+        <div class="pvmsg" id="pvMsg"></div>
+        <div class="pvwho" id="pvWho"></div>
+      </div>
+      <button class="place wcta" id="wPlace" type="button">パズルに置く</button>
+      <button class="tskip" id="wBack" type="button">← 色とメッセージをなおす</button>
+    </section>
+    <section class="wstep" id="wp3">
+      <div class="wmark" aria-hidden="true">
+        <svg viewBox="0 0 64 64"><circle cx="32" cy="32" r="29" fill="none" stroke="#3FC6C0" stroke-width="3"/>
+        <path d="M20 33 l9 9 16 -18" fill="none" stroke="#3E8EE8" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <h2 class="wh">あなたの想いを、<br>受け取りました。</h2>
+      <p class="wsub">みんなのピースが集まって、未来の広島が形になっていきます。<br>810ピースそろったら、<b>8月6日、メルパルク</b>で“未来”をお披露目。</p>
+      <button class="place wcta" id="wDone" type="button">みんなのパズルを見る</button>
+    </section>
+  </div>
 </div>
 
 <div id="about" role="dialog" aria-modal="true" aria-labelledby="aboutTitle">
@@ -380,6 +494,71 @@
     <p class="note">これはコンセプトデモです。入力はこの画面の中だけで完結し、どこにも送信されません。<br>
     ヒント: 「8月6日、いっきにお披露目」ボタンで、当日の演出をプレビューできます。</p>
     <button class="cta" id="aboutCta" type="button">私も未来を描く</button>
+  </div>
+</div>
+<div id="tut" role="dialog" aria-modal="true" aria-label="つかいかた">
+  <div class="sheet tsheet">
+    <button id="tutClose" type="button" aria-label="とじる">×</button>
+    <span class="tag">How to</span>
+    <h2><b>Piece Project</b> のつかいかた</h2>
+    <div id="tutSlides">
+      <section class="tsl on">
+        <div class="tart">
+          <svg viewBox="0 0 190 64">
+            <g transform="translate(6,5) scale(0.96)"><path fill="#7CC4F0" stroke="#fff" stroke-width="2.5" d="M8 18q0-8 8-8h6c-1.2-7 13.2-7 12 0h6q8 0 8 8v6c7-1.2 7 13.2 0 12v6q0 8-8 8H16q-8 0-8-8V18z"/></g>
+            <g transform="translate(70,5) scale(0.96)"><path fill="#F7D97C" stroke="#fff" stroke-width="2.5" d="M8 18q0-8 8-8h6c-1.2-7 13.2-7 12 0h6q8 0 8 8v6c7-1.2 7 13.2 0 12v6q0 8-8 8H16q-8 0-8-8V18z"/></g>
+            <g transform="translate(134,5) scale(0.96)"><path fill="#F5A8C8" stroke="#fff" stroke-width="2.5" d="M8 18q0-8 8-8h6c-1.2-7 13.2-7 12 0h6q8 0 8 8v6c7-1.2 7 13.2 0 12v6q0 8-8 8H16q-8 0-8-8V18z"/></g>
+          </svg>
+        </div>
+        <h3>① ピースの色を選ぶ</h3>
+        <p>「＋ 私も未来を描く」からはじめて、<br>好きな色をえらびます。いまの気持ちに合う色でOK。</p>
+      </section>
+      <section class="tsl">
+        <div class="tart">
+          <svg viewBox="0 0 200 64">
+            <rect x="4" y="10" width="192" height="44" rx="12" fill="#fff" stroke="#B9D2E8" stroke-width="1.5"/>
+            <line x1="20" y1="27" x2="150" y2="27" stroke="#7CA8CC" stroke-width="3" stroke-linecap="round"/>
+            <line x1="20" y1="40" x2="108" y2="40" stroke="#B9D2E8" stroke-width="3" stroke-linecap="round"/>
+            <path d="M168 44 L184 28 l6 6 -16 16 -8 2z" fill="#F7B26E" stroke="#fff" stroke-width="1.5"/>
+          </svg>
+        </div>
+        <h3>② 2045年の広島への想いを描く</h3>
+        <p>24文字までのメッセージを書きます。<br>まよったら、記入例をタップしてもOK。</p>
+      </section>
+      <section class="tsl">
+        <div class="tart">
+          <svg viewBox="0 0 200 72">
+            <defs><radialGradient id="tg" cx=".5" cy=".5" r=".5">
+              <stop offset="0" stop-color="#FFFDF2"/><stop offset=".6" stop-color="#FFF3C9"/><stop offset="1" stop-color="#FFEFB8" stop-opacity="0"/>
+            </radialGradient></defs>
+            <circle cx="78" cy="36" r="34" fill="none" stroke="#CFE4F5" stroke-width="2"/>
+            <circle cx="78" cy="36" r="24" fill="none" stroke="#BBD9F0" stroke-width="2"/>
+            <circle cx="78" cy="36" r="13" fill="url(#tg)"/>
+            <path transform="translate(120,12) scale(0.85)" fill="#7FD8DC" stroke="#fff" stroke-width="2.5" d="M8 18q0-8 8-8h6c-1.2-7 13.2-7 12 0h6q8 0 8 8v6c7-1.2 7 13.2 0 12v6q0 8-8 8H16q-8 0-8-8V18z"/>
+            <path d="M118 40 L104 40" stroke="#5A8CBE" stroke-width="2.5" stroke-linecap="round" stroke-dasharray="1 6"/>
+            <path d="M110 34 l-8 6 8 6" fill="none" stroke="#5A8CBE" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <h3>③ パズルに置く</h3>
+        <p>「パズルに置く」を押すと、あなたのピースが<br>光ってはまります。円は中心からそとへ広がります。</p>
+      </section>
+      <section class="tsl">
+        <div class="tart">
+          <svg viewBox="0 0 200 72">
+            <path transform="translate(28,16) scale(0.9)" fill="#C3A8E8" stroke="#fff" stroke-width="2.5" d="M8 18q0-8 8-8h6c-1.2-7 13.2-7 12 0h6q8 0 8 8v6c7-1.2 7 13.2 0 12v6q0 8-8 8H16q-8 0-8-8V18z"/>
+            <rect x="92" y="8" width="96" height="40" rx="11" fill="#fff" stroke="#B9D2E8" stroke-width="1.5"/>
+            <path d="M100 48 l10 12 4-12z" fill="#fff" stroke="#B9D2E8" stroke-width="1.5"/>
+            <line x1="104" y1="22" x2="176" y2="22" stroke="#7CA8CC" stroke-width="3" stroke-linecap="round"/>
+            <line x1="104" y1="34" x2="152" y2="34" stroke="#B9D2E8" stroke-width="3" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <h3>みんなの想いにふれる</h3>
+        <p>円のピースをタップすると、一人ひとりの想いが読めます。<br>810ピースそろったら、8月6日、メルパルクでお披露目。</p>
+      </section>
+    </div>
+    <div class="tdots" id="tutDots"></div>
+    <button class="cta" id="tutNext" type="button">つぎへ →</button>
+    <button class="tskip" id="tutSkip" type="button">スキップしてはじめる</button>
   </div>
 </div>
 <div id="toast" role="status"></div>
@@ -872,17 +1051,17 @@ bc.addEventListener('click', function (e) {
 popClose.addEventListener('click', function (e) { e.stopPropagation(); hidePop(); });
 document.addEventListener('click', function (e) { if (popOpen && !pop.contains(e.target) && e.target !== bc) hidePop(); });
 
-/* ---------- compose UI ---------- */
-var chosen = PALETTE[0];
+/* ---------- 色・入力（ウィザード内） ---------- */
+var chosen = PALETTE[0], chosenName = COLOR_NAMES[0];
 var swBox = document.getElementById('swatches');
 var previewPath = document.getElementById('previewPath');
 var swLbl = document.getElementById('swLbl');
 function setChosen(color, el, name) {
-  chosen = color;
+  chosen = color; chosenName = name || 'すきな色';
   document.querySelectorAll('.sw').forEach(function (s) { s.classList.remove('sel'); });
   if (el) el.classList.add('sel');
   previewPath.setAttribute('fill', color);
-  swLbl.textContent = name ? 'ピースの色 · ' + name : 'ピースの色';
+  swLbl.textContent = chosenName;
 }
 PALETTE.forEach(function (col, i) {
   var b = document.createElement('button');
@@ -899,29 +1078,14 @@ ci.setAttribute('aria-label', 'すきな色をつくる');
 ci.addEventListener('input', function () { setChosen(ci.value, custom, 'カスタム'); });
 custom.appendChild(ci); swBox.appendChild(custom);
 
-var compose = document.getElementById('compose'), msgInput = document.getElementById('msgInput'),
-    nameInput = document.getElementById('nameInput'), placeBtn = document.getElementById('placeBtn'),
+var msgInput = document.getElementById('msgInput'),
+    nameInput = document.getElementById('nameInput'),
     msgCnt = document.getElementById('msgCnt');
 var composing = false;
 msgInput.addEventListener('compositionstart', function () { composing = true; });
 msgInput.addEventListener('compositionend', function () { composing = false; updateCnt(); });
-function updateCnt() { msgCnt.textContent = 'のこり' + Math.max(0, 24 - msgInput.value.length); updateTut(); }
+function updateCnt() { msgCnt.textContent = 'のこり' + Math.max(0, 24 - msgInput.value.length) + '文字'; }
 msgInput.addEventListener('input', updateCnt);
-
-/* ---------- 3ステップチュートリアル表示 ---------- */
-var ts1 = document.getElementById('ts1'), ts2 = document.getElementById('ts2'), ts3 = document.getElementById('ts3');
-var placedFlashT = null, placedFlash = false;
-function updateTut() {
-  ts1.className = 'tstep'; ts2.className = 'tstep'; ts3.className = 'tstep';
-  if (placedFlash) { ts1.classList.add('done'); ts2.classList.add('done'); ts3.classList.add('cur'); return; }
-  if (msgInput.value.length > 0) { ts1.classList.add('done'); ts2.classList.add('cur'); }
-  else ts1.classList.add('cur');
-}
-function flashPlaced() {
-  placedFlash = true; updateTut();
-  clearTimeout(placedFlashT);
-  placedFlashT = setTimeout(function () { placedFlash = false; updateTut(); }, 2200);
-}
 
 /* 記入例チップ（タップで入力欄へ） */
 var chipsBox = document.getElementById('chips');
@@ -934,14 +1098,6 @@ EXAMPLES.forEach(function (ex) {
   chipsBox.appendChild(b);
 });
 
-/* rotating placeholder examples */
-var phIdx = 0;
-setInterval(function () {
-  if (REDUCED() || document.activeElement === msgInput || msgInput.value) return;
-  phIdx = (phIdx + 1) % PLACEHOLDERS.length;
-  msgInput.placeholder = PLACEHOLDERS[phIdx];
-}, 5000);
-
 /* milestones (manual placements only) */
 var lastMS = 0;
 function msLevel() { var f = placed / TARGET; return f >= 0.75 ? 3 : f >= 0.5 ? 2 : f >= 0.25 ? 1 : 0; }
@@ -951,19 +1107,90 @@ function msCheck() {
   if (m > lastMS) { lastMS = m; toast('円の' + ['25', '50', '75'][m - 1] + '%が埋まりました。'); }
 }
 
-compose.addEventListener('submit', function (e) {
-  e.preventDefault();
+/* ---------- ウィザード（段階的に画面が変遷するステップ） ---------- */
+var wiz = document.getElementById('wiz'), wizClose = document.getElementById('wizClose');
+var wPanels = [document.getElementById('wp1'), document.getElementById('wp2'), document.getElementById('wp3')];
+var wStepsEl = [document.getElementById('ws1'), document.getElementById('ws2'), document.getElementById('ws3')];
+var wNext1 = document.getElementById('wNext1'), wPlace = document.getElementById('wPlace'),
+    wBack = document.getElementById('wBack'), wDone = document.getElementById('wDone');
+var drawBtn = document.getElementById('drawBtn');
+var pvPath = document.getElementById('pvPath'), pvDot = document.getElementById('pvDot'),
+    pvMsg = document.getElementById('pvMsg'), pvWho = document.getElementById('pvWho');
+var wizStep = 0;
+function wizShow(i) {
+  wizStep = i;
+  for (var k = 0; k < 3; k++) {
+    wPanels[k].classList.toggle('on', k === i);
+    wStepsEl[k].className = 'tstep' + (k < i ? ' done' : (k === i ? ' cur' : ''));
+  }
+}
+function openWiz() {
+  hidePop();
+  wiz.classList.add('on');
+  wizShow(0);
+  setTimeout(function () { msgInput.focus(); }, 60);
+}
+function closeWiz() { wiz.classList.remove('on'); }
+drawBtn.addEventListener('click', openWiz);
+wizClose.addEventListener('click', closeWiz);
+wBack.addEventListener('click', function () { wizShow(0); msgInput.focus(); });
+function goPreview() {
   if (composing) return;
   var msg = msgInput.value.trim();
-  if (!msg) { compose.classList.remove('shake'); void compose.offsetWidth; compose.classList.add('shake'); msgInput.focus(); return; }
-  var idx = nextEmpty();
-  if (idx == null) { toast('円がいっぱいです。2045年までみんなで育てましょう'); return; }
-  placePiece(idx, chosen, msg, nameInput.value.trim(), true);
-  msgInput.value = ''; updateCnt(); msgInput.focus();
-  toast('あなたの想いを受け取りました。');
-  flashPlaced();
-  msCheck();
+  if (!msg) {
+    wPanels[0].classList.remove('wshake'); void wPanels[0].offsetWidth;
+    wPanels[0].classList.add('wshake'); msgInput.focus(); return;
+  }
+  pvPath.setAttribute('fill', chosen);
+  pvDot.style.background = chosen;
+  pvMsg.textContent = '「' + msg + '」';
+  var nm = nameInput.value.trim();
+  pvWho.textContent = (nm ? nm + ' · ' : '') + chosenName + 'のピース';
+  wizShow(1);
+}
+wNext1.addEventListener('click', goPreview);
+msgInput.addEventListener('keydown', function (e) {
+  if (e.key === 'Enter' && !composing && wizStep === 0) { e.preventDefault(); goPreview(); }
 });
+wPlace.addEventListener('click', function () {
+  var msg = msgInput.value.trim();
+  var idx = nextEmpty();
+  if (idx == null) { toast('円がいっぱいです。2045年までみんなで育てましょう'); closeWiz(); return; }
+  placePiece(idx, chosen, msg, nameInput.value.trim(), true);
+  msCheck();
+  wizShow(2);
+});
+wDone.addEventListener('click', function () {
+  closeWiz();
+  msgInput.value = ''; nameInput.value = ''; updateCnt();
+  toast('あなたの想いを受け取りました。');
+});
+
+/* ---------- チュートリアル（開いた直後の説明ウィンドウ） ---------- */
+var tut = document.getElementById('tut'), tutClose = document.getElementById('tutClose'),
+    tutNext = document.getElementById('tutNext'), tutSkip = document.getElementById('tutSkip'),
+    tutDots = document.getElementById('tutDots');
+var tutSlides = document.querySelectorAll('#tutSlides .tsl');
+var TUT_N = tutSlides.length, tutIdx = 0;
+for (var td = 0; td < TUT_N; td++) tutDots.appendChild(document.createElement('i'));
+function tutShow(i) {
+  tutIdx = i;
+  for (var k = 0; k < TUT_N; k++) {
+    tutSlides[k].classList.toggle('on', k === i);
+    tutDots.children[k].className = k === i ? 'on' : '';
+  }
+  tutNext.textContent = (i === TUT_N - 1) ? '私も未来を描く' : 'つぎへ →';
+}
+function openTut() { hidePop(); tut.classList.add('on'); tutShow(0); }
+function closeTut() { tut.classList.remove('on'); }
+tutNext.addEventListener('click', function () {
+  if (tutIdx === TUT_N - 1) { closeTut(); openWiz(); }
+  else tutShow(tutIdx + 1);
+});
+tutSkip.addEventListener('click', closeTut);
+tutClose.addEventListener('click', closeTut);
+tut.addEventListener('click', function (e) { if (e.target === tut) closeTut(); });
+document.getElementById('howBtn').addEventListener('click', openTut);
 
 /* ---------- share ---------- */
 var shareBtn = document.getElementById('shareBtn');
@@ -987,7 +1214,7 @@ function assemble() {
   var empties = [];
   for (var i = 0; i < pieces.length; i++) if (!pieces[i]) empties.push(i);
   if (!empties.length) { toast('もう810ピースそろっています'); return; }
-  assembling = true; assembleBtn.disabled = true; placeBtn.disabled = true;
+  assembling = true; assembleBtn.disabled = true; drawBtn.disabled = true;
   if (REDUCED()) {
     for (var e = 0; e < empties.length; e++) { pieces[empties[e]] = mkPiece(PALETTE[(Math.random() * PALETTE.length) | 0], SEED_MESSAGES[(Math.random() * SEED_MESSAGES.length) | 0], '', false); markFilled(empties[e]); }
     placed = TARGET; updateCounter(); drawBoard(); finishAssemble(); return;
@@ -1008,7 +1235,7 @@ function assemble() {
   })();
 }
 function finishAssemble() {
-  placedWave = 0; assembling = false; assembleBtn.disabled = false; placeBtn.disabled = false;
+  placedWave = 0; assembling = false; assembleBtn.disabled = false; drawBtn.disabled = false;
   lastMS = msLevel();
   if (!REDUCED()) {
     for (var k = 0; k < 3; k++) (function (kk) { setTimeout(function () { flashes.push({ r: coreR, vr: t * 0.55, a: 0.7 }); }, kk * 300); })(k);
@@ -1036,10 +1263,14 @@ function closeAbout() {
 }
 infoBtn.addEventListener('click', openAbout);
 aboutClose.addEventListener('click', closeAbout);
-aboutCta.addEventListener('click', function () { closeAbout(); msgInput.focus(); });
+aboutCta.addEventListener('click', function () { closeAbout(); openWiz(); });
 about.addEventListener('click', function (e) { if (e.target === about) closeAbout(); });
 document.addEventListener('keydown', function (e) {
-  if (e.key === 'Escape') { if (about.classList.contains('on')) closeAbout(); else hidePop(); }
+  if (e.key !== 'Escape') return;
+  if (tut.classList.contains('on')) closeTut();
+  else if (wiz.classList.contains('on')) closeWiz();
+  else if (about.classList.contains('on')) closeAbout();
+  else hidePop();
 });
 
 /* ---------- seed ---------- */
@@ -1065,13 +1296,16 @@ var rt;
 window.addEventListener('resize', function () { clearTimeout(rt); rt = setTimeout(resize, 150); });
 var onRMChange = function () { syncRM(); drawBoard(); };
 reduceMQ.addEventListener ? reduceMQ.addEventListener('change', onRMChange) : reduceMQ.addListener(onRMChange);
-function boot() { syncRM(); resize(); seed(false); updateTut(); requestAnimationFrame(fxLoop); }
+function boot() {
+  syncRM(); resize(); seed(false); requestAnimationFrame(fxLoop);
+  if (!(Q.has('tut') && qn('tut', 1) === 0)) setTimeout(openTut, 600); // 開いた直後に「つかいかた」窓
+}
 boot();
 if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { resize(); });
 
 /* test hooks */
 window.PW = {
-  version: '5.0',
+  version: '5.1',
   place: function (c, m, n) { return placePiece(nextEmpty(), c || PALETTE[0], m || 'テスト', n || '', true); },
   assemble: assemble, reset: function () { seed(true); }, count: function () { return placed; }, target: TARGET,
   fill: function (k) {
