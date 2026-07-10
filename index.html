@@ -312,6 +312,28 @@
   .pvwho{margin-top:6px;font-size:11.5px;color:var(--ink-soft);font-weight:500;letter-spacing:.1em}
   .wmark{width:58px;height:58px;margin:clamp(6px,2vh,18px) auto 2px}
   .wmark svg{width:100%;height:100%}
+  .pickBtn{display:block;margin:0 auto 8px}
+  .picknote{font-size:11.5px;font-weight:600;color:#2F9E98;letter-spacing:.06em;margin:-2px 0 8px}
+
+  /* ---------- 置く場所を選ぶ（全画面ピッカー） ---------- */
+  #pick{position:fixed;inset:0;z-index:40;display:none;flex-direction:column;
+    background:rgba(240,248,253,.97)}
+  #pick.on{display:flex}
+  .pktop{flex:0 0 auto;display:flex;align-items:center;gap:12px;padding:12px clamp(14px,3vw,24px)}
+  #pickClose{flex:0 0 auto;width:34px;height:34px;border:0;border-radius:50%;cursor:pointer;
+    background:rgba(31,75,115,.07);color:var(--ink-soft);font-size:15px;font-weight:600}
+  #pickClose:hover{background:rgba(31,75,115,.14);color:var(--ink)}
+  .pkt{flex:1 1 auto;display:flex;flex-direction:column;gap:3px;text-align:center;min-width:0}
+  .pkt b{font-size:clamp(14px,2vh,17px);font-weight:600;color:var(--ink);letter-spacing:.1em}
+  .pkt span{font-size:clamp(10px,1.4vh,11.5px);color:var(--ink-soft);font-weight:500;letter-spacing:.04em}
+  .pkzoom{flex:0 0 auto;display:flex;gap:6px}
+  .pkzoom button{width:34px;height:34px;border:1px solid var(--line);border-radius:10px;cursor:pointer;
+    background:#fff;color:var(--ink);font-size:17px;font-weight:600;line-height:1}
+  .pkzoom button:hover{background:#F2F8FD}
+  #pickWrap{flex:1 1 auto;overflow:auto;-webkit-overflow-scrolling:touch;display:flex;padding:8px}
+  #pickCanvas{margin:auto;display:block;cursor:pointer}
+  .pkfoot{flex:0 0 auto;text-align:center;padding:10px 16px calc(12px + env(safe-area-inset-bottom))}
+  #pickOk:disabled{opacity:.45;box-shadow:none;cursor:default}
 
   /* ---------- tutorial modal（初回に開く「つかいかた」） ---------- */
   #tut{position:fixed;inset:0;z-index:31;display:none;align-items:center;justify-content:center;
@@ -356,19 +378,6 @@
   .rm .place::after{display:none}
   .rm #finale.on{animation:none;opacity:0}
   .rm #auroraCanvas{opacity:.5}
-#miniBoard{display:block;margin:12px auto;border-radius:50%;touch-action:none;cursor:pointer}
-.mini-hint{text-align:center;font-size:.82rem;color:#7ba5b8;margin-bottom:8px}
-
-#boardPage{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(230,238,245,.97);z-index:1000;display:none;flex-direction:column}
-#boardPage.active{display:flex}
-#boardHeader{padding:14px 16px;display:flex;justify-content:space-between;align-items:center}
-#boardHeader h3{font-size:1.05rem;color:#3a6b7e;margin:0;flex:1;text-align:center}
-#boardZoomWrap{flex:1;overflow:auto;-webkit-overflow-scrolling:touch;display:flex;align-items:center;justify-content:center;padding:8px}
-#boardCanvas{touch-action:pinch-zoom;max-width:100%}
-#boardFooter{padding:12px 16px;text-align:center}
-#confirmPlace{padding:12px 40px;border:none;border-radius:24px;background:linear-gradient(135deg,#5ba3b5,#7ec8a0);color:#fff;font-size:1rem;opacity:.4;pointer-events:none}
-#confirmPlace.enabled{opacity:1;pointer-events:auto}
-.zoom-hint{font-size:.72rem;color:#94b8c8;margin-top:2px}
 </style>
 </head>
 <body>
@@ -474,8 +483,9 @@
         <div class="pvmsg" id="pvMsg"></div>
         <div class="pvwho" id="pvWho"></div>
       </div>
-      <button onclick="openBoardPage()" style="display:block;margin:12px auto;padding:10px 24px;border:2px solid #5ba3b5;border-radius:20px;background:white;color:#3a6b7e;font-size:.95rem;cursor:pointer">📍 場所を選ぶ（拡大表示）</button>
-      <button class="place wcta" id="wPlace" disabled type="button">パズルに置く</button>
+      <button class="assemble pickBtn" id="pickBtn" type="button">📍 置く場所を選ぶ（拡大表示・任意）</button>
+      <div class="picknote" id="pickNote" hidden>✓ 場所を選びました — 「パズルに置く」でここに置きます</div>
+      <button class="place wcta" id="wPlace" type="button">パズルに置く</button>
       <button class="tskip" id="wBack" type="button">← 色とメッセージをなおす</button>
     </section>
     <section class="wstep" id="wp3">
@@ -510,6 +520,20 @@
     <button class="cta" id="aboutCta" type="button">私も未来を描く</button>
   </div>
 </div>
+<!-- 置く場所を選ぶ（全画面・拡大可） -->
+<div id="pick" role="dialog" aria-modal="true" aria-label="置く場所を選ぶ">
+  <div class="pktop">
+    <button id="pickClose" type="button" aria-label="とじる">×</button>
+    <div class="pkt"><b>置きたい場所をタップ</b><span>あいているところに置けます ・ ＋ / − で拡大縮小</span></div>
+    <div class="pkzoom">
+      <button id="zoomOut" type="button" aria-label="縮小">−</button>
+      <button id="zoomIn" type="button" aria-label="拡大">＋</button>
+    </div>
+  </div>
+  <div id="pickWrap"><canvas id="pickCanvas"></canvas></div>
+  <div class="pkfoot"><button class="place wcta" id="pickOk" type="button" disabled>この場所に決める</button></div>
+</div>
+
 <div id="tut" role="dialog" aria-modal="true" aria-label="つかいかた">
   <div class="sheet tsheet">
     <button id="tutClose" type="button" aria-label="とじる">×</button>
@@ -584,8 +608,6 @@
    ほぼ正面の円盤（KY=0.95）＋わずかな厚み。透明感のあるパステルピース、
    中心は太陽の光。幾何はフラット座標で構築し描画時に一括変換。
    ===================================================================== */
-var selectedIdx = -1;
-var miniCtx = null;
 var TWO_PI = Math.PI * 2;
 var KY = 0.95;
 var Q = new URLSearchParams(location.search);
@@ -1150,71 +1172,6 @@ function closeWiz() { wiz.classList.remove('on'); }
 drawBtn.addEventListener('click', openWiz);
 wizClose.addEventListener('click', closeWiz);
 wBack.addEventListener('click', function () { wizShow(0); msgInput.focus(); });
-function drawMiniBoard(){if(!document.getElementById('miniBoard'))return;
-  var c=document.getElementById('miniBoard');
-  if(!c)return;
-  miniCtx=c.getContext('2d');
-  var cx=140,cy=140,scale=140/rOut[14];
-  miniCtx.clearRect(0,0,280,280);
-  var idx=0;
-  for(var r=0;r<15;r++){
-    var n=RING_PH[r],aStep=2*Math.PI/n;
-    for(var s=0;s<n;s++){
-      var a1=-Math.PI/2+s*aStep,a2=a1+aStep;
-      miniCtx.beginPath();
-      miniCtx.arc(cx,cy,rOut[r]*scale,a1,a2);
-      miniCtx.arc(cx,cy,rIn[r]*scale,a2,a1,true);
-      miniCtx.closePath();
-      if(pieces[idx]){
-        miniCtx.fillStyle=hexA(pieces[idx].c,.7);
-      }else if(idx===selectedIdx){
-        miniCtx.fillStyle=hexA(chosen,.5);
-      }else{
-        miniCtx.fillStyle='rgba(200,210,220,.35)';
-      }
-      miniCtx.fill();
-      miniCtx.strokeStyle='rgba(255,255,255,.6)';
-      miniCtx.lineWidth=.5;
-      miniCtx.stroke();
-      if(idx===selectedIdx){
-        miniCtx.strokeStyle='#2196F3';
-        miniCtx.lineWidth=2;
-        miniCtx.stroke();
-      }
-      idx++;
-    }
-  }
-}
-
-function onMiniTap(e){if(!document.getElementById('miniBoard'))return;
-  var c=document.getElementById('miniBoard');
-  var rect=c.getBoundingClientRect();
-  var x=(e.touches?e.touches[0].clientX:e.clientX)-rect.left;
-  var y=(e.touches?e.touches[0].clientY:e.clientY)-rect.top;
-  var cx=140,cy=140,scale=140/rOut[14];
-  var dx=x-cx,dy=y-cy,dist=Math.sqrt(dx*dx+dy*dy);
-  var ang=Math.atan2(dy,dx);
-  if(ang<-Math.PI/2)ang+=2*Math.PI;
-  ang+=Math.PI/2;
-  if(ang>=2*Math.PI)ang-=2*Math.PI;
-  var idx=0;
-  for(var r=0;r<15;r++){
-    if(dist>=rIn[r]*scale&&dist<=rOut[r]*scale){
-      var n=RING_PH[r],sIdx=Math.floor(ang/(2*Math.PI/n));
-      if(sIdx>=n)sIdx=n-1;
-      var target=0;
-      for(var i=0;i<r;i++)target+=RING_PH[i];
-      target+=sIdx;
-      if(!pieces[target]){
-        selectedIdx=target;
-        document.getElementById('wPlace').disabled=false;
-        drawMiniBoard();
-      }
-      return;
-    }
-  }
-}
-
 function goPreview() {
   if (composing) return;
   var msg = msgInput.value.trim();
@@ -1227,11 +1184,8 @@ function goPreview() {
   pvMsg.textContent = '「' + msg + '」';
   var nm = nameInput.value.trim();
   pvWho.textContent = (nm ? nm + ' · ' : '') + chosenName + 'のピース';
+  pickReset();
   wizShow(1);
-  selectedIdx=-1;
-  document.getElementById('wPlace').disabled=true;
-  drawMiniBoard();
-
 }
 wNext1.addEventListener('click', goPreview);
 msgInput.addEventListener('keydown', function (e) {
@@ -1239,10 +1193,10 @@ msgInput.addEventListener('keydown', function (e) {
 });
 wPlace.addEventListener('click', function () {
   var msg = msgInput.value.trim();
-  var idx = selectedIdx;
-    if(idx<0)return;
+  var idx = (pickIdx >= 0 && !pieces[pickIdx]) ? pickIdx : nextEmpty();
   if (idx == null) { toast('円がいっぱいです。2045年までみんなで育てましょう'); closeWiz(); return; }
   placePiece(idx, chosen, msg, nameInput.value.trim(), true);
+  pickReset();
   msCheck();
   wizShow(2);
 });
@@ -1251,6 +1205,91 @@ wDone.addEventListener('click', function () {
   msgInput.value = ''; nameInput.value = ''; updateCnt();
   toast('あなたの想いを受け取りました。');
 });
+
+/* ---------- 置く場所を選ぶ（全画面・拡大できるピッカー） ---------- */
+var pick = document.getElementById('pick'), pickWrap = document.getElementById('pickWrap');
+var pickCanvas = document.getElementById('pickCanvas'), pctx = pickCanvas.getContext('2d');
+var pickBtn = document.getElementById('pickBtn'), pickOk = document.getElementById('pickOk'),
+    pickCloseB = document.getElementById('pickClose'), pickNote = document.getElementById('pickNote');
+var pickIdx = -1, pickZ = 1;
+function pickReset() {
+  pickIdx = -1; pickOk.disabled = true; pickNote.hidden = true;
+  pickBtn.textContent = '📍 置く場所を選ぶ（拡大表示・任意）';
+}
+function pickFlatExtent() { return 2 * (outerR + t * 0.6); }
+function renderPick() {
+  var flat = pickFlatExtent();
+  var vw = Math.max(200, pickWrap.clientWidth - 20), vh = Math.max(200, pickWrap.clientHeight - 20);
+  var z = (Math.min(vw, vh) / flat) * pickZ;
+  var side = Math.max(120, Math.round(flat * z));
+  pickCanvas.style.width = side + 'px'; pickCanvas.style.height = side + 'px';
+  var pd = Math.min(window.devicePixelRatio || 1, 2);
+  pickCanvas.width = Math.round(side * pd); pickCanvas.height = Math.round(side * pd);
+  var off = CX - flat / 2, offY = CYf - flat / 2;
+  pctx.setTransform(pd * z, 0, 0, pd * z, -off * pd * z, -offY * pd * z);
+  pctx.clearRect(off, offY, flat, flat);
+  var g = pctx.createRadialGradient(CX, CYf, 0, CX, CYf, outerR);
+  g.addColorStop(0, 'rgba(255,250,225,0.9)');
+  g.addColorStop(1, 'rgba(255,255,255,0)');
+  pctx.fillStyle = g;
+  pctx.beginPath(); pctx.arc(CX, CYf, outerR, 0, TWO_PI); pctx.fill();
+  pctx.lineJoin = 'round';
+  for (var i = 0; i < paths.length; i++) {
+    var pc = pieces[i];
+    if (pc) pctx.fillStyle = pc.fill;
+    else if (i === pickIdx) pctx.fillStyle = hexA(chosen, 0.9);
+    else pctx.fillStyle = 'rgba(255,255,255,0.78)';
+    pctx.fill(paths[i]);
+    pctx.lineWidth = Math.max(0.75, t * 0.05);
+    pctx.strokeStyle = pc ? 'rgba(255,255,255,0.85)' : 'rgba(140,180,215,0.5)';
+    pctx.stroke(paths[i]);
+  }
+  if (pickIdx >= 0) {
+    pctx.lineWidth = t * 0.16;
+    pctx.strokeStyle = '#3E8EE8';
+    pctx.stroke(paths[pickIdx]);
+  }
+  var cg = pctx.createRadialGradient(CX, CYf, 0, CX, CYf, coreR);
+  cg.addColorStop(0, 'rgba(255,255,255,1)');
+  cg.addColorStop(1, 'rgba(255,235,180,0.9)');
+  pctx.fillStyle = cg;
+  pctx.beginPath(); pctx.arc(CX, CYf, coreR, 0, TWO_PI); pctx.fill();
+}
+function cellAtFlat(xf, yf) {
+  var dx = xf - CX, dy = yf - CYf, r = Math.hypot(dx, dy);
+  if (r < rIn[0] || r >= rOut[RINGS - 1]) return -1;
+  var i = 0; while (i < RINGS && r >= rOut[i]) i++;
+  if (i >= RINGS) return -1;
+  var th = Math.atan2(dy, dx);
+  var local = (th - RING_PH[i]) % TWO_PI; if (local < 0) local += TWO_PI;
+  var j = Math.floor(local / (TWO_PI / RING_N[i])) % RING_N[i];
+  return BASE[i] + j;
+}
+pickCanvas.addEventListener('click', function (e) {
+  var rect = pickCanvas.getBoundingClientRect();
+  var flat = pickFlatExtent();
+  var s = rect.width / flat;
+  var xf = (CX - flat / 2) + (e.clientX - rect.left) / s;
+  var yf = (CYf - flat / 2) + (e.clientY - rect.top) / s;
+  var idx = cellAtFlat(xf, yf);
+  if (idx < 0) return;
+  if (pieces[idx]) { toast('そこはもう埋まっています。あいている場所をタップしてください'); return; }
+  pickIdx = idx; pickOk.disabled = false;
+  renderPick();
+});
+function openPick() { pick.classList.add('on'); pickZ = 1; renderPick(); }
+function closePick() { pick.classList.remove('on'); }
+pickBtn.addEventListener('click', openPick);
+pickCloseB.addEventListener('click', closePick);
+pickOk.addEventListener('click', function () {
+  closePick();
+  if (pickIdx >= 0) {
+    pickNote.hidden = false;
+    pickBtn.textContent = '📍 場所を選びなおす';
+  }
+});
+document.getElementById('zoomIn').addEventListener('click', function () { pickZ = Math.min(3, pickZ * 1.3); renderPick(); });
+document.getElementById('zoomOut').addEventListener('click', function () { pickZ = Math.max(1, pickZ / 1.3); renderPick(); });
 
 /* ---------- チュートリアル（開いた直後の説明ウィンドウ） ---------- */
 var tut = document.getElementById('tut'), tutClose = document.getElementById('tutClose'),
@@ -1353,7 +1392,8 @@ aboutCta.addEventListener('click', function () { closeAbout(); openWiz(); });
 about.addEventListener('click', function (e) { if (e.target === about) closeAbout(); });
 document.addEventListener('keydown', function (e) {
   if (e.key !== 'Escape') return;
-  if (tut.classList.contains('on')) closeTut();
+  if (pick.classList.contains('on')) closePick();
+  else if (tut.classList.contains('on')) closeTut();
   else if (wiz.classList.contains('on')) closeWiz();
   else if (about.classList.contains('on')) closeAbout();
   else hidePop();
@@ -1366,7 +1406,7 @@ function seed(reset) {
   buildOrder();
   var n = Math.min(SEED_COUNT, TARGET);
   for (var k = 0; k < n; k++) {
-    var idx = selectedIdx; if(idx < 0) return; if (idx == null) break;
+    var idx = nextEmpty(); if (idx == null) break;
     pieces[idx] = mkPiece(PALETTE[(Math.random() * PALETTE.length) | 0],
       SEED_MESSAGES[(Math.random() * SEED_MESSAGES.length) | 0],
       SEED_NAMES[(Math.random() * SEED_NAMES.length) | 0], false);
@@ -1391,68 +1431,15 @@ if (document.fonts && document.fonts.ready) document.fonts.ready.then(function (
 
 /* test hooks */
 window.PW = {
-  version: '5.1',
+  version: '5.2',
   place: function (c, m, n) { return placePiece(nextEmpty(), c || PALETTE[0], m || 'テスト', n || '', true); },
   assemble: assemble, reset: function () { seed(true); }, count: function () { return placed; }, target: TARGET,
   fill: function (k) {
-    for (var i = 0; i < k; i++) { var idx = selectedIdx; if(idx < 0) return; if (idx == null) break;
+    for (var i = 0; i < k; i++) { var idx = nextEmpty(); if (idx == null) break;
       pieces[idx] = mkPiece(PALETTE[(Math.random() * PALETTE.length) | 0], SEED_MESSAGES[(Math.random() * SEED_MESSAGES.length) | 0], '', false); placed++; markFilled(idx); }
     updateCounter(); drawBoard(); return placed;
   }
 };
-
-var selectedIdx=-1;
-function openBoardPage(){
-document.getElementById('boardPage').classList.add('active');
-drawBoardFull();
-var c=document.getElementById('boardCanvas');
-c.onclick=onBoardClick;
-c.ontouchend=function(e){if(e.changedTouches.length===1){e.preventDefault();var t=e.changedTouches[0];var r=c.getBoundingClientRect();handleBoardSelect((t.clientX-r.left)*600/r.width,(t.clientY-r.top)*600/r.height);}};
-}
-function closeBoardPage(){document.getElementById('boardPage').classList.remove('active');}
-function drawBoardFull(){
-var c=document.getElementById('boardCanvas'),ctx=c.getContext('2d');
-var cx=300,cy=300,sc=295/rOut[14];
-ctx.clearRect(0,0,600,600);
-var idx=0;
-for(var r=0;r<15;r++){var n=RING_N[r],as=2*Math.PI/n;
-for(var s=0;s<n;s++){var a1=-Math.PI/2+s*as,a2=a1+as;
-ctx.beginPath();ctx.arc(cx,cy,rOut[r]*sc,a1,a2);ctx.arc(cx,cy,rIn[r]*sc,a2,a1,true);ctx.closePath();
-if(pieces[idx])ctx.fillStyle=hexA(pieces[idx].c,.7);
-else if(idx===selectedIdx)ctx.fillStyle=hexA(chosen,.6);
-else ctx.fillStyle='rgba(200,210,220,.3)';
-ctx.fill();ctx.strokeStyle='rgba(255,255,255,.7)';ctx.lineWidth=.8;ctx.stroke();
-if(idx===selectedIdx){ctx.strokeStyle='#2196F3';ctx.lineWidth=3;ctx.stroke();}
-idx++;}}
-ctx.beginPath();ctx.arc(cx,cy,rIn[0]*sc,0,2*Math.PI);ctx.fillStyle='rgba(255,255,255,.8)';ctx.fill();
-}
-function onBoardClick(e){var r=e.target.getBoundingClientRect();handleBoardSelect((e.clientX-r.left)*600/r.width,(e.clientY-r.top)*600/r.height);}
-function handleBoardSelect(x,y){
-var cx=300,cy=300,sc=295/rOut[14];
-var dx=x-cx,dy=y-cy,dist=Math.sqrt(dx*dx+dy*dy);
-var ang=Math.atan2(dy,dx)+Math.PI/2;if(ang<0)ang+=2*Math.PI;if(ang>=2*Math.PI)ang-=2*Math.PI;
-for(var r=0;r<15;r++){if(dist>=rIn[r]*sc&&dist<=rOut[r]*sc){
-var n=RING_N[r],si=Math.floor(ang/(2*Math.PI/n));if(si>=n)si=n-1;
-var t=0;for(var i=0;i<r;i++)t+=RING_N[i];t+=si;
-if(!pieces[t]){selectedIdx=t;document.getElementById('confirmPlace').classList.add('enabled');drawBoardFull();}
-return;}}
-}
-function confirmPlacement(){closeBoardPage();document.getElementById('wPlace').disabled=false;}
 </script>
-
-<div id="boardPage">
-<div id="boardHeader">
-<button onclick="closeBoardPage()" style="background:none;border:none;font-size:1.4rem;color:#5ba3b5;padding:8px">✕</button>
-<h3>置きたい場所をタップ</h3>
-<div style="width:40px"></div>
-</div>
-<p class="zoom-hint" style="text-align:center">ピンチで拡大できます</p>
-<div id="boardZoomWrap">
-<canvas id="boardCanvas" width="600" height="600"></canvas>
-</div>
-<div id="boardFooter">
-<button id="confirmPlace" onclick="confirmPlacement()">この場所に決める</button>
-</div>
-</div>
 </body>
 </html>
