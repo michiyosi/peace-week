@@ -36,7 +36,8 @@
     --latin:'EB Garamond','Shippori Mincho',serif;
   }
   *{box-sizing:border-box}
-  html,body{margin:0;height:100%;overflow:hidden;font-family:var(--serif);color:var(--ink);
+  html{height:100%}
+  body{margin:0;min-height:100%;overflow-x:hidden;overflow-y:auto;font-family:var(--serif);color:var(--ink);
     -webkit-font-smoothing:antialiased;-webkit-tap-highlight-color:transparent}
   body{
     background:
@@ -51,7 +52,7 @@
   }
   button,input{font-family:var(--serif)}
   :focus-visible{outline:2px solid #fff;outline-offset:2px;border-radius:6px}
-  #app{position:fixed;inset:0;display:flex;flex-direction:column}
+  #app{position:relative;height:100vh;height:100svh;display:flex;flex-direction:column}
 
   /* ---------- header ---------- */
   header{
@@ -121,6 +122,10 @@
   #pop .dot{width:12px;height:12px;border-radius:4px;box-shadow:inset 0 0 0 1px rgba(0,0,0,.1)}
   #pop .msg{font-size:15px;font-weight:600;line-height:1.55;color:var(--ink);word-break:break-word}
   #pop .who{margin-top:7px;font-size:11.5px;color:var(--ink-soft);font-weight:500;letter-spacing:.06em}
+  #pop .when{margin-top:3px;font-size:10px;color:var(--ink-faint);font-weight:500;letter-spacing:.08em;font-variant-numeric:tabular-nums}
+  #pop .part{margin:8px 0 2px;border-radius:10px;overflow:hidden;border:1px solid var(--line)}
+  #pop .part svg{display:block;width:100%;height:auto}
+  #pop .artcap{font-size:9px;color:var(--ink-faint);font-weight:500;letter-spacing:.08em;margin-top:3px}
   #pop::after{content:"";position:absolute;left:50%;bottom:-8px;transform:translateX(-50%);
     border:8px solid transparent;border-top-color:var(--card);border-bottom:0}
   #pop.below::after{bottom:auto;top:-8px;border-top:0;border-bottom:8px solid var(--card)}
@@ -314,6 +319,29 @@
   .wmark svg{width:100%;height:100%}
   .pickBtn{display:block;margin:0 auto 8px}
   .picknote{font-size:11.5px;font-weight:600;color:#2F9E98;letter-spacing:.06em;margin:-2px 0 8px}
+  .cdown{font-size:clamp(10.5px,1.5vh,12.5px);color:var(--ink);font-weight:600;letter-spacing:.08em;
+    text-shadow:0 1px 8px rgba(255,255,255,.8)}
+  .cdown b{font-family:var(--latin);font-size:1.3em;color:#2F6FB5;font-weight:500}
+  .scrollcue{font-size:10px;font-weight:600;color:var(--ink-faint);letter-spacing:.16em;
+    animation:cue 2.6s ease-in-out infinite}
+  @keyframes cue{0%,100%{transform:translateY(0);opacity:.7}50%{transform:translateY(3px);opacity:1}}
+  .rm .scrollcue{animation:none}
+
+  /* ---------- story（スクロールで「知る」を深める） ---------- */
+  #story{position:relative;padding:clamp(40px,7vh,72px) 20px 30px;
+    background:linear-gradient(180deg,#EAF5FC 0%,#F5F9FD 26%,#EDF4FB 70%,#E7F1FA 100%)}
+  .sblock{max-width:640px;margin:0 auto clamp(22px,4vh,34px);background:rgba(255,255,255,.92);
+    border:1px solid rgba(255,255,255,.9);border-radius:18px;box-shadow:var(--shadow-s);
+    padding:clamp(22px,4vh,32px) clamp(20px,4vw,34px)}
+  .snum{font-family:var(--latin);font-style:italic;font-size:12px;letter-spacing:.3em;color:#B9893B}
+  .sblock h3{margin:8px 0 10px;font-size:clamp(17px,2.6vh,21px);font-weight:600;letter-spacing:.1em;color:var(--ink)}
+  .sblock p{margin:0;font-size:13.5px;line-height:2.15;font-weight:500;color:#3C5A76;letter-spacing:.03em}
+  .sblock p b{color:#2F6FB5;font-weight:600}
+  .sblock p + p{margin-top:10px}
+  .scta{max-width:640px;margin:0 auto;text-align:center;padding:clamp(14px,3vh,26px) 0 8px}
+  .scta h3{margin:0 0 14px;font-size:clamp(18px,2.8vh,23px);font-weight:600;letter-spacing:.12em;color:var(--ink)}
+  .sfoot{text-align:center;margin-top:26px;font-family:var(--latin);font-style:italic;font-size:10px;
+    letter-spacing:.2em;color:var(--ink-faint)}
 
   /* ---------- 置く場所を選ぶ（全画面ピッカー） ---------- */
   #pick{position:fixed;inset:0;z-index:40;display:none;flex-direction:column;
@@ -410,8 +438,11 @@
     <div id="pop" role="status">
       <button id="popClose" type="button" aria-label="とじる">×</button>
       <span class="chip"><span class="dot" id="popDot"></span><span id="popTag">2045年の広島へ</span></span>
+      <div class="part" id="popArt" hidden></div>
       <div class="msg" id="popMsg"></div>
       <div class="who" id="popWho"></div>
+      <div class="when" id="popWhen"></div>
+      <div class="artcap">イメージイラスト: メッセージから自動生成（デモ）</div>
     </div>
   </div>
 
@@ -421,6 +452,7 @@
     <div class="pbar"><i id="bar"></i></div>
     <span class="p-left">あと <b id="leftNum">810</b> ピース</span>
     <span class="p-note" id="countNote">あと810人の想いで、2045年の広島が完成します。</span>
+    <span class="cdown" id="cdown" hidden>お披露目まで あと <b id="cdays">–</b> 日 ─ その日、この円が一枚の絵に変わります</span>
     <span class="p-hint">ピースをタップすると、一人ひとりが描く「2045年の広島」を見ることができます</span>
   </div>
 
@@ -433,8 +465,36 @@
       <button class="assemble" id="assembleBtn" type="button">8月6日、いっきにお披露目</button>
     </div>
     <span class="credit">PIECE PROJECT — HIROSHIMA 2045 · CONCEPT DEMO</span>
+    <span class="scrollcue">▼ スクロールして、プロジェクトのことを知る</span>
   </div>
 </div>
+
+<!-- スクロールで「知る」を深めるセクション -->
+<section id="story">
+  <div class="sblock">
+    <span class="snum">01 — Why 2045</span>
+    <h3>なぜ、2045年なのか。</h3>
+    <p>2045年は、<b>被爆から100年</b>の節目の年。あの日から一世紀がたつその年に、広島はどんな街であってほしいか——それを、いまここに生きる私たち一人ひとりの言葉で描いておきたいと考えました。</p>
+    <p>願うだけではなく、<b>未来を一緒に作る</b>。Piece Projectは、そのための小さな一歩です。</p>
+  </div>
+  <div class="sblock">
+    <span class="snum">02 — 810 Pieces</span>
+    <h3>810ピースに込めた意味</h3>
+    <p>ピースウィークの6日間（8月1日〜6日）で集めるのは、<b>810の想い</b>。8月6日、それがひとつの円になり、「2045年の広島」の絵が生まれます。</p>
+    <p>そして円はそこで終わりません。<b>毎年10ピースずつ</b>みんなで育てていき、被爆100年の2045年に、ちょうど<b>1000ピース</b>で完成します。20年かけて、未来へ受け渡していくパズルです。</p>
+  </div>
+  <div class="sblock">
+    <span class="snum">03 — Peace × Piece</span>
+    <h3>Peace Weekとのつながり</h3>
+    <p>このプロジェクトは、広島の平和文化月間 <b>Hiroshima Peace Week 2026</b>（8/1–8/6）のなかで生まれました。「ピース」には、平和の <b>Peace</b> と、パズルの <b>Piece</b>、ふたつの意味を重ねています。</p>
+    <p>会期中はまちのあちこちでピースを集め、8月6日、<b>メルパルク</b>にてみんなの想いから生まれた一枚の絵をお披露目します。</p>
+  </div>
+  <div class="scta">
+    <h3>あなたの一つの想いが、未来をつくる。</h3>
+    <button class="place wide" id="drawBtn2" type="button">＋ 私も未来を描く</button>
+    <div class="sfoot">PIECE PROJECT — HIROSHIMA 2045</div>
+  </div>
+</section>
 
 <!-- ステップ型ウィザード（段階的に画面が変遷） -->
 <div id="wiz" role="dialog" aria-modal="true" aria-label="ピースをつくる">
@@ -685,8 +745,47 @@ function shade(hex) {
   return 'rgb(' + ((v[0] * 0.6) | 0) + ',' + ((v[1] * 0.68) | 0) + ',' + ((v[2] * 0.8) | 0) + ')';
 }
 function hexA(hex, a) { var v = hexRGB(hex); return 'rgba(' + v[0] + ',' + v[1] + ',' + v[2] + ',' + a + ')'; }
-function mkPiece(color, msg, name, animate) {
+
+/* ---------- メッセージ連動のイメージイラスト（デモ版AI生成。将来は画像生成APIに差し替え） ---------- */
+var ART = {
+  hikari: '<svg viewBox="0 0 160 90"><rect width="160" height="90" fill="#EAF6FE"/><circle cx="80" cy="48" r="30" fill="#FFE9A8" opacity=".4"/><circle cx="80" cy="48" r="19" fill="#FFE38E"/><g stroke="#F5CE79" stroke-width="3" stroke-linecap="round" opacity=".8"><line x1="80" y1="8" x2="80" y2="18"/><line x1="36" y1="48" x2="46" y2="48"/><line x1="114" y1="48" x2="124" y2="48"/><line x1="50" y1="20" x2="57" y2="27"/><line x1="110" y1="20" x2="103" y2="27"/></g><ellipse cx="80" cy="84" rx="66" ry="7" fill="#CDE7F9"/></svg>',
+  sora: '<svg viewBox="0 0 160 90"><rect width="160" height="90" fill="#BFE0F8"/><ellipse cx="46" cy="30" rx="22" ry="9" fill="#fff" opacity=".95"/><ellipse cx="64" cy="26" rx="14" ry="7" fill="#fff" opacity=".8"/><ellipse cx="116" cy="52" rx="19" ry="8" fill="#fff" opacity=".9"/><path d="M84 36 q5 -7 10 0 q5 -7 10 0" stroke="#5A86B4" stroke-width="2.2" fill="none" stroke-linecap="round"/><path d="M36 58 q4 -6 8 0 q4 -6 8 0" stroke="#5A86B4" stroke-width="2" fill="none" stroke-linecap="round"/><circle cx="134" cy="16" r="9" fill="#FFE9A8"/></svg>',
+  kawa: '<svg viewBox="0 0 160 90"><rect width="160" height="90" fill="#E7F4FB"/><path d="M0 52 Q40 44 80 52 T160 52 L160 90 L0 90 Z" fill="#9CCBEE"/><path d="M0 60 Q40 53 80 60 T160 60" stroke="#C9E5F7" stroke-width="3" fill="none"/><path d="M30 52 Q55 30 80 52" stroke="#B9986B" stroke-width="4" fill="none"/><rect x="0" y="44" width="160" height="4" fill="#A8CF74" opacity=".7"/><circle cx="132" cy="18" r="9" fill="#FFE9A8"/><ellipse cx="22" cy="40" rx="10" ry="6" fill="#A8CF74"/></svg>',
+  asobi: '<svg viewBox="0 0 160 90"><rect width="160" height="90" fill="#EDF7EA"/><rect x="0" y="62" width="160" height="28" fill="#B8DE9A"/><circle cx="126" cy="20" r="9" fill="#FFE9A8"/><circle cx="58" cy="42" r="8" fill="#F6C9A8"/><rect x="51" y="50" width="14" height="17" rx="6" fill="#7CC4F0"/><circle cx="92" cy="45" r="8" fill="#F6C9A8"/><rect x="85" y="53" width="14" height="15" rx="6" fill="#F49A93"/><circle cx="76" cy="70" r="7" fill="#fff" stroke="#5A86B4" stroke-width="1.6"/><path d="M72 67 l8 6 M80 67 l-8 6" stroke="#5A86B4" stroke-width="1.2"/></svg>',
+  hana: '<svg viewBox="0 0 160 90"><rect width="160" height="90" fill="#F2F9EF"/><rect x="0" y="68" width="160" height="22" fill="#C4E4A9"/><g><line x1="45" y1="70" x2="45" y2="46" stroke="#7FBF6A" stroke-width="3"/><circle cx="45" cy="40" r="5" fill="#FFDD87"/><g fill="#F5A8C8"><circle cx="45" cy="31" r="5.5"/><circle cx="54" cy="37" r="5.5"/><circle cx="51" cy="47" r="5.5"/><circle cx="39" cy="47" r="5.5"/><circle cx="36" cy="37" r="5.5"/></g></g><g><line x1="85" y1="72" x2="85" y2="50" stroke="#7FBF6A" stroke-width="3"/><circle cx="85" cy="44" r="4.5" fill="#fff"/><g fill="#F7D97C"><circle cx="85" cy="36" r="5"/><circle cx="93" cy="41" r="5"/><circle cx="90" cy="50" r="5"/><circle cx="80" cy="50" r="5"/><circle cx="77" cy="41" r="5"/></g></g><g><line x1="122" y1="70" x2="122" y2="52" stroke="#7FBF6A" stroke-width="3"/><g fill="#B79AE0"><circle cx="122" cy="40" r="4.5"/><circle cx="129" cy="45" r="4.5"/><circle cx="126" cy="53" r="4.5"/><circle cx="118" cy="53" r="4.5"/><circle cx="115" cy="45" r="4.5"/></g><circle cx="122" cy="47" r="4" fill="#FFE9A8"/></g></svg>',
+  egao: '<svg viewBox="0 0 160 90"><rect width="160" height="90" fill="#FFF6E8"/><circle cx="56" cy="45" r="21" fill="#FFE3A6"/><circle cx="49" cy="40" r="2.4" fill="#7A5A34"/><circle cx="63" cy="40" r="2.4" fill="#7A5A34"/><path d="M47 50 q9 8 18 0" stroke="#7A5A34" stroke-width="2.4" fill="none" stroke-linecap="round"/><circle cx="106" cy="48" r="17" fill="#FAD1DC"/><circle cx="100" cy="44" r="2" fill="#7A4A56"/><circle cx="112" cy="44" r="2" fill="#7A4A56"/><path d="M99 52 q7 6 14 0" stroke="#7A4A56" stroke-width="2.2" fill="none" stroke-linecap="round"/><g fill="#F7D97C"><circle cx="30" cy="22" r="3"/><circle cx="132" cy="20" r="3.6"/><circle cx="140" cy="66" r="2.6"/></g></svg>',
+  hato: '<svg viewBox="0 0 160 90"><rect width="160" height="90" fill="#DFF0FB"/><path d="M62 52 q18 -24 44 -18 q-8 10 -18 13 q20 1 32 -7 q-7 18 -29 21 q-20 3 -32 -6z" fill="#fff" stroke="#BFD8EA" stroke-width="1.5"/><path d="M74 34 q4 -10 14 -10 q-2 8 -8 11z" fill="#fff" stroke="#BFD8EA" stroke-width="1.5"/><circle cx="70" cy="46" r="1.8" fill="#5A86B4"/><path d="M52 62 q6 3 12 0" stroke="#7FBF6A" stroke-width="2.5" fill="none" stroke-linecap="round"/><circle cx="128" cy="18" r="8" fill="#FFE9A8"/><g fill="#fff" opacity=".9"><circle cx="28" cy="24" r="2.4"/><circle cx="40" cy="70" r="2"/></g></svg>',
+  machi: '<svg viewBox="0 0 160 90"><rect width="160" height="90" fill="#EAF4FB"/><rect x="0" y="72" width="160" height="18" fill="#CBE3F2"/><rect x="22" y="38" width="22" height="34" rx="2" fill="#A9CBE8"/><rect x="52" y="26" width="26" height="46" rx="2" fill="#BFD9EE"/><rect x="86" y="44" width="20" height="28" rx="2" fill="#9CC0E2"/><g fill="#fff"><rect x="27" y="44" width="4" height="4"/><rect x="35" y="44" width="4" height="4"/><rect x="27" y="54" width="4" height="4"/><rect x="35" y="54" width="4" height="4"/><rect x="58" y="32" width="4" height="4"/><rect x="66" y="32" width="4" height="4"/><rect x="58" y="42" width="4" height="4"/><rect x="66" y="42" width="4" height="4"/><rect x="58" y="52" width="4" height="4"/><rect x="66" y="52" width="4" height="4"/></g><circle cx="126" cy="52" r="11" fill="#A8CF74"/><rect x="124" y="60" width="4" height="12" fill="#8F6B47"/><circle cx="138" cy="18" r="8" fill="#FFE9A8"/></svg>',
+  manabi: '<svg viewBox="0 0 160 90"><rect width="160" height="90" fill="#F3F6FB"/><path d="M34 62 q23 -10 46 0 q23 -10 46 0 l0 -34 q-23 -10 -46 0 q-23 -10 -46 0 z" fill="#fff" stroke="#B9CFE4" stroke-width="2"/><line x1="80" y1="26" x2="80" y2="60" stroke="#B9CFE4" stroke-width="2"/><g stroke="#9CC0E2" stroke-width="2" stroke-linecap="round"><line x1="44" y1="36" x2="70" y2="33"/><line x1="44" y1="44" x2="70" y2="41"/><line x1="44" y1="52" x2="66" y2="49"/><line x1="90" y1="33" x2="116" y2="36"/><line x1="90" y1="41" x2="116" y2="44"/></g><path d="M120 12 l2.6 5.4 6 .7 -4.4 4 1.2 5.9 -5.4 -3 -5.4 3 1.2 -5.9 -4.4 -4 6 -.7z" fill="#F7D97C"/></svg>',
+  tsunagu: '<svg viewBox="0 0 160 90"><rect width="160" height="90" fill="#FDF1F4"/><path d="M80 68 q-26 -18 -26 -35 a13 13 0 0 1 26 -5 a13 13 0 0 1 26 5 q0 17 -26 35z" fill="#F5A8C8"/><circle cx="38" cy="58" r="9" fill="#F6C9A8"/><circle cx="122" cy="58" r="9" fill="#E8B58B"/><path d="M46 56 q14 6 26 8 M114 56 q-14 6 -26 8" stroke="#D89A6E" stroke-width="3" fill="none" stroke-linecap="round"/><g fill="#fff"><circle cx="66" cy="22" r="2.2"/><circle cx="96" cy="20" r="2.6"/></g></svg>'
+};
+var ART_MATCH = [
+  ['asobi', ['サッカー', 'スポーツ', 'あそ', '遊', 'ボール', '公園', '走']],
+  ['kawa', ['川', 'かわ', '水', '海', 'うみ', '橋']],
+  ['sora', ['空', 'そら', 'あお', '青', '雲', '鳥']],
+  ['hana', ['花', 'はな', 'みどり', '緑', '自然', '木', '咲']],
+  ['egao', ['笑', 'えがお', 'たのし', '楽', 'うれし', '嬉']],
+  ['hato', ['平和', 'へいわ', '戦争', 'せんそう', '鳩', 'はと', '争']],
+  ['machi', ['街', 'まち', '都市', 'ビル', '暮', '住']],
+  ['manabi', ['学', 'まな', '夢', 'ゆめ', '本', '知']],
+  ['tsunagu', ['手', 'つな', '友', 'とも', '助', 'ひとり', '一緒', 'いっしょ', '愛', 'あい', 'やさし', '優']]
+];
+function pickArt(msg) {
+  for (var i = 0; i < ART_MATCH.length; i++) {
+    var ws = ART_MATCH[i][1];
+    for (var j = 0; j < ws.length; j++) if (msg.indexOf(ws[j]) >= 0) return ART_MATCH[i][0];
+  }
+  return 'hikari';
+}
+function fmtTime(ts) {
+  var d = new Date(ts);
+  return (d.getMonth() + 1) + '/' + d.getDate() + ' ' +
+    ('0' + d.getHours()).slice(-2) + ':' + ('0' + d.getMinutes()).slice(-2);
+}
+
+function mkPiece(color, msg, name, animate, ts) {
   return { color: color, fill: hexA(color, 0.92), dark: shade(color), msg: msg || '', name: name || '',
+    ts: ts || Date.now(), art: pickArt(msg || ''),
     t0: (animate && !REDUCED()) ? performance.now() : null };
 }
 
@@ -1073,6 +1172,7 @@ function hitTest(clientX, clientY) {
   var idx = BASE[i] + j;
   return pieces[idx] ? { i: idx, dx: x, dy: y } : null;
 }
+var popArt = document.getElementById('popArt'), popWhen = document.getElementById('popWhen');
 bc.addEventListener('click', function (e) {
   var hit = hitTest(e.clientX, e.clientY);
   if (!hit) { hidePop(); return; }
@@ -1080,6 +1180,9 @@ bc.addEventListener('click', function (e) {
   popMsg.textContent = pc.msg || '（メッセージなし）';
   popWho.textContent = (pc.name && pc.name !== '—') ? pc.name + ' さんのピース' : 'あなたたちのピース';
   popDot.style.background = pc.color;
+  popArt.innerHTML = ART[pc.art] || ART.hikari;
+  popArt.hidden = false;
+  popWhen.textContent = '投稿: ' + fmtTime(pc.ts);
   var bx = boardEl.offsetLeft, by = boardEl.offsetTop;
   pop.classList.toggle('below', hit.dy < 95);
   pop.style.left = (bx + Math.max(80, Math.min(W - 80, hit.dx))) + 'px';
@@ -1409,7 +1512,8 @@ function seed(reset) {
     var idx = nextEmpty(); if (idx == null) break;
     pieces[idx] = mkPiece(PALETTE[(Math.random() * PALETTE.length) | 0],
       SEED_MESSAGES[(Math.random() * SEED_MESSAGES.length) | 0],
-      SEED_NAMES[(Math.random() * SEED_NAMES.length) | 0], false);
+      SEED_NAMES[(Math.random() * SEED_NAMES.length) | 0], false,
+      Date.now() - Math.random() * 3 * 86400000);
     placed++; markFilled(idx);
   }
   lastMS = msLevel();
@@ -1422,6 +1526,19 @@ var rt;
 window.addEventListener('resize', function () { clearTimeout(rt); rt = setTimeout(resize, 150); });
 var onRMChange = function () { syncRM(); drawBoard(); };
 reduceMQ.addEventListener ? reduceMQ.addEventListener('change', onRMChange) : reduceMQ.addListener(onRMChange);
+/* ---------- 8/6 カウントダウン & 深掘りセクションのCTA ---------- */
+(function () {
+  var el = document.getElementById('cdown'), dEl = document.getElementById('cdays');
+  var target = new Date('2026-08-06T10:00:00+09:00');
+  var days = Math.ceil((target - Date.now()) / 86400000);
+  if (days > 1) { dEl.textContent = days; el.hidden = false; }
+  else if (days >= 0) { el.innerHTML = '<b>まもなくお披露目</b> ─ この円が、一枚の絵に変わります'; el.hidden = false; }
+})();
+document.getElementById('drawBtn2').addEventListener('click', function () {
+  window.scrollTo({ top: 0, behavior: REDUCED() ? 'auto' : 'smooth' });
+  openWiz();
+});
+
 function boot() {
   syncRM(); resize(); seed(false); requestAnimationFrame(fxLoop);
   if (!(Q.has('tut') && qn('tut', 1) === 0)) setTimeout(openTut, 600); // 開いた直後に「つかいかた」窓
@@ -1431,7 +1548,7 @@ if (document.fonts && document.fonts.ready) document.fonts.ready.then(function (
 
 /* test hooks */
 window.PW = {
-  version: '5.2',
+  version: '6.0',
   place: function (c, m, n) { return placePiece(nextEmpty(), c || PALETTE[0], m || 'テスト', n || '', true); },
   assemble: assemble, reset: function () { seed(true); }, count: function () { return placed; }, target: TARGET,
   fill: function (k) {
