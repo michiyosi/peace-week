@@ -92,6 +92,11 @@
   .dc-dots{display:flex;gap:4px}
   .dc-dots i{width:6px;height:6px;border-radius:50%;background:rgba(31,75,115,.16);transition:background .4s,transform .4s}
   .dc-dots i.on{background:linear-gradient(135deg,#5BC8F0,#3E8EE8);transform:scale(1.2)}
+  .flip-chip{position:absolute;right:0;top:2px;z-index:4;border:1px solid rgba(62,142,232,.4);cursor:pointer;
+    background:rgba(255,255,255,.9);backdrop-filter:blur(4px);border-radius:99px;padding:7px 14px;
+    font-family:var(--serif);font-size:clamp(11px,1.5vh,13px);font-weight:600;letter-spacing:.06em;
+    color:#2F6FB5;box-shadow:var(--shadow-s);transition:transform .15s ease}
+  .flip-chip:hover{transform:translateY(-2px)}
   #emptyHint{position:absolute;left:50%;bottom:1%;transform:translateX(-50%);z-index:2;
     pointer-events:none;opacity:0;transition:opacity .5s;white-space:nowrap}
   #emptyHint.on{opacity:1}
@@ -432,6 +437,7 @@
       <canvas id="auroraCanvas" aria-hidden="true"></canvas>
       <canvas id="fxCanvas" aria-hidden="true"></canvas>
       <div class="day-chip" id="dayChip"><span class="dc-dots" id="dayDots"></span><span id="dayLabel">8/1 · あつまり中</span></div>
+      <button class="flip-chip" id="flipBtn" type="button" hidden>⇄ うら面：みんなの想い</button>
       <div id="emptyHint"><span>さいしょのピースを置いてみよう</span></div>
       <div id="finale" aria-hidden="true"><b>8.6</b><span>みんなの想いが、ひとつの未来に。</span><small>完成した「2045年の広島」は、8月6日、メルパルクにて。</small></div>
     </div>
@@ -879,6 +885,7 @@ function resize() {
 var pieces = new Array(TARGET).fill(null);
 var placed = 0;
 var curMaxRing = -1;
+var revealed = false, faceMode = 'art'; // 完成後: 表面=一枚の絵 / 裏面=想いのモザイク
 var seedOrder = [], seedPtr = 0;
 function buildOrder() {
   seedOrder = [];
@@ -912,6 +919,23 @@ function drawBoard() {
   gg.addColorStop(1, 'rgba(255,240,200,0)');
   bctx.fillStyle = gg;
   bctx.beginPath(); bctx.arc(CX, CYf, auroraR, 0, TWO_PI); bctx.fill();
+
+  // 表面（統合された一枚の絵）— 810ピース完成後
+  if (revealed && faceMode === 'art') {
+    applyT(bctx, TH);
+    for (var e2 = 0; e2 < drawOrder.length; e2++) { var i2 = drawOrder[e2]; if (pieces[i2]) { bctx.fillStyle = pieces[i2].dark; bctx.fill(paths[i2]); } }
+    applyT(bctx);
+    bctx.save();
+    bctx.beginPath(); bctx.arc(CX, CYf, outerR, 0, TWO_PI); bctx.clip();
+    paintScene(bctx);
+    bctx.restore();
+    bctx.lineJoin = 'round';
+    bctx.lineWidth = Math.max(1, t * 0.055);
+    bctx.strokeStyle = 'rgba(255,255,255,0.72)';
+    for (var g2 = 0; g2 < paths.length; g2++) bctx.stroke(paths[g2]);
+    animActive = false;
+    return;
+  }
 
   var now = performance.now();
   var stillAnimating = false;
@@ -966,6 +990,134 @@ function drawBoard() {
   bctx.beginPath(); bctx.arc(CX, CYf, coreR * 2.1, 0, TWO_PI); bctx.fill();
 
   animActive = stillAnimating;
+}
+
+/* ---------- 統合された一枚の絵「2045年の広島」（デモ用・コード描画。本番はAI生成絵に差し替え） ---------- */
+function scCloud(c, cx, cy, r) {
+  c.beginPath();
+  c.arc(cx - r * 0.8, cy, r * 0.6, 0, TWO_PI);
+  c.arc(cx, cy - r * 0.35, r * 0.8, 0, TWO_PI);
+  c.arc(cx + r * 0.85, cy, r * 0.62, 0, TWO_PI);
+  c.fill();
+}
+function scBird(c, cx, cy, s) {
+  c.beginPath();
+  c.moveTo(cx - s, cy);
+  c.quadraticCurveTo(cx - s / 2, cy - s * 0.9, cx, cy);
+  c.quadraticCurveTo(cx + s / 2, cy - s * 0.9, cx + s, cy);
+  c.stroke();
+}
+function scTree(c, cx, baseY, s) {
+  c.fillStyle = '#8F6B47';
+  c.fillRect(cx - s * 0.08, baseY - s * 0.55, s * 0.16, s * 0.55);
+  c.fillStyle = '#7FBF6A';
+  c.beginPath(); c.arc(cx, baseY - s * 0.75, s * 0.42, 0, TWO_PI); c.fill();
+  c.fillStyle = 'rgba(255,255,255,0.18)';
+  c.beginPath(); c.arc(cx - s * 0.14, baseY - s * 0.88, s * 0.18, 0, TWO_PI); c.fill();
+}
+function scKid(c, cx, baseY, s, col) {
+  c.fillStyle = col;
+  c.beginPath(); c.arc(cx, baseY - s * 0.34, s * 0.3, 0, TWO_PI); c.fill();
+  c.fillRect(cx - s * 0.28, baseY - s * 0.4, s * 0.56, s * 0.4);
+  c.fillStyle = '#F6C9A8';
+  c.beginPath(); c.arc(cx, baseY - s * 0.78, s * 0.24, 0, TWO_PI); c.fill();
+}
+function scBld(c, x0, baseY, w, h, col) {
+  c.fillStyle = col;
+  c.fillRect(x0, baseY - h, w, h);
+  c.fillStyle = 'rgba(255,255,255,0.75)';
+  for (var wy = baseY - h + w * 0.22; wy < baseY - w * 0.2; wy += w * 0.34)
+    for (var wx = x0 + w * 0.16; wx < x0 + w * 0.72; wx += w * 0.34)
+      c.fillRect(wx, wy, w * 0.14, w * 0.14);
+}
+function paintScene(c) {
+  var R = outerR, x = CX, y = CYf;
+  var yH = y + R * 0.1, yR1 = y + R * 0.34, yR2 = y + R * 0.6;
+  // 空
+  var sky = c.createLinearGradient(0, y - R, 0, yH);
+  sky.addColorStop(0, '#8FC4EF'); sky.addColorStop(1, '#E4F3FC');
+  c.fillStyle = sky; c.fillRect(x - R, y - R, 2 * R, R + (yH - y));
+  // 太陽（中心の光を受け継ぐ）
+  var sun = c.createRadialGradient(x, y - R * 0.08, 0, x, y - R * 0.08, R * 0.36);
+  sun.addColorStop(0, 'rgba(255,251,230,1)'); sun.addColorStop(0.4, 'rgba(255,235,170,0.9)'); sun.addColorStop(1, 'rgba(255,235,170,0)');
+  c.fillStyle = sun; c.fillRect(x - R, y - R, 2 * R, 2 * R);
+  c.fillStyle = '#FFE9A8'; c.beginPath(); c.arc(x, y - R * 0.08, R * 0.1, 0, TWO_PI); c.fill();
+  // 雲・鳥
+  c.fillStyle = 'rgba(255,255,255,0.92)';
+  scCloud(c, x - R * 0.5, y - R * 0.55, R * 0.15);
+  scCloud(c, x + R * 0.44, y - R * 0.6, R * 0.12);
+  scCloud(c, x + R * 0.62, y - R * 0.28, R * 0.1);
+  scCloud(c, x - R * 0.74, y - R * 0.18, R * 0.09);
+  c.strokeStyle = '#5A86B4'; c.lineWidth = R * 0.008; c.lineCap = 'round';
+  scBird(c, x - R * 0.22, y - R * 0.46, R * 0.045);
+  scBird(c, x - R * 0.08, y - R * 0.4, R * 0.036);
+  scBird(c, x + R * 0.28, y - R * 0.4, R * 0.04);
+  // 遠くの山なみ
+  c.fillStyle = '#BCD9C8';
+  c.beginPath(); c.moveTo(x - R, yH);
+  c.quadraticCurveTo(x - R * 0.62, yH - R * 0.14, x - R * 0.28, yH);
+  c.quadraticCurveTo(x + R * 0.1, yH - R * 0.1, x + R * 0.5, yH);
+  c.quadraticCurveTo(x + R * 0.78, yH - R * 0.12, x + R, yH);
+  c.lineTo(x + R, yH + R * 0.02); c.lineTo(x - R, yH + R * 0.02); c.closePath(); c.fill();
+  // 向こう岸（緑）
+  c.fillStyle = '#B4DC96'; c.fillRect(x - R, yH, 2 * R, yR1 - yH);
+  // 街並みとドーム
+  scBld(c, x - R * 0.88, yR1 - R * 0.02, R * 0.11, R * 0.2, '#BFD9EE');
+  scBld(c, x - R * 0.74, yR1 - R * 0.02, R * 0.13, R * 0.28, '#A9CBE8');
+  scBld(c, x - R * 0.57, yR1 - R * 0.02, R * 0.1, R * 0.17, '#C8DEF0');
+  scBld(c, x + R * 0.75, yR1 - R * 0.02, R * 0.12, R * 0.22, '#BFD9EE');
+  // 原爆ドーム（穏やかなシルエット・未来も残る記憶）
+  (function () {
+    var dx = x + R * 0.45, base = yR1 - R * 0.02, s = R * 0.15;
+    c.fillStyle = '#A9C4B5';
+    c.fillRect(dx - s * 0.55, base - s * 0.75, s * 1.1, s * 0.75);
+    c.beginPath(); c.arc(dx, base - s * 0.75, s * 0.42, Math.PI, 0); c.fill();
+    c.strokeStyle = 'rgba(255,255,255,0.7)'; c.lineWidth = R * 0.008;
+    c.beginPath(); c.arc(dx, base - s * 0.75, s * 0.42, Math.PI, 0); c.stroke();
+    c.strokeRect(dx - s * 0.55, base - s * 0.75, s * 1.1, s * 0.75);
+  })();
+  // 木々
+  scTree(c, x - R * 0.35, yR1, R * 0.16);
+  scTree(c, x + R * 0.22, yR1, R * 0.13);
+  scTree(c, x + R * 0.63, yR1, R * 0.14);
+  // 川
+  c.fillStyle = '#8FC3EA'; c.fillRect(x - R, yR1, 2 * R, yR2 - yR1);
+  c.strokeStyle = 'rgba(255,255,255,0.5)'; c.lineWidth = R * 0.012; c.lineCap = 'round';
+  c.beginPath(); c.moveTo(x - R * 0.7, y + R * 0.42); c.quadraticCurveTo(x - R * 0.5, y + R * 0.4, x - R * 0.3, y + R * 0.42); c.stroke();
+  c.beginPath(); c.moveTo(x + R * 0.15, y + R * 0.5); c.quadraticCurveTo(x + R * 0.35, y + R * 0.48, x + R * 0.55, y + R * 0.5); c.stroke();
+  // 橋
+  c.strokeStyle = '#EDE6D6'; c.lineWidth = R * 0.028; c.lineCap = 'round';
+  c.beginPath(); c.moveTo(x - R * 0.42, yR1 + R * 0.03);
+  c.quadraticCurveTo(x - R * 0.18, yR1 - R * 0.05, x + R * 0.06, yR1 + R * 0.03); c.stroke();
+  c.lineWidth = R * 0.012;
+  c.beginPath(); c.moveTo(x - R * 0.42, yR1 + R * 0.03); c.lineTo(x + R * 0.06, yR1 + R * 0.03); c.stroke();
+  // 手前の岸（緑）
+  c.fillStyle = '#A5D48A'; c.fillRect(x - R, yR2, 2 * R, R);
+  // 遊ぶこどもたちとボール
+  scKid(c, x - R * 0.16, y + R * 0.74, R * 0.11, '#7CC4F0');
+  scKid(c, x + R * 0.1, y + R * 0.76, R * 0.11, '#F49A93');
+  scKid(c, x + R * 0.42, y + R * 0.7, R * 0.1, '#A98BD8');
+  c.fillStyle = '#fff';
+  c.beginPath(); c.arc(x - R * 0.03, y + R * 0.78, R * 0.03, 0, TWO_PI); c.fill();
+  c.strokeStyle = '#5A86B4'; c.lineWidth = R * 0.006;
+  c.beginPath(); c.arc(x - R * 0.03, y + R * 0.78, R * 0.03, 0, TWO_PI); c.stroke();
+  // 花
+  var FC = ['#F5A8C8', '#F7D97C', '#FFFFFF', '#EF8FBB', '#C3A8E8'];
+  for (var f = 0; f < 24; f++) {
+    var fa = Math.PI * (0.15 + 0.7 * (f / 24)), fr = R * (0.8 + (f % 3) * 0.055);
+    var fx = x + Math.cos(fa + Math.PI / 2 - 0.5) * fr * 0.9, fy = y + R * 0.82 + ((f * 37) % 3) * R * 0.04;
+    if (fy < y + R * 0.98) {
+      c.fillStyle = FC[f % FC.length];
+      c.beginPath(); c.arc(x - R * 0.9 + (f / 24) * R * 1.8, fy, R * 0.016, 0, TWO_PI); c.fill();
+    }
+  }
+  // さくらの気配（左上）
+  c.fillStyle = 'rgba(245,168,200,0.8)';
+  for (var p2 = 0; p2 < 10; p2++) {
+    c.beginPath();
+    c.arc(x - R * 0.85 + (p2 * 53 % 40) * R * 0.008, y - R * 0.75 + (p2 * 29 % 50) * R * 0.008, R * 0.012, 0, TWO_PI);
+    c.fill();
+  }
 }
 
 /* ---------- aurora（soft-light 合成の分光グラデ） ---------- */
@@ -1435,7 +1587,15 @@ shareBtn.addEventListener('click', function () {
 /* ---------- assemble = 8/6 unveiling preview ---------- */
 var assembleBtn = document.getElementById('assembleBtn'), resetBtn = document.getElementById('resetBtn');
 var finale = document.getElementById('finale');
+var flipBtn = document.getElementById('flipBtn');
 var assembling = false, placedWave = 0, finaleT;
+function flipLabel() {
+  flipBtn.textContent = faceMode === 'art' ? '⇄ うら面：みんなの想い' : '⇄ おもて面：一枚の絵';
+}
+flipBtn.addEventListener('click', function () {
+  faceMode = faceMode === 'art' ? 'mosaic' : 'art';
+  flipLabel(); hidePop(); drawBoard();
+});
 function assemble() {
   if (assembling) return;
   hidePop();
@@ -1465,6 +1625,12 @@ function assemble() {
 function finishAssemble() {
   placedWave = 0; assembling = false; assembleBtn.disabled = false; drawBtn.disabled = false;
   lastMS = msLevel();
+  var doReveal = function () {
+    revealed = true; faceMode = 'art';
+    flipBtn.hidden = false; flipLabel();
+    hidePop(); drawBoard();
+  };
+  if (REDUCED()) doReveal(); else setTimeout(doReveal, 1200); // 白い光の中で、絵に変わる
   if (!REDUCED()) {
     for (var k = 0; k < 3; k++) (function (kk) { setTimeout(function () { flashes.push({ r: coreR, vr: t * 0.55, a: 0.7 }); }, kk * 300); })(k);
     for (var c = 0; c < 7; c++) (function (cc) { setTimeout(function () { burst(CX + (Math.random() - .5) * W * 0.6, devYf(CYf) + (Math.random() - .5) * H * 0.4, 16, 5); }, cc * 110); })(c);
@@ -1506,6 +1672,8 @@ document.addEventListener('keydown', function (e) {
 function seed(reset) {
   for (var i = 0; i < pieces.length; i++) pieces[i] = null;
   placed = 0; lastMS = 0; curMaxRing = -1; seedPtr = 0;
+  revealed = false; faceMode = 'art';
+  if (typeof flipBtn !== 'undefined' && flipBtn) flipBtn.hidden = true;
   buildOrder();
   var n = Math.min(SEED_COUNT, TARGET);
   for (var k = 0; k < n; k++) {
@@ -1548,7 +1716,7 @@ if (document.fonts && document.fonts.ready) document.fonts.ready.then(function (
 
 /* test hooks */
 window.PW = {
-  version: '6.0',
+  version: '6.1',
   place: function (c, m, n) { return placePiece(nextEmpty(), c || PALETTE[0], m || 'テスト', n || '', true); },
   assemble: assemble, reset: function () { seed(true); }, count: function () { return placed; }, target: TARGET,
   fill: function (k) {
