@@ -1150,7 +1150,7 @@ function closeWiz() { wiz.classList.remove('on'); }
 drawBtn.addEventListener('click', openWiz);
 wizClose.addEventListener('click', closeWiz);
 wBack.addEventListener('click', function () { wizShow(0); msgInput.focus(); });
-function drawMiniBoard(){
+function drawMiniBoard(){if(!document.getElementById('miniBoard'))return;
   var c=document.getElementById('miniBoard');
   if(!c)return;
   miniCtx=c.getContext('2d');
@@ -1186,7 +1186,7 @@ function drawMiniBoard(){
   }
 }
 
-function onMiniTap(e){
+function onMiniTap(e){if(!document.getElementById('miniBoard'))return;
   var c=document.getElementById('miniBoard');
   var rect=c.getBoundingClientRect();
   var x=(e.touches?e.touches[0].clientX:e.clientX)-rect.left;
@@ -1231,8 +1231,8 @@ function goPreview() {
   selectedIdx=-1;
   document.getElementById('wPlace').disabled=true;
   drawMiniBoard();
-  document.getElementById('miniBoard').addEventListener('click',onMiniTap);
-  document.getElementById('miniBoard').addEventListener('touchstart',function(e){e.preventDefault();onMiniTap(e);});
+  var mb=document.getElementById('miniBoard'); if(mb){mb.addEventListener('click',onMiniTap);}
+  if(mb){mb.addEventListener('touchstart',function(e){e.preventDefault();}onMiniTap(e);});
 }
 wNext1.addEventListener('click', goPreview);
 msgInput.addEventListener('keydown', function (e) {
