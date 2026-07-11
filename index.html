@@ -368,6 +368,23 @@
     transition:transform .15s ease,box-shadow .2s ease}
   .wlink:hover{transform:translateY(-1px);box-shadow:0 6px 18px rgba(62,142,232,.22)}
   .wlink span{display:block;font-size:10.5px;color:var(--ink-soft);font-weight:500;letter-spacing:.1em;margin-top:3px}
+  .agree{display:flex;align-items:flex-start;gap:8px;max-width:400px;margin:0 auto 10px;text-align:left;
+    font-size:11px;color:var(--ink-soft);font-weight:500;line-height:1.7;cursor:pointer}
+  .agree input{margin-top:3px;accent-color:#3E8EE8;width:15px;height:15px;flex:0 0 auto;cursor:pointer}
+  .agree.wshake2{animation:shake .3s}
+  .linklike{border:0;background:none;padding:0;cursor:pointer;font-family:inherit;font-size:inherit;
+    color:#2F6FB5;text-decoration:underline;font-weight:600}
+  #terms{position:fixed;inset:0;z-index:35;display:none;align-items:center;justify-content:center;
+    background:rgba(31,75,115,.42);backdrop-filter:blur(6px);padding:18px}
+  #terms.on{display:flex}
+  .tmsheet{width:min(560px,100%);text-align:left}
+  .tmbody{max-height:52vh;overflow:auto;padding-right:6px}
+  .tmbody h3{margin:14px 0 4px;font-size:13px;font-weight:600;color:#2F6FB5;letter-spacing:.06em}
+  .tmbody p{margin:0;font-size:12px;line-height:1.95;color:var(--ink);font-weight:500}
+  .tmdate{margin-top:14px !important;color:var(--ink-faint) !important;font-size:11px !important}
+  #tmClose{position:absolute;right:14px;top:14px;width:32px;height:32px;border:0;border-radius:50%;
+    cursor:pointer;background:rgba(31,75,115,.06);color:var(--ink-soft);font-size:15px;font-weight:600}
+  #tmClose:hover{background:rgba(31,75,115,.12);color:var(--ink)}
   #events{position:fixed;inset:0;z-index:33;display:none;align-items:center;justify-content:center;
     background:rgba(31,75,115,.42);backdrop-filter:blur(6px);padding:18px}
   #events.on{display:flex}
@@ -614,7 +631,7 @@
   <div class="scta">
     <h3>あなたの一つの想いが、未来をつくる。</h3>
     <button class="place wide" id="drawBtn2" type="button">＋ 私も未来を描く</button>
-    <div class="sfoot">PIECE PROJECT — HIROSHIMA 2045</div>
+    <div class="sfoot">PIECE PROJECT — HIROSHIMA 2045 · <button type="button" class="linklike" id="termsBtn2">利用規約・プライバシー</button></div>
   </div>
 </section>
 
@@ -667,6 +684,10 @@
       </div>
       <button class="assemble pickBtn" id="pickBtn" type="button">📍 置く場所を選ぶ（拡大表示・任意）</button>
       <div class="picknote" id="pickNote" hidden>✓ 場所を選びました — 「パズルに置く」でここに置きます</div>
+      <label class="agree" id="agreeRow">
+        <input type="checkbox" id="agreeChk">
+        <span>投稿内容の公開と、絵の制作・展示・広報への利用に同意します（<button type="button" class="linklike" id="termsBtn1">利用規約</button>）</span>
+      </label>
       <button class="place wcta" id="wPlace" type="button">パズルに置く</button>
       <button class="tskip" id="wBack" type="button">← 色とメッセージをなおす</button>
     </section>
@@ -707,6 +728,35 @@
     <button class="cta" id="aboutCta" type="button">私も未来を描く</button>
   </div>
 </div>
+<!-- 利用規約・プライバシー（ドラフト。公開前に運営で確認） -->
+<div id="terms" role="dialog" aria-modal="true" aria-labelledby="tmTitle">
+  <div class="sheet tmsheet">
+    <button id="tmClose" type="button" aria-label="とじる">×</button>
+    <span class="tag">Terms & Privacy</span>
+    <h2 id="tmTitle">利用規約・プライバシー</h2>
+    <div class="tmbody">
+      <h3>1. この企画について</h3>
+      <p>Piece Project（ピースウィーク）は、Hiroshima Peace Week 2026 の一環として行う参加型アート企画です。参加者の「好きな色」と「2045年の広島への想い」を810ピースのパズルとして集め、一枚の絵をつくります。</p>
+      <h3>2. 投稿の公開と利用について</h3>
+      <p>投稿いただいた内容（色・メッセージ・ニックネーム・投稿日時）は、本サイト上で公開されます。また、投稿内容は次の目的で無償で利用されることに同意いただきます: ①「2045年の広島」の絵の制作素材（AIによる画像生成を含む）、②お披露目会・会場での展示、③本企画の広報（SNS・印刷物・報道対応等）。利用の際に氏名表示は行いません。</p>
+      <h3>3. 書いてはいけないこと</h3>
+      <p>次の内容を含む投稿はできません。運営の判断で予告なく非表示・削除します: 本名のフルネーム・住所・電話番号・SNSアカウント等の個人情報／特定の個人・団体への誹謗中傷／差別的な表現／わいせつな表現／宣伝・勧誘／法令や公序良俗に反する内容。</p>
+      <h3>4. 投稿の削除</h3>
+      <p>自分の投稿の削除を希望する場合は、お問い合わせ先までご連絡ください（内容と投稿日時をお知らせください）。</p>
+      <h3>5. 個人情報の取り扱い</h3>
+      <p>本サイトが収集するのは、任意入力のニックネーム・投稿内容・投稿日時のみです。データはデータベースサービス（Supabase）に保存されます。法令に基づく場合を除き、第三者に提供しません。</p>
+      <h3>6. 未成年の方へ</h3>
+      <p>18歳未満の方は、保護者の方の了解のもとで参加してください。</p>
+      <h3>7. 免責</h3>
+      <p>システムの障害・保守等により、予告なくサービスを停止・変更する場合があります。</p>
+      <h3>8. お問い合わせ</h3>
+      <p>Piece Project 運営（Hiroshima Peace Week 2026）※連絡先は準備中です。</p>
+      <p class="tmdate">2026年7月 制定（ドラフト）</p>
+    </div>
+    <button class="cta excta" id="tmOk" type="button">とじる</button>
+  </div>
+</div>
+
 <!-- この夏のイベント -->
 <div id="events" role="dialog" aria-modal="true" aria-labelledby="evTitle">
   <div class="sheet gsheet evsheet">
@@ -905,6 +955,28 @@ var PLACEHOLDERS = [
   '例：たのしく仕事してる'
 ];
 var EXAMPLES = ['平和公園で絵を描いてる', '公園でサッカーしてる', '焼き芋たべてる', 'すきな服を選んでる', '川辺をのんびり歩いてる', 'たのしく仕事してる'];
+
+/* ---------- NGワード（クライアント側の一次チェック。サーバ側でも同等の検証あり） ---------- */
+var NG_WORDS = ['しね', '死ね', '市ね', '氏ね', 'ころす', '殺す', 'ころせ', '殺せ', '殺人', 'きえろ', '消えろ', 'くたばれ',
+  '死にたい', 'しにたい', '自殺', 'ばくは', '爆破', 'ばくだん', '爆弾', 'テロ',
+  'ちんこ', 'ちんぽ', 'まんこ', 'せっくす', 'セックス', 'sex', 'fuck', 'shit', 'エロ', 'れいぷ', 'レイプ', '強姦', 'わいせつ',
+  '大麻', '覚醒剤', '薬物',
+  'がいじ', 'ガイジ', '池沼', 'きちがい', 'キチガイ', '気違い', '土人', 'ちょん公', 'シナ人', 'nigger', 'faggot'];
+function ngNormalize(s) {
+  s = String(s || '').toLowerCase();
+  try { s = s.normalize('NFKC'); } catch (e) {}
+  return s.replace(/[\s　・、。,.\-_~〜!！?？*＊@＠#＃|｜/／\\]/g, '');
+}
+function ngCheck(s) {
+  var n = ngNormalize(s);
+  if (!n) return null;
+  if (/https?:|www\./.test(n)) return 'URLは書けません';
+  if (/[0-9]{8,}/.test(n)) return '長い数字（電話番号など）は書けません';
+  for (var i = 0; i < NG_WORDS.length; i++) {
+    if (n.indexOf(ngNormalize(NG_WORDS[i])) >= 0) return '使えない言葉が含まれています。表現を変えてみてください';
+  }
+  return null;
+}
 
 /* ---------- stage / canvases ---------- */
 var boardWrap = document.getElementById('boardWrap');
@@ -1121,6 +1193,16 @@ function sbPoll() {
       if (added) { updateCounter(); animActive = true; drawBoard(); }
     }).catch(function () {});
 }
+function sbUndo(idx, pc, msgToast) {
+  if (pieces[idx] === pc) { pieces[idx] = null; placed--; }
+  recomputeMaxRing();
+  shownCount = placed; renderCount(placed);
+  updateCounter(); drawBoard();
+  // 入力を戻してウィザードを再表示（編集して再挑戦できるように）
+  msgInput.value = pc.msg || ''; nameInput.value = pc.name || ''; updateCnt();
+  wizShow(0); wiz.classList.add('on');
+  if (msgToast) toast(msgToast);
+}
 function sbSubmit(idx, tries) {
   if (!SB_ON) return;
   var pc = pieces[idx]; if (!pc) return;
@@ -1144,9 +1226,13 @@ function sbSubmit(idx, tries) {
       } else { updateCounter(); drawBoard(); }
       return;
     }
+    if (r.status === 400) { // サーバ側のNG判定など
+      sbUndo(idx, pc, 'この内容は保存できませんでした。表現を変えてもう一度お試しください');
+      return;
+    }
     return Promise.reject(r.status);
   }).catch(function () {
-    toast('通信エラー: ピースを保存できませんでした。電波の良い場所でもう一度お試しください');
+    sbUndo(idx, pc, '通信エラーで保存できませんでした。電波の良い場所でもう一度お試しください');
   });
 }
 
@@ -1714,6 +1800,12 @@ function goPreview() {
     wPanels[0].classList.remove('wshake'); void wPanels[0].offsetWidth;
     wPanels[0].classList.add('wshake'); msgInput.focus(); return;
   }
+  var ng = ngCheck(msg) || ngCheck(nameInput.value);
+  if (ng) {
+    toast(ng);
+    wPanels[0].classList.remove('wshake'); void wPanels[0].offsetWidth;
+    wPanels[0].classList.add('wshake'); msgInput.focus(); return;
+  }
   pvPath.setAttribute('fill', chosen);
   pvDot.style.background = chosen;
   pvMsg.textContent = '「' + msg + '」';
@@ -1727,6 +1819,13 @@ msgInput.addEventListener('keydown', function (e) {
   if (e.key === 'Enter' && !composing && wizStep === 0) { e.preventDefault(); goPreview(); }
 });
 wPlace.addEventListener('click', function () {
+  var agreeChk = document.getElementById('agreeChk');
+  if (!agreeChk.checked) {
+    var ar = document.getElementById('agreeRow');
+    ar.classList.remove('wshake2'); void ar.offsetWidth; ar.classList.add('wshake2');
+    toast('利用規約に同意のチェックをお願いします');
+    return;
+  }
   var msg = msgInput.value.trim();
   var idx = (pickIdx >= 0 && !pieces[pickIdx]) ? pickIdx : nextEmpty();
   if (idx == null) { toast('円がいっぱいです。2045年までみんなで育てましょう'); closeWiz(); return; }
@@ -1779,6 +1878,15 @@ function doShare() {
   } else toast(url);
 }
 document.getElementById('wShare').addEventListener('click', doShare);
+var terms = document.getElementById('terms');
+function openTerms() { terms.classList.add('on'); }
+function closeTerms() { terms.classList.remove('on'); }
+document.getElementById('termsBtn1').addEventListener('click', function (e) { e.preventDefault(); e.stopPropagation(); openTerms(); });
+document.getElementById('termsBtn2').addEventListener('click', openTerms);
+document.getElementById('tmClose').addEventListener('click', closeTerms);
+document.getElementById('tmOk').addEventListener('click', closeTerms);
+terms.addEventListener('click', function (e) { if (e.target === terms) closeTerms(); });
+
 var events = document.getElementById('events');
 function openEvents() { events.classList.add('on'); }
 function closeEvents() { events.classList.remove('on'); }
@@ -2225,7 +2333,8 @@ aboutCta.addEventListener('click', function () { closeAbout(); openWiz(); });
 about.addEventListener('click', function (e) { if (e.target === about) closeAbout(); });
 document.addEventListener('keydown', function (e) {
   if (e.key !== 'Escape') return;
-  if (gate.classList.contains('on')) closeGate();
+  if (terms.classList.contains('on')) closeTerms();
+  else if (gate.classList.contains('on')) closeGate();
   else if (events.classList.contains('on')) closeEvents();
   else if (pick.classList.contains('on')) closePick();
   else if (stats.classList.contains('on')) closeStats();
@@ -2288,7 +2397,7 @@ if (document.fonts && document.fonts.ready) document.fonts.ready.then(function (
 
 /* test hooks */
 window.PW = {
-  version: '8.0',
+  version: '8.1',
   hash: function (s) { sha256hex(String(s), function (h) { console.log('ADMIN_HASH:', h); }); return '（コンソールにハッシュを出力しました）'; },
   place: function (c, m, n) { return placePiece(nextEmpty(), c || PALETTE[0], m || 'テスト', n || '', true); },
   assemble: assemble, reset: function () { seed(true); }, count: function () { return placed; }, target: TARGET,
