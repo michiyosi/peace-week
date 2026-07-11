@@ -1648,19 +1648,43 @@ wPlace.addEventListener('click', function () {
   var msg = msgInput.value.trim();
   var idx = (pickIdx >= 0 && !pieces[pickIdx]) ? pickIdx : nextEmpty();
   if (idx == null) { toast('円がいっぱいです。2045年までみんなで育てましょう'); closeWiz(); return; }
-  // ウィザードを一旦閉じて、ピースが光に包まれてはまる様子を見せる
+  var startR = document.querySelector('#wp2 .pvpiece').getBoundingClientRect();
+  var flyMsg = msg, flyName = nameInput.value.trim(), flyColor = chosen;
+  // ウィザードを閉じて、プレビューのピースがそのままパズルへ飛んでいく
   closeWiz();
   window.scrollTo({ top: 0, behavior: 'auto' });
-  placePiece(idx, chosen, msg, nameInput.value.trim(), true);
-  var hx = cx0[idx], hy = devYf(cy0[idx]);
-  if (!REDUCED()) {
-    halos.push({ x: hx, y: hy, r: t * 0.4, vr: t * 0.16, a: 0.95 });
-    setTimeout(function () { halos.push({ x: hx, y: hy, r: t * 0.4, vr: t * 0.13, a: 0.8 }); }, 200);
-    burst(hx, hy, 18, 4);
+  var landed = false;
+  function land() {
+    if (landed) return; landed = true;
+    placePiece(idx, flyColor, flyMsg, flyName, true);
+    var hx = cx0[idx], hy = devYf(cy0[idx]);
+    if (!REDUCED()) {
+      halos.push({ x: hx, y: hy, r: t * 0.4, vr: t * 0.16, a: 0.95 });
+      setTimeout(function () { halos.push({ x: hx, y: hy, r: t * 0.4, vr: t * 0.13, a: 0.8 }); }, 200);
+      burst(hx, hy, 18, 4);
+    }
+    pickReset();
+    msCheck();
+    setTimeout(function () { wizShow(2); wiz.classList.add('on'); }, REDUCED() ? 0 : 950);
   }
-  pickReset();
-  msCheck();
-  setTimeout(function () { wizShow(2); wiz.classList.add('on'); }, REDUCED() ? 0 : 1200);
+  if (REDUCED() || !document.body.animate) { land(); return; }
+  var bcr = bc.getBoundingClientRect();
+  var tx2 = bcr.left + cx0[idx], ty2 = bcr.top + devYf(cy0[idx]);
+  var fl = document.createElement('div');
+  fl.style.cssText = 'position:fixed;left:0;top:0;width:64px;height:64px;z-index:60;pointer-events:none;filter:drop-shadow(0 4px 10px rgba(31,75,115,.35))';
+  fl.innerHTML = '<svg viewBox="0 0 56 56" style="width:100%;height:100%;overflow:visible"><path fill="' + flyColor + '" stroke="#fff" stroke-width="2" d="M8 18q0-8 8-8h6c-1.2-7 13.2-7 12 0h6q8 0 8 8v6c7-1.2 7 13.2 0 12v6q0 8-8 8H16q-8 0-8-8V18z"/></svg>';
+  document.body.appendChild(fl);
+  var sx = startR.left + startR.width / 2 - 32, sy = startR.top + startR.height / 2 - 32;
+  var ex = tx2 - 32, ey = ty2 - 32;
+  var endScale = Math.max(0.16, (t * 1.7) / 64);
+  var mx2 = (sx + ex) / 2, my2 = Math.min(sy, ey) - 70;
+  var anim = fl.animate([
+    { transform: 'translate(' + sx + 'px,' + sy + 'px) scale(1) rotate(0deg)', opacity: 1 },
+    { transform: 'translate(' + mx2 + 'px,' + my2 + 'px) scale(' + ((1 + endScale) / 2).toFixed(3) + ') rotate(14deg)', opacity: 1, offset: 0.55 },
+    { transform: 'translate(' + ex + 'px,' + ey + 'px) scale(' + endScale.toFixed(3) + ') rotate(0deg)', opacity: 0.95 }
+  ], { duration: 850, easing: 'cubic-bezier(.3,.7,.3,1)', fill: 'forwards' });
+  anim.onfinish = function () { fl.remove(); land(); };
+  setTimeout(function () { if (fl.parentNode) fl.remove(); land(); }, 1500); // 保険
 });
 function doShare() {
   var url = location.origin + location.pathname;
@@ -2172,7 +2196,7 @@ if (document.fonts && document.fonts.ready) document.fonts.ready.then(function (
 
 /* test hooks */
 window.PW = {
-  version: '7.2',
+  version: '7.3',
   hash: function (s) { sha256hex(String(s), function (h) { console.log('ADMIN_HASH:', h); }); return '（コンソールにハッシュを出力しました）'; },
   place: function (c, m, n) { return placePiece(nextEmpty(), c || PALETTE[0], m || 'テスト', n || '', true); },
   assemble: assemble, reset: function () { seed(true); }, count: function () { return placed; }, target: TARGET,
