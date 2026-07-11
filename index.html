@@ -655,7 +655,7 @@
     </section>
     <section class="wstep" id="wp2">
       <h2 class="wh">あなたのピースを、<br>パズルに置きましょう。</h2>
-      <p class="wsub">置くと、みんなの想いとつながっていきます。</p>
+      <p class="wsub">置くと、みんなの想いとつながっていきます。<br><small style="opacity:.8">※ 色とメッセージは、このサイト上でみんなに公開されます</small></p>
       <div class="wcard wpv">
         <div class="wcap"><span class="pvdot" id="pvDot"></span>あなたのピース</div>
         <div class="pvpiece">
@@ -871,7 +871,17 @@ var TARGET = 0;
     for (var j = 0; j < RING_N[i]; j++) RING_S[i][j] = Math.random() < 0.5 ? 1 : -1;
   }
 })(); // TARGET === 810
-var SEED_COUNT = Math.round(qn('seed', 132));
+
+/* ---------- Supabase（本番データ保存）。?demo=1 でオフライン・デモに切替 ---------- */
+var SB_URL = 'https://onpwsqexqstunyemjjzr.supabase.co';
+var SB_KEY = 'sb_publishable_ROB27m0jG2DYzvo0dY-j0w_CWhmC7bD'; // 公開可能キー（RLSで保護）
+var SB_ON = !(Q.has('demo') && qn('demo', 0) > 0);
+function sbHeaders(extra) {
+  var h = { apikey: SB_KEY, Authorization: 'Bearer ' + SB_KEY, 'Content-Type': 'application/json' };
+  if (extra) for (var k in extra) h[k] = extra[k];
+  return h;
+}
+var SEED_COUNT = Math.round(qn('seed', SB_ON ? 0 : 132));
 
 /* 空のパステル12色（水色・黄緑・黄色・オレンジ・ピンク・紫 系、透明感重視） */
 var PALETTE = [
@@ -1079,6 +1089,66 @@ function nextEmpty() {
   return seedPtr < TARGET ? seedOrder[seedPtr] : null;
 }
 function markFilled(idx) { if (cellRing[idx] > curMaxRing) curMaxRing = cellRing[idx]; }
+
+/* ---------- Supabase 同期 ---------- */
+var sbMaxId = 0;
+function sbApplyRow(r, animate) {
+  if (r.id > sbMaxId) sbMaxId = r.id;
+  var idx = r.idx;
+  if (idx == null || idx < 0 || idx >= TARGET) return;
+  if (pieces[idx]) { if (!pieces[idx].sbId) pieces[idx].sbId = r.id; return; }
+  var pc = mkPiece(r.color, r.message, r.name || '', animate, Date.parse(r.created_at) || Date.now());
+  pc.sbId = r.id;
+  pieces[idx] = pc; placed++; markFilled(idx);
+}
+function sbFetchAll(cb) {
+  fetch(SB_URL + '/rest/v1/pieces?select=id,idx,color,message,name,created_at&order=id', { headers: sbHeaders() })
+    .then(function (r) { return r.ok ? r.json() : Promise.reject(r.status); })
+    .then(function (rows) {
+      for (var i = 0; i < rows.length; i++) sbApplyRow(rows[i], false);
+      shownCount = placed; renderCount(placed);
+      updateCounter(); drawBoard();
+      if (cb) cb(true);
+    }, function () { toast('データの読み込みに失敗しました。再読み込みしてください'); if (cb) cb(false); });
+}
+function sbPoll() {
+  if (!SB_ON || assembling) return;
+  fetch(SB_URL + '/rest/v1/pieces?select=id,idx,color,message,name,created_at&id=gt.' + sbMaxId + '&order=id', { headers: sbHeaders() })
+    .then(function (r) { return r.ok ? r.json() : []; })
+    .then(function (rows) {
+      var added = 0;
+      for (var i = 0; i < rows.length; i++) { var b = placed; sbApplyRow(rows[i], true); if (placed > b) added++; }
+      if (added) { updateCounter(); animActive = true; drawBoard(); }
+    }).catch(function () {});
+}
+function sbSubmit(idx, tries) {
+  if (!SB_ON) return;
+  var pc = pieces[idx]; if (!pc) return;
+  fetch(SB_URL + '/rest/v1/pieces', {
+    method: 'POST',
+    headers: sbHeaders({ Prefer: 'return=representation' }),
+    body: JSON.stringify({ idx: idx, ring: cellRing[idx], color: pc.color, message: pc.msg, name: pc.name || null, theme: pc.art })
+  }).then(function (r) {
+    if (r.status === 201) return r.json().then(function (rows) {
+      pc.sbId = rows[0].id;
+      if (rows[0].id > sbMaxId) sbMaxId = rows[0].id;
+    });
+    if (r.status === 409) { // 同じ場所を先に取られた → 近くの空きへ移動して再送
+      pieces[idx] = null; placed--;
+      var alt = nextEmpty();
+      if (alt != null) {
+        pieces[alt] = pc; placed++; markFilled(alt);
+        updateCounter(); drawBoard();
+        if ((tries || 0) < 3) sbSubmit(alt, (tries || 0) + 1);
+        toast('その場所は先に置かれたため、近くに置きました');
+      } else { updateCounter(); drawBoard(); }
+      return;
+    }
+    return Promise.reject(r.status);
+  }).catch(function () {
+    toast('通信エラー: ピースを保存できませんでした。電波の良い場所でもう一度お試しください');
+  });
+}
 
 /* ---------- drawing ---------- */
 var easeOutCubic = function (x) { return 1 - Math.pow(1 - x, 3); };
@@ -1521,7 +1591,19 @@ bc.addEventListener('click', function (e) {
   if (adminDelete) {
     if (hit && pieces[hit.i]) {
       var pcD = pieces[hit.i];
-      if (window.confirm('このピースを削除しますか？\n「' + pcD.msg + '」' + (pcD.name ? ' — ' + pcD.name : ''))) deletePiece(hit.i);
+      if (window.confirm('このピースを削除しますか？\n「' + pcD.msg + '」' + (pcD.name ? ' — ' + pcD.name : ''))) {
+        if (SB_ON && pcD.sbId) {
+          if (!adminPass) { toast('サーバ削除にはパスワードの再入力が必要です'); openGate(); return; }
+          var hitIdx = hit.i;
+          fetch(SB_URL + '/rest/v1/rpc/hide_piece', { method: 'POST', headers: sbHeaders(), body: JSON.stringify({ p_id: pcD.sbId, p_pass: adminPass }) })
+            .then(function (r) { return r.json(); })
+            .then(function (ok) {
+              if (ok === true) deletePiece(hitIdx);
+              else { toast('サーバ側の削除に失敗しました（パスワード不一致）'); }
+            })
+            .catch(function () { toast('通信エラーで削除できませんでした'); });
+        } else deletePiece(hit.i);
+      }
     }
     return;
   }
@@ -1657,6 +1739,7 @@ wPlace.addEventListener('click', function () {
   function land() {
     if (landed) return; landed = true;
     placePiece(idx, flyColor, flyMsg, flyName, true);
+    sbSubmit(idx, 0);
     var hx = cx0[idx], hy = devYf(cy0[idx]);
     if (!REDUCED()) {
       halos.push({ x: hx, y: hy, r: t * 0.4, vr: t * 0.16, a: 0.95 });
@@ -1787,7 +1870,7 @@ document.getElementById('exCopy2').addEventListener('click', function () { copyT
    起動: ロゴを5回連続タップ、または ?admin=1 → パスワード入力。
    照合はSHA-256ハッシュのみ保持。変更方法: コンソールで PW.hash('新パスワード') → 出力を ADMIN_HASH に貼る。 */
 var ADMIN_HASH = '43c1cfae072ad1a86400658d34f3338a75eae4e8514730de545fe21a8b79258f';
-var ADMIN = false;
+var ADMIN = false, adminPass = '';
 var adminBar = document.getElementById('adminBar');
 var adminDelete = false;
 var delModeBtn = document.getElementById('delModeBtn');
@@ -1818,6 +1901,7 @@ function tryUnlock() {
   if (!v) { gatePw.focus(); return; }
   sha256hex(v, function (h) {
     if (h && h === ADMIN_HASH) {
+      adminPass = v;
       closeGate(); enableAdmin(); toast('管理モードを解錠しました');
     } else {
       var sh = gate.querySelector('.gsheet');
@@ -2115,7 +2199,11 @@ function finishAssemble() {
   }
   toast('8月6日 — 810の想いが、ひとつの未来に。');
 }
-resetBtn.addEventListener('click', function () { hidePop(); seed(true); toast('はじめからにしました'); });
+resetBtn.addEventListener('click', function () {
+  hidePop(); seed(true);
+  if (SB_ON) { sbFetchAll(); toast('サーバと再同期しました'); }
+  else toast('はじめからにしました');
+});
 assembleBtn.addEventListener('click', assemble);
 
 /* ---------- toast ---------- */
@@ -2189,6 +2277,10 @@ document.getElementById('drawBtn2').addEventListener('click', function () {
 
 function boot() {
   syncRM(); resize(); seed(false); requestAnimationFrame(fxLoop);
+  if (SB_ON) {
+    sbFetchAll();
+    setInterval(sbPoll, 12000); // 12秒ごとに、他の人のピースがポンと増える
+  }
   if (!(Q.has('tut') && qn('tut', 1) === 0)) setTimeout(openTut, 600); // 開いた直後に「つかいかた」窓
 }
 boot();
@@ -2196,7 +2288,7 @@ if (document.fonts && document.fonts.ready) document.fonts.ready.then(function (
 
 /* test hooks */
 window.PW = {
-  version: '7.3',
+  version: '8.0',
   hash: function (s) { sha256hex(String(s), function (h) { console.log('ADMIN_HASH:', h); }); return '（コンソールにハッシュを出力しました）'; },
   place: function (c, m, n) { return placePiece(nextEmpty(), c || PALETTE[0], m || 'テスト', n || '', true); },
   assemble: assemble, reset: function () { seed(true); }, count: function () { return placed; }, target: TARGET,
