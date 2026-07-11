@@ -348,6 +348,29 @@
   .sfoot{text-align:center;margin-top:26px;font-family:var(--latin);font-style:italic;font-size:10px;
     letter-spacing:.2em;color:var(--ink-faint)}
 
+  /* ---------- 声→プロンプト抽出 ---------- */
+  #extract{position:fixed;inset:0;z-index:32;display:none;align-items:center;justify-content:center;
+    background:rgba(31,75,115,.4);backdrop-filter:blur(6px);padding:18px}
+  #extract.on{display:flex}
+  .exsheet{width:min(620px,100%)}
+  .exsheet h2 b{font-family:var(--serif);color:#2F6FB5;font-weight:600}
+  .exlead{font-size:12px;line-height:1.9;color:var(--ink-soft);font-weight:500;margin:8px 0 14px}
+  .exgrid{display:flex;flex-direction:column;gap:8px;margin-bottom:14px}
+  .exrow{display:flex;align-items:baseline;gap:10px;font-size:12.5px;border-bottom:1px dashed var(--line);padding-bottom:7px}
+  .exrow .exth{flex:0 0 auto;font-weight:600;color:var(--ink);min-width:9.5em}
+  .exrow .excnt{flex:0 0 auto;font-family:var(--latin);color:#2F6FB5;font-weight:500;min-width:2.6em;text-align:right}
+  .exrow .exex{flex:1 1 auto;font-size:11px;color:var(--ink-soft);font-weight:500;line-height:1.7}
+  .excolors{font-size:12px;color:var(--ink);font-weight:600;margin:4px 0 14px}
+  .excolors i{display:inline-block;width:11px;height:11px;border-radius:3px;margin:0 3px 0 10px;vertical-align:-1px;box-shadow:inset 0 0 0 1px rgba(0,0,0,.1)}
+  .excap{font-size:11px;font-weight:600;letter-spacing:.1em;color:var(--ink-soft);margin:12px 0 6px}
+  .exta{width:100%;font-family:ui-monospace,Consolas,monospace;font-size:11.5px;line-height:1.7;color:var(--ink);
+    background:#F5F9FD;border:1px solid var(--line);border-radius:10px;padding:10px 12px;resize:vertical}
+  .excta{margin-top:8px;padding:10px;font-size:13.5px}
+  .excta.sub{background:rgba(255,255,255,.92);color:#2F6FB5;border:1px solid rgba(62,142,232,.45);box-shadow:var(--shadow-s)}
+  #exClose{position:absolute;right:14px;top:14px;width:32px;height:32px;border:0;border-radius:50%;
+    cursor:pointer;background:rgba(31,75,115,.06);color:var(--ink-soft);font-size:15px;font-weight:600}
+  #exClose:hover{background:rgba(31,75,115,.12);color:var(--ink)}
+
   /* ---------- 置く場所を選ぶ（全画面ピッカー） ---------- */
   #pick{position:fixed;inset:0;z-index:40;display:none;flex-direction:column;
     background:rgba(240,248,253,.97)}
@@ -466,6 +489,7 @@
     <button class="place wide" id="drawBtn" type="button">＋ 私も未来を描く</button>
     <div class="homeLinks">
       <button class="ghost" id="howBtn" type="button">つかいかた</button>
+      <button class="ghost" id="extractBtn" type="button">声をプロンプトに</button>
       <button class="ghost" id="shareBtn" type="button">リンクを共有</button>
       <button class="ghost" id="resetBtn" type="button">はじめから</button>
       <button class="assemble" id="assembleBtn" type="button">8月6日、いっきにお披露目</button>
@@ -586,6 +610,24 @@
     <button class="cta" id="aboutCta" type="button">私も未来を描く</button>
   </div>
 </div>
+<!-- 声→プロンプト抽出（運営用・最終絵づくりの下ごしらえ） -->
+<div id="extract" role="dialog" aria-modal="true" aria-labelledby="exTitle">
+  <div class="sheet exsheet">
+    <button id="exClose" type="button" aria-label="とじる">×</button>
+    <span class="tag">Extract — for the final artwork</span>
+    <h2 id="exTitle">みんなの声を、<b>一枚の絵</b>のプロンプトへ</h2>
+    <p class="exlead">いま集まっているピースの声をテーマごとに集計し、最終絵（Midjourney手動生成）用のプロンプトに変換します。<br>本番では締切後にサーバ側で同じ処理を行う想定です。</p>
+    <div id="exBody"></div>
+    <div class="excap">Midjourney用プロンプト（英語・コピーして使用）</div>
+    <textarea class="exta" id="exPrompt" readonly rows="7"></textarea>
+    <button class="cta excta" id="exCopy1" type="button">プロンプトをコピー</button>
+    <div class="excap">ピース絵テンプレート（GPT Image 2用・投稿ごとに自動生成する想定）</div>
+    <textarea class="exta" id="exPieceT" readonly rows="4">A small, tender watercolor vignette illustrating this wish for Hiroshima in the year 2045: "{メッセージ}". Soft pastel colors, warm gentle light, simple picture-book style, square, no text.</textarea>
+    <button class="cta excta sub" id="exCopy2" type="button">テンプレをコピー</button>
+    <p class="note">流れ: ①8/5に投稿を締切 → ②この抽出を実行 → ③プロンプトをMidjourneyへ（人が選別・調整）→ ④完成した絵をサイトの「おもて面」に差し替え。ピース絵はGPT Image 2をサーバレス関数経由で自動生成。</p>
+  </div>
+</div>
+
 <!-- 置く場所を選ぶ（全画面・拡大可） -->
 <div id="pick" role="dialog" aria-modal="true" aria-label="置く場所を選ぶ">
   <div class="pktop">
@@ -1461,6 +1503,75 @@ wDone.addEventListener('click', function () {
   toast('あなたの想いを受け取りました。');
 });
 
+/* ---------- 声→プロンプト抽出（最終絵づくりの下ごしらえ） ---------- */
+var THEME_INFO = {
+  asobi: ['あそぶ・スポーツ', 'children playing with a ball in a green riverside park'],
+  kawa: ['川・水辺', 'clean sparkling rivers with gentle bridges'],
+  sora: ['空・青', 'a wide blue sky with soft clouds and birds'],
+  hana: ['花・自然', 'streets and banks full of flowers and green trees'],
+  egao: ['笑顔・たのしみ', 'smiling people of every generation'],
+  hato: ['平和への願い', 'doves in flight, a city where peace is ordinary'],
+  machi: ['街・くらし', 'a warm, lively cityscape where life feels easy'],
+  manabi: ['学び・夢', 'children learning and chasing their dreams'],
+  tsunagu: ['つながり・やさしさ', 'people holding hands and helping one another'],
+  hikari: ['光・希望', 'warm hopeful light spreading over the whole city']
+};
+var COLOR_EN = { 'そらいろ': 'sky blue', 'みずいろ': 'aqua', 'ミント': 'mint green', 'きみどり': 'fresh yellow-green',
+  'きいろ': 'warm yellow', 'オレンジ': 'soft orange', 'コーラル': 'coral', 'ピンク': 'pink', 'さくら': 'cherry-blossom pink',
+  'ラベンダー': 'lavender', 'むらさき': 'light purple', 'ふじいろ': 'periwinkle', 'カスタム': 'each person\'s own color' };
+var extract = document.getElementById('extract'), extractBtn = document.getElementById('extractBtn'),
+    exClose = document.getElementById('exClose'), exBody = document.getElementById('exBody'),
+    exPrompt = document.getElementById('exPrompt');
+function esc(s) { return String(s).replace(/[&<>"']/g, function (m) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]; }); }
+function buildExtract() {
+  var counts = {}, examples = {}, colorCount = {}, total = 0;
+  for (var i = 0; i < pieces.length; i++) {
+    var pc = pieces[i]; if (!pc) continue;
+    total++;
+    counts[pc.art] = (counts[pc.art] || 0) + 1;
+    if (!examples[pc.art]) examples[pc.art] = [];
+    if (pc.msg && examples[pc.art].length < 3 && examples[pc.art].indexOf(pc.msg) < 0) examples[pc.art].push(pc.msg);
+    var pi = PALETTE.indexOf(pc.color);
+    var cn = pi >= 0 ? COLOR_NAMES[pi] : 'カスタム';
+    colorCount[cn] = (colorCount[cn] || 0) + 1;
+  }
+  var themes = Object.keys(counts).sort(function (a, b) { return counts[b] - counts[a]; });
+  var rows = '';
+  for (var tIx = 0; tIx < themes.length; tIx++) {
+    var k = themes[tIx];
+    rows += '<div class="exrow"><span class="exth">' + THEME_INFO[k][0] + '</span><span class="excnt">' + counts[k] + '</span>' +
+      '<span class="exex">「' + (examples[k] || []).map(esc).join('」「') + '」</span></div>';
+  }
+  var colors = Object.keys(colorCount).sort(function (a, b) { return colorCount[b] - colorCount[a]; }).slice(0, 5);
+  var colHtml = '色の分布:';
+  for (var cIx = 0; cIx < colors.length; cIx++) {
+    var idx2 = COLOR_NAMES.indexOf(colors[cIx]);
+    var swCol = idx2 >= 0 ? PALETTE[idx2] : '#B9CFE4';
+    colHtml += '<i style="background:' + swCol + '"></i>' + colors[cIx] + ' ' + Math.round(colorCount[colors[cIx]] / total * 100) + '%';
+  }
+  exBody.innerHTML = '<div class="excolors">集まった声: ' + total + ' ピース ／ ' + colHtml + '</div><div class="exgrid">' + rows + '</div>';
+  var phrases = themes.slice(0, 6).map(function (k2) { return THEME_INFO[k2][1] + ' (' + counts[k2] + ' voices)'; });
+  var colEn = colors.slice(0, 4).map(function (n) { return COLOR_EN[n] || n; });
+  exPrompt.value =
+    'One heartwarming watercolor illustration of Hiroshima in the year 2045, a future built from ' + total + ' wishes: ' +
+    phrases.join('; ') + '. ' +
+    'Soft pastel palette of ' + colEn.join(', ') + '. ' +
+    'Gentle sun at the center of the composition, the rivers and bridges of Hiroshima, the Peace Dome resting quietly among green trees. ' +
+    'Picture-book watercolor style, luminous, tender, hopeful, highly detailed, no text. --ar 1:1';
+}
+function openExtract() { hidePop(); buildExtract(); extract.classList.add('on'); exClose.focus(); }
+function closeExtract() { extract.classList.remove('on'); }
+extractBtn.addEventListener('click', openExtract);
+exClose.addEventListener('click', closeExtract);
+extract.addEventListener('click', function (e) { if (e.target === extract) closeExtract(); });
+function copyText(txt, done) {
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(txt).then(function () { toast(done); }, function () { toast('コピーできませんでした'); });
+  } else toast('コピーできませんでした');
+}
+document.getElementById('exCopy1').addEventListener('click', function () { copyText(exPrompt.value, 'Midjourney用プロンプトをコピーしました'); });
+document.getElementById('exCopy2').addEventListener('click', function () { copyText(document.getElementById('exPieceT').value, 'ピース絵テンプレをコピーしました'); });
+
 /* ---------- 置く場所を選ぶ（全画面・拡大できるピッカー） ---------- */
 var pick = document.getElementById('pick'), pickWrap = document.getElementById('pickWrap');
 var pickCanvas = document.getElementById('pickCanvas'), pctx = pickCanvas.getContext('2d');
@@ -1662,6 +1773,7 @@ about.addEventListener('click', function (e) { if (e.target === about) closeAbou
 document.addEventListener('keydown', function (e) {
   if (e.key !== 'Escape') return;
   if (pick.classList.contains('on')) closePick();
+  else if (extract.classList.contains('on')) closeExtract();
   else if (tut.classList.contains('on')) closeTut();
   else if (wiz.classList.contains('on')) closeWiz();
   else if (about.classList.contains('on')) closeAbout();
@@ -1716,7 +1828,7 @@ if (document.fonts && document.fonts.ready) document.fonts.ready.then(function (
 
 /* test hooks */
 window.PW = {
-  version: '6.1',
+  version: '6.2',
   place: function (c, m, n) { return placePiece(nextEmpty(), c || PALETTE[0], m || 'テスト', n || '', true); },
   assemble: assemble, reset: function () { seed(true); }, count: function () { return placed; }, target: TARGET,
   fill: function (k) {
