@@ -4,7 +4,14 @@
 
 **Live:** https://michiyosi.github.io/peace-week/
 
-## v8.2 OG画像（現行）
+## v8.3 セルフテスト（現行）
+
+- `https://michiyosi.github.io/peace-week/?selftest=1` で開くと、主要フロー（初期化・NG判定・ウィザード遷移・同意必須・配置演出・完了・タップ・抽出・統計・エクスポート・お披露目・完成絵・めくり）を自動で一巡し、**合否パネル（28項目）**を表示。コンソールにも `[SELFTEST] 28/28 ALL PASS` を出力
+- selftest中は自動で保存オフ（本番DBを汚さない）。手動起動は `PW.selftest()`
+- **運用**: サイトを更新するたびに `?selftest=1` を開いて緑（すべて合格）を確認 → 大きな破損を即発見できる。単一HTMLのまま入る軽量な自動テスト
+- 参考コスト情報: Supabase Free=$0（本規模で十分）、Pro=$25/月〜（本番月のみの保険で可）
+
+## v8.2 OG画像
 
 - SNS/LINE等でリンクを貼ると表示されるサムネイル `og.png`（1200×630）を設置。青空・太陽の円形パズル・タイトル入りのブランドデザイン
 - meta: `og:image` / `og:image:width/height/alt` / `twitter:card=summary_large_image` / `twitter:image` を追加

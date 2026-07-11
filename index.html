@@ -930,7 +930,8 @@ var TARGET = 0;
 /* ---------- Supabase（本番データ保存）。?demo=1 でオフライン・デモに切替 ---------- */
 var SB_URL = 'https://onpwsqexqstunyemjjzr.supabase.co';
 var SB_KEY = 'sb_publishable_ROB27m0jG2DYzvo0dY-j0w_CWhmC7bD'; // 公開可能キー（RLSで保護）
-var SB_ON = !(Q.has('demo') && qn('demo', 0) > 0);
+// セルフテスト中は本番DBを汚さないよう保存オフ（demo扱い）
+var SB_ON = !((Q.has('demo') && qn('demo', 0) > 0) || (Q.has('selftest') && qn('selftest', 0) > 0));
 function sbHeaders(extra) {
   var h = { apikey: SB_KEY, Authorization: 'Bearer ' + SB_KEY, 'Content-Type': 'application/json' };
   if (extra) for (var k in extra) h[k] = extra[k];
@@ -2402,7 +2403,7 @@ if (document.fonts && document.fonts.ready) document.fonts.ready.then(function (
 
 /* test hooks */
 window.PW = {
-  version: '8.2',
+  version: '8.3',
   hash: function (s) { sha256hex(String(s), function (h) { console.log('ADMIN_HASH:', h); }); return '（コンソールにハッシュを出力しました）'; },
   place: function (c, m, n) { return placePiece(nextEmpty(), c || PALETTE[0], m || 'テスト', n || '', true); },
   assemble: assemble, reset: function () { seed(true); }, count: function () { return placed; }, target: TARGET,
@@ -2410,8 +2411,148 @@ window.PW = {
     for (var i = 0; i < k; i++) { var idx = nextEmpty(); if (idx == null) break;
       pieces[idx] = mkPiece(PALETTE[(Math.random() * PALETTE.length) | 0], SEED_MESSAGES[(Math.random() * SEED_MESSAGES.length) | 0], '', false); placed++; markFilled(idx); }
     updateCounter(); drawBoard(); return placed;
-  }
+  },
+  selftest: runSelfTest
 };
+
+/* =====================================================================
+   セルフテスト（?selftest=1 で起動）
+   主要フローを自動で一巡し、合否パネルを表示する軽量テスト。
+   demoモード（データ保存なし）で実行するので本番DBは汚さない。
+   ===================================================================== */
+function runSelfTest() {
+  var results = [];
+  function check(name, cond, detail) { results.push({ name: name, ok: !!cond, detail: detail || '' }); }
+  var sleep = function (ms) { return new Promise(function (r) { setTimeout(r, ms); }); };
+
+  (async function () {
+    try {
+      // --- 環境・初期化 ---
+      check('バージョン 8.3', PW.version === '8.3');
+      check('盤面 810セル', TARGET === 810 && paths.length === 810);
+      check('ジグソー形状生成', !!paths[0] && typeof paths[0].addPath === 'function' || !!paths[100]);
+      check('パレット12色', PALETTE.length === 12 && COLOR_NAMES.length === 12);
+
+      // モーダル類を閉じてまっさらに
+      [tut, about, wiz, pick, extract, stats, gate, terms, events].forEach(function (m) { if (m) m.classList.remove('on'); });
+      seed(true);
+      check('リセットで初期状態', placed === SEED_COUNT || placed === 0);
+
+      // --- NGワード（クライアント一次判定） ---
+      check('NG判定: 死ね系', ngCheck('し ね') != null);
+      check('NG判定: URL', ngCheck('見て https://x.co') != null);
+      check('NG判定: 電話番号', ngCheck('09012345678') != null);
+      check('NG判定: 正常文はOK', ngCheck('えがおがつづく街に') == null);
+
+      // --- ウィザード遷移 ---
+      openWiz(); await sleep(80);
+      check('ウィザード起動→STEP1', wiz.classList.contains('on') && wPanels[0].classList.contains('on'));
+      // 色選択
+      var sw = document.querySelectorAll('#swatches .sw')[3];
+      sw && sw.click();
+      check('色を選択できる', chosen === PALETTE[3]);
+      // NG入力で先へ進めない
+      msgInput.value = 'ころす'; msgInput.dispatchEvent(new Event('input', { bubbles: true }));
+      goPreview();
+      check('NG入力はSTEP1で止まる', wPanels[0].classList.contains('on'));
+      // 正常入力→STEP2
+      msgInput.value = '川辺をあるいてる'; msgInput.dispatchEvent(new Event('input', { bubbles: true }));
+      nameInput.value = 'テスト';
+      goPreview(); await sleep(60);
+      check('正常入力でSTEP2へ', wPanels[1].classList.contains('on'));
+      check('プレビューにメッセージ反映', pvMsg.textContent.indexOf('川辺をあるいてる') >= 0);
+
+      // --- 同意チェック必須 ---
+      var agreeChk = document.getElementById('agreeChk');
+      agreeChk.checked = false;
+      var before = placed;
+      wPlace.click(); await sleep(60);
+      check('未同意では置けない', placed === before && wPanels[1].classList.contains('on'));
+
+      // 規約モーダル
+      openTerms(); check('利用規約モーダルが開く', terms.classList.contains('on')); closeTerms();
+
+      // --- 配置（飛翔演出→完了） ---
+      agreeChk.checked = true;
+      before = placed;
+      wPlace.click();
+      await sleep(2400); // 飛翔アニメ(≈850ms)＋着地後の完了表示(≈950ms)を余裕をもって待つ
+      check('ピースが1つ増える', placed === before + 1);
+      check('完了画面(STEP3)表示', wPanels[2].classList.contains('on'));
+      wDone.click(); await sleep(40);
+      check('完了→ウィザード閉じる', !wiz.classList.contains('on'));
+
+      // --- タップでポップ ---
+      PW.fill(30);
+      var idxF = -1; for (var i = 0; i < pieces.length; i++) { if (pieces[i]) { idxF = i; break; } }
+      if (idxF >= 0) {
+        var rect = bc.getBoundingClientRect();
+        var px = rect.left + cx0[idxF], py = rect.top + devYf(cy0[idxF]);
+        bc.dispatchEvent(new MouseEvent('click', { clientX: px, clientY: py, bubbles: true }));
+        check('ピースをタップでポップ表示', pop.classList.contains('on'));
+        popClose.click();
+      } else check('ピースをタップでポップ表示', false, 'ピース無し');
+
+      // --- 抽出（プロンプト生成） ---
+      openExtract(); await sleep(40);
+      check('声→プロンプト抽出が生成', exPrompt.value.indexOf('Hiroshima') >= 0 && exPrompt.value.length > 100);
+      closeExtract();
+
+      // --- 管理: 統計・エクスポート・削除ロジック ---
+      buildStats();
+      check('統計ダッシュボード生成', stBody.innerHTML.indexOf('集まったピース') >= 0);
+      var rowsExp = exportRows();
+      check('エクスポート行を生成', rowsExp.length === placed && (placed === 0 || 'message' in rowsExp[0]));
+
+      // --- お披露目→完成絵→めくり ---
+      seed(true);
+      assemble();
+      await sleep(4600); // 組み上げ(≈2800ms)＋リビール(≈1200ms)を余裕をもって待つ
+      check('810ピース完成', placed === TARGET);
+      check('完成で一枚絵モード', revealed === true && faceMode === 'art');
+      check('めくりボタン出現', !flipBtn.hidden);
+      flipBtn.click();
+      check('うら面へめくり替え', faceMode === 'mosaic');
+      flipBtn.click();
+      check('おもて面へ戻る', faceMode === 'art');
+
+      seed(false); // 後片付け
+    } catch (e) {
+      check('例外なく完走', false, String(e && e.message || e));
+    }
+    renderSelfTest(results);
+  })();
+}
+
+function renderSelfTest(results) {
+  var pass = results.filter(function (r) { return r.ok; }).length;
+  var total = results.length;
+  var allOk = pass === total;
+  var el = document.createElement('div');
+  el.id = 'selftestPanel';
+  el.style.cssText = 'position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:rgba(20,40,70,.55);backdrop-filter:blur(6px);padding:16px;font-family:var(--serif)';
+  var rows = results.map(function (r) {
+    return '<div style="display:flex;gap:8px;align-items:baseline;font-size:12.5px;padding:4px 0;border-bottom:1px solid rgba(120,150,180,.14)">' +
+      '<span style="flex:0 0 auto;font-weight:700;color:' + (r.ok ? '#1F9E6B' : '#E24C4C') + '">' + (r.ok ? '✓' : '✕') + '</span>' +
+      '<span style="flex:1 1 auto;color:#2E3A45">' + r.name + '</span>' +
+      (r.detail ? '<span style="flex:0 0 auto;color:#93A;font-size:10.5px">' + r.detail + '</span>' : '') + '</div>';
+  }).join('');
+  el.innerHTML = '<div style="width:min(460px,100%);max-height:86vh;overflow:auto;background:#fff;border-radius:18px;padding:22px 22px 18px;box-shadow:0 30px 80px rgba(20,40,70,.4)">' +
+    '<div style="font-family:var(--latin);font-style:italic;font-size:11px;letter-spacing:.2em;color:#6E7E8C">Self Test</div>' +
+    '<div style="display:flex;align-items:baseline;gap:10px;margin:2px 0 12px">' +
+    '<h2 style="margin:0;font-size:22px;font-weight:600;color:' + (allOk ? '#1F9E6B' : '#E24C4C') + '">' + (allOk ? 'すべて合格' : '要確認あり') + '</h2>' +
+    '<span style="font-family:var(--latin);font-size:20px;color:#2F6FB5;font-weight:500">' + pass + ' / ' + total + '</span></div>' +
+    rows +
+    '<button id="selftestClose" style="margin-top:14px;width:100%;border:0;border-radius:12px;cursor:pointer;font-family:var(--serif);font-size:15px;font-weight:700;color:#fff;padding:12px;background:linear-gradient(135deg,#3E8EE8,#3FC6C0)">とじる</button>' +
+    '</div>';
+  document.body.appendChild(el);
+  document.getElementById('selftestClose').addEventListener('click', function () { el.remove(); });
+  console.log('[SELFTEST]', pass + '/' + total, allOk ? 'ALL PASS' : 'HAS FAILURES', results.filter(function (r) { return !r.ok; }));
+}
+
+if (Q.has('selftest') && qn('selftest', 0) > 0) {
+  setTimeout(function () { try { closeTut(); } catch (e) {} runSelfTest(); }, 900);
+}
 </script>
 </body>
 </html>
