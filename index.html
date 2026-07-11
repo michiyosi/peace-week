@@ -361,6 +361,24 @@
   .abtn:hover{background:rgba(255,255,255,.24)}
   .abtn.gold{background:linear-gradient(135deg,#F0CE8B,#DBAA5E);color:#4A3A1E;border:0}
   .abtn.danger{background:#E86A6A;border:0}
+  .wnext{display:flex;flex-direction:column;gap:9px;margin:14px auto 6px;max-width:340px}
+  .wlink{background:rgba(255,255,255,.94);border:1px solid rgba(62,142,232,.35);border-radius:14px;
+    padding:11px 14px;font-family:var(--serif);font-size:14px;font-weight:600;letter-spacing:.04em;
+    color:var(--ink);cursor:pointer;box-shadow:var(--shadow-s);text-align:center;
+    transition:transform .15s ease,box-shadow .2s ease}
+  .wlink:hover{transform:translateY(-1px);box-shadow:0 6px 18px rgba(62,142,232,.22)}
+  .wlink span{display:block;font-size:10.5px;color:var(--ink-soft);font-weight:500;letter-spacing:.1em;margin-top:3px}
+  #events{position:fixed;inset:0;z-index:33;display:none;align-items:center;justify-content:center;
+    background:rgba(31,75,115,.42);backdrop-filter:blur(6px);padding:18px}
+  #events.on{display:flex}
+  .evsheet{width:min(420px,100%);text-align:left}
+  .evsheet h2 b{color:#2F6FB5;font-weight:600}
+  .evrow{border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin:10px 0;background:#F7FAFD}
+  .evrow b{display:block;font-size:13px;color:#2F6FB5;letter-spacing:.06em;margin-bottom:4px}
+  .evrow p{margin:0;font-size:12px;line-height:1.9;color:var(--ink);font-weight:500}
+  #evClose{position:absolute;right:14px;top:14px;width:32px;height:32px;border:0;border-radius:50%;
+    cursor:pointer;background:rgba(31,75,115,.06);color:var(--ink-soft);font-size:15px;font-weight:600}
+  #evClose:hover{background:rgba(31,75,115,.12);color:var(--ink)}
   #gate{position:fixed;inset:0;z-index:34;display:none;align-items:center;justify-content:center;
     background:rgba(31,75,115,.42);backdrop-filter:blur(6px);padding:18px}
   #gate.on{display:flex}
@@ -613,8 +631,8 @@
   </div>
   <div class="wview">
     <section class="wstep on" id="wp1">
-      <h2 class="wh">あなたの想いが、<br>2045年の広島をつくります。</h2>
-      <p class="wsub">好きな色を選んで、未来へのメッセージを描きましょう。</p>
+      <h2 class="wh">2045年の“今この瞬間”、<br>あなたは何をしていたい？</h2>
+      <p class="wsub">情景がうかぶひと言が、そのまま「2045年の広島」の絵の素になります。</p>
       <div class="wcard">
         <div class="wcap">ピースの色を選ぶ</div>
         <div class="swatches wizsw" id="swatches">
@@ -626,9 +644,9 @@
         <div class="wname" id="swLbl">そらいろ</div>
       </div>
       <div class="wcard">
-        <div class="wcap">2045年の広島への想いを描こう <span class="cnt" id="msgCnt">のこり24文字</span></div>
+        <div class="wcap">2045年のあなたの“そのとき”を描こう <span class="cnt" id="msgCnt">のこり24文字</span></div>
         <div class="field">
-          <input id="msgInput" maxlength="24" enterkeyhint="done" placeholder="例：自然と人が共に生きるまちに" aria-label="2045年の広島への想い">
+          <input id="msgInput" maxlength="24" enterkeyhint="done" placeholder="例：平和公園で絵を描いてる" aria-label="2045年の今この瞬間、していたいこと">
         </div>
         <div class="chips" id="chips"><span class="ex">例</span></div>
         <div class="field nameField"><input id="nameInput" maxlength="10" placeholder="なまえ（任意）" aria-label="なまえ（任意）"></div>
@@ -657,9 +675,14 @@
         <svg viewBox="0 0 64 64"><circle cx="32" cy="32" r="29" fill="none" stroke="#3FC6C0" stroke-width="3"/>
         <path d="M20 33 l9 9 16 -18" fill="none" stroke="#3E8EE8" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </div>
-      <h2 class="wh">あなたの想いを、<br>受け取りました。</h2>
-      <p class="wsub">みんなのピースが集まって、未来の広島が形になっていきます。<br>810ピースそろったら、<b>8月6日、メルパルク</b>で“未来”をお披露目。</p>
-      <button class="place wcta" id="wDone" type="button">みんなのパズルを見る</button>
+      <h2 class="wh">あなたの未来を、<br>受け取りました。</h2>
+      <p class="wsub">あなたのピースが、光の円にはまりました。<br>810ピースそろったら、<b>8月6日、メルパルク</b>で“未来”をお披露目。</p>
+      <div class="wnext">
+        <button class="wlink" id="wShare" type="button">🤝 他の人とも未来を創る<span>このプロジェクトを共有する</span></button>
+        <button class="wlink" id="wEvents" type="button">🌻 この夏、ピースメーカーになる<span>イベントを見る</span></button>
+        <button class="wlink" id="wStory" type="button">📖 ストーリーを見る<span>Piece Projectについて</span></button>
+      </div>
+      <button class="tskip" id="wDone" type="button">みんなのパズルへもどる</button>
     </section>
   </div>
 </div>
@@ -684,6 +707,19 @@
     <button class="cta" id="aboutCta" type="button">私も未来を描く</button>
   </div>
 </div>
+<!-- この夏のイベント -->
+<div id="events" role="dialog" aria-modal="true" aria-labelledby="evTitle">
+  <div class="sheet gsheet evsheet">
+    <button id="evClose" type="button" aria-label="とじる">×</button>
+    <span class="tag">Events</span>
+    <h2 id="evTitle">この夏、<b>ピースメーカー</b>に。</h2>
+    <div class="evrow"><b>8/1（土）–8/5（水）</b><p>ピースウィーク期間中、まちなかの会場でピースをあつめています。好きな色と「2045年のいま」のひと言で、だれでも参加できます。</p></div>
+    <div class="evrow"><b>8/6（木）お披露目会 @ メルパルク</b><p>810ピースから生まれた一枚の絵「2045年の広島」を、はじめて公開します。その瞬間を、いっしょに見届けてください。</p></div>
+    <p class="note">各会場・時間の詳細は、決まりしだいここに掲載します。（デモ版）</p>
+    <button class="cta excta" id="evOk" type="button">とじる</button>
+  </div>
+</div>
+
 <!-- 管理モード解錠（パスワード） -->
 <div id="gate" role="dialog" aria-modal="true" aria-label="管理モード">
   <div class="sheet gsheet">
@@ -766,8 +802,8 @@
             <path d="M168 44 L184 28 l6 6 -16 16 -8 2z" fill="#F7B26E" stroke="#fff" stroke-width="1.5"/>
           </svg>
         </div>
-        <h3>② 2045年の広島への想いを描く</h3>
-        <p>24文字までのメッセージを書きます。<br>まよったら、記入例をタップしてもOK。</p>
+        <h3>② 「2045年のいま」を描く</h3>
+        <p>“何をしていたい？”に24文字で答えます。<br>まよったら、記入例をタップしてもOK。</p>
       </section>
       <section class="tsl">
         <div class="tart">
@@ -853,12 +889,12 @@ var SEED_MESSAGES = [
 ];
 var SEED_NAMES = ['ひろ','ゆき','そら','あい','けん','なな','みお','たく','りん','はると','ここ','—','—','—'];
 var PLACEHOLDERS = [
-  '2045年の広島への想いを描こう',
-  '例：自然と人が共に生きるまちに',
-  '例：笑顔があふれるまちに',
-  '例：川と空が、きれいなままで'
+  '例：平和公園で絵を描いてる',
+  '例：公園でサッカーしてる',
+  '例：川辺をのんびり歩いてる',
+  '例：たのしく仕事してる'
 ];
-var EXAMPLES = ['平和な世界に','みんなが助け合えるまちに','自然豊かな未来に','子どもたちの笑顔のために'];
+var EXAMPLES = ['平和公園で絵を描いてる', '公園でサッカーしてる', '焼き芋たべてる', 'すきな服を選んでる', '川辺をのんびり歩いてる', 'たのしく仕事してる'];
 
 /* ---------- stage / canvases ---------- */
 var boardWrap = document.getElementById('boardWrap');
@@ -910,10 +946,10 @@ var ART_MATCH = [
   ['kawa', ['川', 'かわ', '水', '海', 'うみ', '橋']],
   ['sora', ['空', 'そら', 'あお', '青', '雲', '鳥']],
   ['hana', ['花', 'はな', 'みどり', '緑', '自然', '木', '咲']],
-  ['egao', ['笑', 'えがお', 'たのし', '楽', 'うれし', '嬉']],
+  ['egao', ['笑', 'えがお', 'たのし', '楽', 'うれし', '嬉', 'たべ', '食', 'いも', 'おいし']],
   ['hato', ['平和', 'へいわ', '戦争', 'せんそう', '鳩', 'はと', '争']],
-  ['machi', ['街', 'まち', '都市', 'ビル', '暮', '住']],
-  ['manabi', ['学', 'まな', '夢', 'ゆめ', '本', '知']],
+  ['machi', ['街', 'まち', '都市', 'ビル', '暮', '住', '服', '仕事', 'はたら', '歩', '買い物']],
+  ['manabi', ['学', 'まな', '夢', 'ゆめ', '本', '知', '絵', '描', '音楽']],
   ['tsunagu', ['手', 'つな', '友', 'とも', '助', 'ひとり', '一緒', 'いっしょ', '愛', 'あい', 'やさし', '優']]
 ];
 function pickArt(msg) {
@@ -1291,7 +1327,7 @@ function drawAurora(now) {
 }
 
 /* ---------- fx: 光の粒 / 浮遊ピース / 光のリング / きらめき ---------- */
-var motes = [], flashes = [];
+var motes = [], flashes = [], halos = []; // halos: 置いた瞬間、ピースを包む光の輪
 var decor = [], decorPath = null;
 var sparkles = [];
 function buildDecor() {
@@ -1376,6 +1412,20 @@ function fxLoop() {
     fctx.ellipse(CX, devYf(CYf), fl.r, fl.r * KY, 0, 0, TWO_PI);
     fctx.lineWidth = t * 0.4;
     fctx.strokeStyle = 'rgba(255,255,255,' + fl.a + ')';
+    fctx.stroke();
+  }
+
+  // 置いた瞬間、ピースを包む光の輪
+  for (var h9 = halos.length - 1; h9 >= 0; h9--) {
+    var hl = halos[h9]; hl.r += hl.vr; hl.a *= 0.92;
+    if (hl.a < 0.03) { halos.splice(h9, 1); continue; }
+    fctx.beginPath(); fctx.arc(hl.x, hl.y, hl.r, 0, TWO_PI);
+    fctx.lineWidth = Math.max(2, t * 0.18);
+    fctx.strokeStyle = 'rgba(255,255,255,' + hl.a + ')';
+    fctx.stroke();
+    fctx.beginPath(); fctx.arc(hl.x, hl.y, hl.r * 0.6, 0, TWO_PI);
+    fctx.lineWidth = Math.max(1.5, t * 0.12);
+    fctx.strokeStyle = 'rgba(255,240,180,' + (hl.a * 0.85) + ')';
     fctx.stroke();
   }
 
@@ -1598,15 +1648,46 @@ wPlace.addEventListener('click', function () {
   var msg = msgInput.value.trim();
   var idx = (pickIdx >= 0 && !pieces[pickIdx]) ? pickIdx : nextEmpty();
   if (idx == null) { toast('円がいっぱいです。2045年までみんなで育てましょう'); closeWiz(); return; }
+  // ウィザードを一旦閉じて、ピースが光に包まれてはまる様子を見せる
+  closeWiz();
+  window.scrollTo({ top: 0, behavior: 'auto' });
   placePiece(idx, chosen, msg, nameInput.value.trim(), true);
+  var hx = cx0[idx], hy = devYf(cy0[idx]);
+  if (!REDUCED()) {
+    halos.push({ x: hx, y: hy, r: t * 0.4, vr: t * 0.16, a: 0.95 });
+    setTimeout(function () { halos.push({ x: hx, y: hy, r: t * 0.4, vr: t * 0.13, a: 0.8 }); }, 200);
+    burst(hx, hy, 18, 4);
+  }
   pickReset();
   msCheck();
-  wizShow(2);
+  setTimeout(function () { wizShow(2); wiz.classList.add('on'); }, REDUCED() ? 0 : 1200);
+});
+function doShare() {
+  var url = location.origin + location.pathname;
+  var data = { title: 'Piece Project', text: '8月6日、人々が思う“2045年の広島”を形に。', url: url };
+  if (navigator.share) { navigator.share(data).catch(function () {}); return; }
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(url).then(function () { toast('リンクをコピーしました'); },
+      function () { toast(url); });
+  } else toast(url);
+}
+document.getElementById('wShare').addEventListener('click', doShare);
+var events = document.getElementById('events');
+function openEvents() { events.classList.add('on'); }
+function closeEvents() { events.classList.remove('on'); }
+document.getElementById('wEvents').addEventListener('click', openEvents);
+document.getElementById('evClose').addEventListener('click', closeEvents);
+document.getElementById('evOk').addEventListener('click', closeEvents);
+events.addEventListener('click', function (e) { if (e.target === events) closeEvents(); });
+document.getElementById('wStory').addEventListener('click', function () {
+  closeWiz();
+  msgInput.value = ''; nameInput.value = ''; updateCnt();
+  document.getElementById('story').scrollIntoView({ behavior: REDUCED() ? 'auto' : 'smooth' });
 });
 wDone.addEventListener('click', function () {
   closeWiz();
   msgInput.value = ''; nameInput.value = ''; updateCnt();
-  toast('あなたの想いを受け取りました。');
+  toast('あなたの未来を受け取りました。');
 });
 
 /* ---------- 声→プロンプト抽出（最終絵づくりの下ごしらえ） ---------- */
@@ -2033,6 +2114,7 @@ about.addEventListener('click', function (e) { if (e.target === about) closeAbou
 document.addEventListener('keydown', function (e) {
   if (e.key !== 'Escape') return;
   if (gate.classList.contains('on')) closeGate();
+  else if (events.classList.contains('on')) closeEvents();
   else if (pick.classList.contains('on')) closePick();
   else if (stats.classList.contains('on')) closeStats();
   else if (extract.classList.contains('on')) closeExtract();
@@ -2090,7 +2172,7 @@ if (document.fonts && document.fonts.ready) document.fonts.ready.then(function (
 
 /* test hooks */
 window.PW = {
-  version: '7.1',
+  version: '7.2',
   hash: function (s) { sha256hex(String(s), function (h) { console.log('ADMIN_HASH:', h); }); return '（コンソールにハッシュを出力しました）'; },
   place: function (c, m, n) { return placePiece(nextEmpty(), c || PALETTE[0], m || 'テスト', n || '', true); },
   assemble: assemble, reset: function () { seed(true); }, count: function () { return placed; }, target: TARGET,
