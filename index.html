@@ -349,6 +349,7 @@
     letter-spacing:.2em;color:var(--ink-faint)}
 
   /* ---------- 管理モード ---------- */
+  .adminBar[hidden]{display:none !important}
   .adminBar{display:flex;align-items:center;gap:6px;flex-wrap:wrap;justify-content:center;
     background:rgba(31,75,115,.85);backdrop-filter:blur(6px);border-radius:14px;
     padding:8px 12px;margin-bottom:2px;box-shadow:0 6px 20px rgba(20,50,90,.3)}
@@ -2008,7 +2009,7 @@ if (document.fonts && document.fonts.ready) document.fonts.ready.then(function (
 
 /* test hooks */
 window.PW = {
-  version: '7.0',
+  version: '7.0.1',
   place: function (c, m, n) { return placePiece(nextEmpty(), c || PALETTE[0], m || 'テスト', n || '', true); },
   assemble: assemble, reset: function () { seed(true); }, count: function () { return placed; }, target: TARGET,
   fill: function (k) {
