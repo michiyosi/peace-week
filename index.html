@@ -348,6 +348,36 @@
   .sfoot{text-align:center;margin-top:26px;font-family:var(--latin);font-style:italic;font-size:10px;
     letter-spacing:.2em;color:var(--ink-faint)}
 
+  /* ---------- 管理モード ---------- */
+  .adminBar{display:flex;align-items:center;gap:6px;flex-wrap:wrap;justify-content:center;
+    background:rgba(31,75,115,.85);backdrop-filter:blur(6px);border-radius:14px;
+    padding:8px 12px;margin-bottom:2px;box-shadow:0 6px 20px rgba(20,50,90,.3)}
+  .abadge{font-family:var(--latin);font-style:italic;font-size:10px;letter-spacing:.24em;color:#9CC7FF;
+    font-weight:500;margin-right:2px}
+  .abtn{border:1px solid rgba(255,255,255,.35);background:rgba(255,255,255,.1);cursor:pointer;
+    color:#fff;font-family:var(--serif);font-size:11.5px;font-weight:600;letter-spacing:.04em;
+    border-radius:99px;padding:7px 12px;transition:background .15s}
+  .abtn:hover{background:rgba(255,255,255,.24)}
+  .abtn.gold{background:linear-gradient(135deg,#F0CE8B,#DBAA5E);color:#4A3A1E;border:0}
+  .abtn.danger{background:#E86A6A;border:0}
+  #stats{position:fixed;inset:0;z-index:32;display:none;align-items:center;justify-content:center;
+    background:rgba(31,75,115,.4);backdrop-filter:blur(6px);padding:18px}
+  #stats.on{display:flex}
+  #stClose{position:absolute;right:14px;top:14px;width:32px;height:32px;border:0;border-radius:50%;
+    cursor:pointer;background:rgba(31,75,115,.06);color:var(--ink-soft);font-size:15px;font-weight:600}
+  #stClose:hover{background:rgba(31,75,115,.12);color:var(--ink)}
+  .stsum{display:flex;gap:12px;justify-content:space-between;margin:12px 0 16px;flex-wrap:wrap}
+  .stcard{flex:1 1 100px;background:#F5F9FD;border:1px solid var(--line);border-radius:12px;padding:12px;text-align:center}
+  .stcard b{display:block;font-family:var(--latin);font-size:24px;color:#2F6FB5;font-weight:500}
+  .stcard span{font-size:10.5px;color:var(--ink-soft);font-weight:600;letter-spacing:.08em}
+  .sthead{font-size:11px;font-weight:600;letter-spacing:.1em;color:var(--ink-soft);margin:14px 0 8px}
+  .strow{display:flex;align-items:center;gap:8px;font-size:12px;font-weight:600;color:var(--ink);margin-bottom:6px}
+  .strow .stlbl{flex:0 0 8.5em}
+  .strow .stbar{flex:1 1 auto;height:10px;border-radius:99px;background:rgba(31,75,115,.08);overflow:hidden}
+  .strow .stbar i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,#5BC8F0,#3E8EE8)}
+  .strow .stn{flex:0 0 2.6em;text-align:right;font-family:var(--latin);color:#2F6FB5;font-weight:500}
+  .strow .stsw{flex:0 0 auto;width:11px;height:11px;border-radius:3px;box-shadow:inset 0 0 0 1px rgba(0,0,0,.1)}
+
   /* ---------- 声→プロンプト抽出 ---------- */
   #extract{position:fixed;inset:0;z-index:32;display:none;align-items:center;justify-content:center;
     background:rgba(31,75,115,.4);backdrop-filter:blur(6px);padding:18px}
@@ -424,6 +454,30 @@
     .field input{font-size:16px}
     .pbar{width:82vw}
   }
+  @media (max-width:560px){
+    header{padding:10px 14px 0}
+    .brand h1{font-size:22px}
+    .brand .sub{font-size:11px;white-space:normal;line-height:1.5}
+    #boardWrap{padding:0 8px}
+    #progress{gap:4px;padding:2px 12px 8px}
+    .p-hint{white-space:normal;line-height:1.6;max-width:88vw}
+    .cdown{white-space:normal;line-height:1.6;max-width:88vw;text-align:center}
+    .place.wide{width:min(86vw,340px)}
+    .day-chip{padding:5px 11px}
+    .flip-chip{padding:6px 11px;font-size:11px}
+    #pop{max-width:min(250px,80vw)}
+    .wview{padding:8px 12px 20px}
+    .wcard{padding:14px 14px}
+    .wcta{width:100%;padding:0}
+    .wh{font-size:18px}
+    .tsheet .tart{height:82px}
+    .pkzoom button{width:40px;height:40px}
+    .pkfoot .wcta{width:min(86vw,340px)}
+    #story{padding:36px 14px 24px}
+    .sblock{padding:18px 16px}
+    .adminBar{border-radius:12px;padding:7px 8px}
+    .abtn{font-size:10.5px;padding:6px 9px}
+  }
   @media (prefers-reduced-motion: reduce){
     .pbar>i,.logo svg{animation:none}
     .place::after{display:none}
@@ -486,13 +540,20 @@
   </div>
 
   <div id="homeBar">
+    <div class="adminBar" id="adminBar" hidden>
+      <span class="abadge">ADMIN</span>
+      <button class="abtn" id="statsBtn" type="button">📊 統計</button>
+      <button class="abtn" id="extractBtn" type="button">🎨 抽出</button>
+      <button class="abtn" id="delModeBtn" type="button">🗑 削除モード</button>
+      <button class="abtn" id="expCsvBtn" type="button">⬇ CSV</button>
+      <button class="abtn" id="expJsonBtn" type="button">⬇ JSON</button>
+      <button class="abtn gold" id="assembleBtn" type="button">✨ お披露目</button>
+      <button class="abtn" id="resetBtn" type="button">↺ リセット</button>
+    </div>
     <button class="place wide" id="drawBtn" type="button">＋ 私も未来を描く</button>
     <div class="homeLinks">
       <button class="ghost" id="howBtn" type="button">つかいかた</button>
-      <button class="ghost" id="extractBtn" type="button">声をプロンプトに</button>
       <button class="ghost" id="shareBtn" type="button">リンクを共有</button>
-      <button class="ghost" id="resetBtn" type="button">はじめから</button>
-      <button class="assemble" id="assembleBtn" type="button">8月6日、いっきにお披露目</button>
     </div>
     <span class="credit">PIECE PROJECT — HIROSHIMA 2045 · CONCEPT DEMO</span>
     <span class="scrollcue">▼ スクロールして、プロジェクトのことを知る</span>
@@ -606,10 +667,20 @@
       <div><i>4</i>円のピースをタップすると、みんなの想いが読める</div>
     </div>
     <p class="note">これはコンセプトデモです。入力はこの画面の中だけで完結し、どこにも送信されません。<br>
-    ヒント: 「8月6日、いっきにお披露目」ボタンで、当日の演出をプレビューできます。</p>
+    ヒント: 810ピースがそろうと、円が「一枚の絵」に変わります。</p>
     <button class="cta" id="aboutCta" type="button">私も未来を描く</button>
   </div>
 </div>
+<!-- 統計ダッシュボード（管理モード） -->
+<div id="stats" role="dialog" aria-modal="true" aria-labelledby="stTitle">
+  <div class="sheet exsheet">
+    <button id="stClose" type="button" aria-label="とじる">×</button>
+    <span class="tag">Dashboard</span>
+    <h2 id="stTitle">投稿の<b>いま</b></h2>
+    <div id="stBody"></div>
+  </div>
+</div>
+
 <!-- 声→プロンプト抽出（運営用・最終絵づくりの下ごしらえ） -->
 <div id="extract" role="dialog" aria-modal="true" aria-labelledby="exTitle">
   <div class="sheet exsheet">
@@ -908,10 +979,11 @@ function buildPaths() {
 
 function resize() {
   var rect = boardWrap.getBoundingClientRect();
-  var availW = Math.max(220, rect.width - 66);
-  var availH = Math.max(170, rect.height - 8);
-  var R = Math.min(availW / 2, (availH - 26) / (2 * KY));
-  W = Math.round(R * 2 + 56); H = Math.round(R * 2 * KY + 34);
+  var narrow = rect.width < 560;
+  var availW = Math.max(200, rect.width - (narrow ? 26 : 66));
+  var availH = Math.max(160, rect.height - 8);
+  var R = Math.min(availW / 2, (availH - (narrow ? 20 : 26)) / (2 * KY));
+  W = Math.round(R * 2 + (narrow ? 24 : 56)); H = Math.round(R * 2 * KY + (narrow ? 24 : 34));
   boardEl.style.width = W + 'px'; boardEl.style.height = H + 'px';
   dpr = Math.min(window.devicePixelRatio || 1, 2);
   CX = W / 2; CYf = W / 2; CYv = H / 2;
@@ -1369,6 +1441,13 @@ function hitTest(clientX, clientY) {
 var popArt = document.getElementById('popArt'), popWhen = document.getElementById('popWhen');
 bc.addEventListener('click', function (e) {
   var hit = hitTest(e.clientX, e.clientY);
+  if (adminDelete) {
+    if (hit && pieces[hit.i]) {
+      var pcD = pieces[hit.i];
+      if (window.confirm('このピースを削除しますか？\n「' + pcD.msg + '」' + (pcD.name ? ' — ' + pcD.name : ''))) deletePiece(hit.i);
+    }
+    return;
+  }
   if (!hit) { hidePop(); return; }
   var pc = pieces[hit.i];
   popMsg.textContent = pc.msg || '（メッセージなし）';
@@ -1572,6 +1651,106 @@ function copyText(txt, done) {
 document.getElementById('exCopy1').addEventListener('click', function () { copyText(exPrompt.value, 'Midjourney用プロンプトをコピーしました'); });
 document.getElementById('exCopy2').addEventListener('click', function () { copyText(document.getElementById('exPieceT').value, 'ピース絵テンプレをコピーしました'); });
 
+/* ---------- 管理モード（?admin=1 で解錠。本番はサーバ側認証に置き換え） ---------- */
+var ADMIN = Q.has('admin') && qn('admin', 0) > 0;
+var adminBar = document.getElementById('adminBar');
+var adminDelete = false;
+var delModeBtn = document.getElementById('delModeBtn');
+if (ADMIN) adminBar.hidden = false;
+
+var stats = document.getElementById('stats'), stClose = document.getElementById('stClose'), stBody = document.getElementById('stBody');
+function buildStats() {
+  var total = 0, counts = {}, colorCount = {}, byDay = {};
+  for (var i = 0; i < pieces.length; i++) {
+    var pc = pieces[i]; if (!pc) continue; total++;
+    counts[pc.art] = (counts[pc.art] || 0) + 1;
+    var pi = PALETTE.indexOf(pc.color); var cn = pi >= 0 ? COLOR_NAMES[pi] : 'カスタム';
+    colorCount[cn] = (colorCount[cn] || 0) + 1;
+    var d = new Date(pc.ts); var dk = (d.getMonth() + 1) + '/' + d.getDate();
+    byDay[dk] = (byDay[dk] || 0) + 1;
+  }
+  var html = '<div class="stsum">' +
+    '<div class="stcard"><b>' + total + '</b><span>集まったピース</span></div>' +
+    '<div class="stcard"><b>' + (TARGET - total) + '</b><span>あと</span></div>' +
+    '<div class="stcard"><b>' + Math.round(total / TARGET * 100) + '%</b><span>達成率</span></div></div>';
+  var days = Object.keys(byDay).sort(function (a, b) { return new Date('2026/' + a) - new Date('2026/' + b); });
+  var maxD = 1; days.forEach(function (k) { if (byDay[k] > maxD) maxD = byDay[k]; });
+  html += '<div class="sthead">日別の投稿</div>';
+  days.slice(-7).forEach(function (k) {
+    html += '<div class="strow"><span class="stlbl">' + k + '</span><span class="stbar"><i style="width:' + Math.round(byDay[k] / maxD * 100) + '%"></i></span><span class="stn">' + byDay[k] + '</span></div>';
+  });
+  var th = Object.keys(counts).sort(function (a, b) { return counts[b] - counts[a]; });
+  var maxT = counts[th[0]] || 1;
+  html += '<div class="sthead">テーマ別</div>';
+  th.forEach(function (k) {
+    html += '<div class="strow"><span class="stlbl">' + THEME_INFO[k][0] + '</span><span class="stbar"><i style="width:' + Math.round(counts[k] / maxT * 100) + '%"></i></span><span class="stn">' + counts[k] + '</span></div>';
+  });
+  var cs = Object.keys(colorCount).sort(function (a, b) { return colorCount[b] - colorCount[a]; });
+  var maxC = colorCount[cs[0]] || 1;
+  html += '<div class="sthead">色の分布</div>';
+  cs.forEach(function (k) {
+    var idx3 = COLOR_NAMES.indexOf(k); var sw2 = idx3 >= 0 ? PALETTE[idx3] : '#B9CFE4';
+    html += '<div class="strow"><span class="stsw" style="background:' + sw2 + '"></span><span class="stlbl">' + k + '</span><span class="stbar"><i style="width:' + Math.round(colorCount[k] / maxC * 100) + '%"></i></span><span class="stn">' + colorCount[k] + '</span></div>';
+  });
+  stBody.innerHTML = html;
+}
+function openStats() { buildStats(); stats.classList.add('on'); stClose.focus(); }
+function closeStats() { stats.classList.remove('on'); }
+document.getElementById('statsBtn').addEventListener('click', openStats);
+stClose.addEventListener('click', closeStats);
+stats.addEventListener('click', function (e) { if (e.target === stats) closeStats(); });
+
+delModeBtn.addEventListener('click', function () {
+  adminDelete = !adminDelete;
+  delModeBtn.classList.toggle('danger', adminDelete);
+  delModeBtn.textContent = adminDelete ? '🗑 削除モード中（ピースをタップ）' : '🗑 削除モード';
+  toast(adminDelete ? '削除モード: 削除したいピースをタップしてください' : '削除モードを終了しました');
+  hidePop();
+});
+function recomputeMaxRing() {
+  curMaxRing = -1;
+  for (var i = 0; i < pieces.length; i++) if (pieces[i] && cellRing[i] > curMaxRing) curMaxRing = cellRing[i];
+}
+function deletePiece(idx) {
+  if (!pieces[idx]) return;
+  pieces[idx] = null; placed--; seedPtr = 0;
+  recomputeMaxRing();
+  if (revealed) { revealed = false; flipBtn.hidden = true; }
+  lastMS = msLevel();
+  shownCount = placed; renderCount(placed);
+  updateCounter(); drawBoard();
+  toast('ピースを削除しました');
+}
+function dlFile(name, text, mime) {
+  var b = new Blob([text], { type: mime });
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(b); a.download = name;
+  document.body.appendChild(a); a.click();
+  setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 500);
+}
+function stamp() { var d = new Date(); return d.getFullYear() + ('0' + (d.getMonth() + 1)).slice(-2) + ('0' + d.getDate()).slice(-2); }
+function exportRows() {
+  var rows = [];
+  for (var i = 0; i < pieces.length; i++) {
+    var pc = pieces[i]; if (!pc) continue;
+    rows.push({ index: i, ring: cellRing[i], color: pc.color, message: pc.msg, name: pc.name, theme: pc.art, postedAt: new Date(pc.ts).toISOString() });
+  }
+  return rows;
+}
+document.getElementById('expJsonBtn').addEventListener('click', function () {
+  dlFile('piece-project_' + stamp() + '.json', JSON.stringify({ exportedAt: new Date().toISOString(), total: placed, target: TARGET, pieces: exportRows() }, null, 2), 'application/json');
+  toast('JSONを書き出しました');
+});
+document.getElementById('expCsvBtn').addEventListener('click', function () {
+  var rows = exportRows();
+  var csv = 'index,ring,color,message,name,theme,postedAt\n' + rows.map(function (r) {
+    var q = function (s) { return '"' + String(s).replace(/"/g, '""') + '"'; };
+    return [r.index, r.ring, r.color, q(r.message), q(r.name), r.theme, r.postedAt].join(',');
+  }).join('\n');
+  dlFile('piece-project_' + stamp() + '.csv', '﻿' + csv, 'text/csv');
+  toast('CSVを書き出しました');
+});
+
 /* ---------- 置く場所を選ぶ（全画面・拡大できるピッカー） ---------- */
 var pick = document.getElementById('pick'), pickWrap = document.getElementById('pickWrap');
 var pickCanvas = document.getElementById('pickCanvas'), pctx = pickCanvas.getContext('2d');
@@ -1773,6 +1952,7 @@ about.addEventListener('click', function (e) { if (e.target === about) closeAbou
 document.addEventListener('keydown', function (e) {
   if (e.key !== 'Escape') return;
   if (pick.classList.contains('on')) closePick();
+  else if (stats.classList.contains('on')) closeStats();
   else if (extract.classList.contains('on')) closeExtract();
   else if (tut.classList.contains('on')) closeTut();
   else if (wiz.classList.contains('on')) closeWiz();
@@ -1828,7 +2008,7 @@ if (document.fonts && document.fonts.ready) document.fonts.ready.then(function (
 
 /* test hooks */
 window.PW = {
-  version: '6.2',
+  version: '7.0',
   place: function (c, m, n) { return placePiece(nextEmpty(), c || PALETTE[0], m || 'テスト', n || '', true); },
   assemble: assemble, reset: function () { seed(true); }, count: function () { return placed; }, target: TARGET,
   fill: function (k) {
