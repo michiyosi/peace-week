@@ -581,6 +581,7 @@
       <span class="sub2">一つひとつの想いが、未来の広島をつくっていきます — Hiroshima Peace Week 2026 · 8/1–8/6 · メルパルク</span>
     </div>
     <div class="spacer"></div>
+    <button class="iconbtn" id="soundBtn" type="button" aria-pressed="false" aria-label="効果音のオン・オフ" title="効果音">🔈</button>
     <button class="iconbtn" id="infoBtn" type="button" aria-haspopup="dialog" aria-label="Piece Projectとは？">?</button>
   </header>
 
@@ -1646,6 +1647,53 @@ function fxLoop() {
   requestAnimationFrame(fxLoop);
 }
 
+/* ---------- 効果音（Web Audio・音声ファイル不要）＋ 振動 ---------- */
+var SND_ON = false, actx2 = null;
+function initAudio() {
+  if (actx2) return;
+  try { actx2 = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { actx2 = null; }
+}
+function tone(freq, dur, type, vol, whenOff) {
+  if (!SND_ON || !actx2) return;
+  var t0 = actx2.currentTime + (whenOff || 0);
+  var o = actx2.createOscillator(), g = actx2.createGain();
+  o.type = type || 'sine'; o.frequency.setValueAtTime(freq, t0);
+  g.gain.setValueAtTime(0.0001, t0);
+  g.gain.exponentialRampToValueAtTime(vol || 0.14, t0 + 0.008);
+  g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+  o.connect(g); g.connect(actx2.destination);
+  o.start(t0); o.stop(t0 + dur + 0.02);
+}
+function vibrate(pattern) {
+  if (REDUCED()) return;
+  try { if (navigator.vibrate) navigator.vibrate(pattern); } catch (e) {}
+}
+/* 「カチッ」= 短い高め→低めの2音＋クリック感。はまった時に鳴らす */
+function sndClick() {
+  if (!SND_ON || !actx2) return;
+  tone(880, 0.05, 'triangle', 0.12, 0);
+  tone(1320, 0.04, 'sine', 0.10, 0.01);
+  tone(440, 0.06, 'sine', 0.08, 0.03);
+}
+function sndChime() { // 完了画面
+  [523, 659, 784, 1047].forEach(function (f, i) { tone(f, 0.5, 'sine', 0.10, i * 0.09); });
+}
+function sndReveal() { // お披露目
+  [392, 523, 659, 784, 1047, 1319].forEach(function (f, i) { tone(f, 0.7, 'triangle', 0.09, i * 0.12); });
+}
+var soundBtn = document.getElementById('soundBtn');
+function setSound(on) {
+  SND_ON = on;
+  soundBtn.textContent = on ? '🔊' : '🔈';
+  soundBtn.setAttribute('aria-pressed', on ? 'true' : 'false');
+  try { localStorage.setItem('pw_sound', on ? '1' : '0'); } catch (e) {}
+  if (on) { initAudio(); if (actx2 && actx2.state === 'suspended') actx2.resume(); sndClick(); }
+}
+soundBtn.addEventListener('click', function () { setSound(!SND_ON); });
+try { if (localStorage.getItem('pw_sound') === '1') { /* 復元は初回操作後に鳴らせるので状態だけ */ SND_ON = true; soundBtn.textContent = '🔊'; soundBtn.setAttribute('aria-pressed', 'true'); } } catch (e) {}
+// ブラウザ制約: 最初のユーザー操作でオーディオを解禁
+document.addEventListener('pointerdown', function once() { if (SND_ON) { initAudio(); if (actx2 && actx2.state === 'suspended') actx2.resume(); } document.removeEventListener('pointerdown', once); }, { once: true });
+
 /* ---------- placing ---------- */
 function placePiece(idx, color, msg, name, animate) {
   if (idx == null || pieces[idx]) return false;
@@ -1943,6 +1991,7 @@ wPlace.addEventListener('click', function () {
     if (landed) return; landed = true;
     placePiece(idx, flyColor, flyMsg, flyName, true);
     sbSubmit(idx, 0);
+    sndClick(); vibrate(20); // カチッ＋振動
     var hx = cx0[idx], hy = devYf(cy0[idx]);
     if (!REDUCED()) {
       halos.push({ x: hx, y: hy, r: t * 0.4, vr: t * 0.16, a: 0.95 });
@@ -1951,7 +2000,7 @@ wPlace.addEventListener('click', function () {
     }
     pickReset();
     msCheck();
-    setTimeout(function () { wizShow(2); wiz.classList.add('on'); }, REDUCED() ? 0 : 950);
+    setTimeout(function () { wizShow(2); wiz.classList.add('on'); sndChime(); vibrate([12, 40, 12]); }, REDUCED() ? 0 : 950);
   }
   if (REDUCED() || !document.body.animate) { land(); return; }
   var bcr = bc.getBoundingClientRect();
@@ -2408,6 +2457,7 @@ function finishAssemble() {
     for (var c = 0; c < 7; c++) (function (cc) { setTimeout(function () { burst(CX + (Math.random() - .5) * W * 0.6, devYf(CYf) + (Math.random() - .5) * H * 0.4, 16, 5); }, cc * 110); })(c);
     finale.classList.remove('on'); void finale.offsetWidth; finale.classList.add('on');
     clearTimeout(finaleT); finaleT = setTimeout(function () { finale.classList.remove('on'); }, 3600);
+    sndReveal(); vibrate([20, 60, 20, 60, 30]);
   }
   toast('8月6日 — 810の想いが、ひとつの未来に。');
 }
@@ -2502,7 +2552,7 @@ if (document.fonts && document.fonts.ready) document.fonts.ready.then(function (
 
 /* test hooks */
 window.PW = {
-  version: '8.4',
+  version: '8.5',
   hash: function (s) { sha256hex(String(s), function (h) { console.log('ADMIN_HASH:', h); }); return '（コンソールにハッシュを出力しました）'; },
   place: function (c, m, n) { return placePiece(nextEmpty(), c || PALETTE[0], m || 'テスト', n || '', true); },
   assemble: assemble, reset: function () { seed(true); }, count: function () { return placed; }, target: TARGET,
@@ -2527,7 +2577,8 @@ function runSelfTest() {
   (async function () {
     try {
       // --- 環境・初期化 ---
-      check('バージョン 8.3', PW.version === '8.3');
+      check('バージョン取得 (' + PW.version + ')', typeof PW.version === 'string' && PW.version.length > 0);
+      check('効果音トグル存在', !!document.getElementById('soundBtn'));
       check('盤面 810セル', TARGET === 810 && paths.length === 810);
       check('ジグソー形状生成', !!paths[0] && typeof paths[0].addPath === 'function' || !!paths[100]);
       check('パレット12色', PALETTE.length === 12 && COLOR_NAMES.length === 12);
