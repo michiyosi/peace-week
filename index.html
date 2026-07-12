@@ -379,6 +379,30 @@
   .agree.wshake2{animation:shake .3s}
   .linklike{border:0;background:none;padding:0;cursor:pointer;font-family:inherit;font-size:inherit;
     color:#2F6FB5;text-decoration:underline;font-weight:600}
+  #read{position:fixed;inset:0;z-index:33;display:none;align-items:center;justify-content:center;
+    background:rgba(31,75,115,.42);backdrop-filter:blur(6px);padding:18px}
+  #read.on{display:flex}
+  .rdsheet{width:min(560px,100%);text-align:left}
+  .rdsheet h2 b{color:#2F6FB5;font-weight:600}
+  #rdCount{font-family:var(--latin);font-size:16px;color:#2F6FB5;font-weight:500}
+  .rdlead{font-size:12px;line-height:1.85;color:var(--ink-soft);font-weight:500;margin:8px 0 14px}
+  #rdList{max-height:56vh;overflow:auto;padding-right:4px}
+  .rditem{display:flex;gap:11px;align-items:flex-start;width:100%;text-align:left;cursor:pointer;
+    background:#fff;border:1px solid var(--line);border-radius:13px;padding:11px 13px;margin-bottom:8px;
+    transition:transform .12s ease,box-shadow .15s ease}
+  .rditem:hover{transform:translateY(-1px);box-shadow:var(--shadow-s)}
+  .rdart{flex:0 0 auto;width:56px;height:34px;border-radius:8px;overflow:hidden;border:1px solid var(--line)}
+  .rdart svg{display:block;width:100%;height:100%}
+  .rdmain{flex:1 1 auto;min-width:0}
+  .rdmsg{font-size:14.5px;font-weight:600;color:var(--ink);line-height:1.5;word-break:break-word}
+  .rdmeta{display:flex;align-items:center;gap:7px;margin-top:5px;font-size:10.5px;color:var(--ink-soft);font-weight:500}
+  .rddot{width:10px;height:10px;border-radius:3px;flex:0 0 auto;box-shadow:inset 0 0 0 1px rgba(0,0,0,.1)}
+  .rdempty{text-align:center;padding:30px 10px;color:var(--ink-soft)}
+  .rdempty b{display:block;font-size:15px;color:var(--ink);margin-bottom:6px;font-weight:600}
+  .rdempty .cta{display:inline-block;width:auto;margin-top:14px;padding:11px 26px}
+  #rdClose{position:absolute;right:14px;top:14px;width:32px;height:32px;border:0;border-radius:50%;
+    cursor:pointer;background:rgba(31,75,115,.06);color:var(--ink-soft);font-size:15px;font-weight:600}
+  #rdClose:hover{background:rgba(31,75,115,.12);color:var(--ink)}
   #terms{position:fixed;inset:0;z-index:35;display:none;align-items:center;justify-content:center;
     background:rgba(31,75,115,.42);backdrop-filter:blur(6px);padding:18px}
   #terms.on{display:flex}
@@ -605,6 +629,7 @@
     </div>
     <button class="place wide" id="drawBtn" type="button">＋ 私も未来を描く</button>
     <div class="homeLinks">
+      <button class="ghost" id="readBtn" type="button">📖 みんなの想いをよむ</button>
       <button class="ghost" id="howBtn" type="button">つかいかた</button>
       <button class="ghost" id="shareBtn" type="button">リンクを共有</button>
     </div>
@@ -733,6 +758,17 @@
     <button class="cta" id="aboutCta" type="button">私も未来を描く</button>
   </div>
 </div>
+<!-- みんなの想い一覧 -->
+<div id="read" role="dialog" aria-modal="true" aria-labelledby="rdTitle">
+  <div class="sheet rdsheet">
+    <button id="rdClose" type="button" aria-label="とじる">×</button>
+    <span class="tag">Everyone's wishes</span>
+    <h2 id="rdTitle">みんなの<b>想い</b> <span id="rdCount"></span></h2>
+    <p class="rdlead">一つひとつが、2045年の広島への想いです。新しいものから順にならんでいます。</p>
+    <div id="rdList" aria-live="polite"></div>
+  </div>
+</div>
+
 <!-- 利用規約・プライバシー（ドラフト。公開前に運営で確認） -->
 <div id="terms" role="dialog" aria-modal="true" aria-labelledby="tmTitle">
   <div class="sheet tmsheet">
@@ -1196,7 +1232,10 @@ function sbPoll() {
     .then(function (rows) {
       var added = 0;
       for (var i = 0; i < rows.length; i++) { var b = placed; sbApplyRow(rows[i], true); if (placed > b) added++; }
-      if (added) { updateCounter(); animActive = true; drawBoard(); }
+      if (added) {
+        updateCounter(); animActive = true; drawBoard();
+        if (read.classList.contains('on')) buildReadList(); // 一覧を開いたまま新着を反映
+      }
     }).catch(function () {});
 }
 function sbUndo(idx, pc, msgToast) {
@@ -1715,6 +1754,65 @@ bc.addEventListener('click', function (e) {
 });
 popClose.addEventListener('click', function (e) { e.stopPropagation(); hidePop(); });
 document.addEventListener('click', function (e) { if (popOpen && !pop.contains(e.target) && e.target !== bc) hidePop(); });
+
+/* ピースを開いて表示（一覧からの遷移用。座標は盤面中心基準で算出） */
+function showPiecePop(idx) {
+  var pc = pieces[idx]; if (!pc) return;
+  popMsg.textContent = pc.msg || '（メッセージなし）';
+  popWho.textContent = (pc.name && pc.name !== '—') ? pc.name + ' さんのピース' : 'あなたたちのピース';
+  popDot.style.background = pc.color;
+  popArt.innerHTML = ART[pc.art] || ART.hikari; popArt.hidden = false;
+  popWhen.textContent = '投稿: ' + fmtTime(pc.ts);
+  var bx = boardEl.offsetLeft, by = boardEl.offsetTop;
+  var dx = cx0[idx], dy = devYf(cy0[idx]);
+  pop.classList.toggle('below', dy < 95);
+  pop.style.left = (bx + Math.max(80, Math.min(W - 80, dx))) + 'px';
+  pop.style.top = (by + dy) + 'px';
+  pop.classList.add('on'); popOpen = true;
+  // 盤面上でハイライト（光の輪）
+  if (!REDUCED()) { halos.push({ x: cx0[idx], y: devYf(cy0[idx]), r: t * 0.4, vr: t * 0.14, a: 0.9 }); animActive = true; }
+}
+
+/* ---------- みんなの想い 一覧ビュー ---------- */
+var read = document.getElementById('read'), rdList = document.getElementById('rdList'),
+    rdClose = document.getElementById('rdClose'), rdCount = document.getElementById('rdCount');
+function buildReadList() {
+  var items = [];
+  for (var i = 0; i < pieces.length; i++) if (pieces[i]) items.push({ idx: i, pc: pieces[i] });
+  items.sort(function (a, b) { return (b.pc.ts || 0) - (a.pc.ts || 0); }); // 新着順
+  rdCount.textContent = items.length ? items.length.toLocaleString('en-US') + ' / 810' : '';
+  if (!items.length) {
+    rdList.innerHTML = '<div class="rdempty"><b>まだ想いが集まっていません</b>あなたが、さいしょの一人になりませんか？<br>' +
+      '<button class="cta" id="rdFirstBtn" type="button">＋ 私も未来を描く</button></div>';
+    var fb = document.getElementById('rdFirstBtn');
+    if (fb) fb.addEventListener('click', function () { closeRead(); openWiz(); });
+    return;
+  }
+  var html = '';
+  for (var k = 0; k < items.length; k++) {
+    var pc = items[k].pc;
+    var who = (pc.name && pc.name !== '—') ? esc(pc.name) + ' さん' : 'あなたたち';
+    html += '<button class="rditem" data-idx="' + items[k].idx + '" type="button">' +
+      '<span class="rdart">' + (ART[pc.art] || ART.hikari) + '</span>' +
+      '<span class="rdmain"><span class="rdmsg">' + esc(pc.msg || '（メッセージなし）') + '</span>' +
+      '<span class="rdmeta"><span class="rddot" style="background:' + pc.color + '"></span>' + who + ' · ' + fmtTime(pc.ts) + '</span></span></button>';
+  }
+  rdList.innerHTML = html;
+  var btns = rdList.querySelectorAll('.rditem');
+  for (var b = 0; b < btns.length; b++) {
+    btns[b].addEventListener('click', function () {
+      var idx = parseInt(this.getAttribute('data-idx'), 10);
+      closeRead();
+      window.scrollTo({ top: 0, behavior: REDUCED() ? 'auto' : 'smooth' });
+      setTimeout(function () { showPiecePop(idx); }, REDUCED() ? 0 : 300);
+    });
+  }
+}
+function openRead() { hidePop(); buildReadList(); read.classList.add('on'); rdClose.focus(); rdList.scrollTop = 0; }
+function closeRead() { read.classList.remove('on'); }
+document.getElementById('readBtn').addEventListener('click', openRead);
+rdClose.addEventListener('click', closeRead);
+read.addEventListener('click', function (e) { if (e.target === read) closeRead(); });
 
 /* ---------- 色・入力（ウィザード内） ---------- */
 var chosen = PALETTE[0], chosenName = COLOR_NAMES[0];
@@ -2340,6 +2438,7 @@ about.addEventListener('click', function (e) { if (e.target === about) closeAbou
 document.addEventListener('keydown', function (e) {
   if (e.key !== 'Escape') return;
   if (terms.classList.contains('on')) closeTerms();
+  else if (read.classList.contains('on')) closeRead();
   else if (gate.classList.contains('on')) closeGate();
   else if (events.classList.contains('on')) closeEvents();
   else if (pick.classList.contains('on')) closePick();
@@ -2403,7 +2502,7 @@ if (document.fonts && document.fonts.ready) document.fonts.ready.then(function (
 
 /* test hooks */
 window.PW = {
-  version: '8.3',
+  version: '8.4',
   hash: function (s) { sha256hex(String(s), function (h) { console.log('ADMIN_HASH:', h); }); return '（コンソールにハッシュを出力しました）'; },
   place: function (c, m, n) { return placePiece(nextEmpty(), c || PALETTE[0], m || 'テスト', n || '', true); },
   assemble: assemble, reset: function () { seed(true); }, count: function () { return placed; }, target: TARGET,
