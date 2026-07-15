@@ -458,6 +458,32 @@
   #extract{position:fixed;inset:0;z-index:32;display:none;align-items:center;justify-content:center;
     background:rgba(31,75,115,.4);backdrop-filter:blur(6px);padding:18px}
   #extract.on{display:flex}
+  #bulkDel{position:fixed;inset:0;z-index:32;display:none;align-items:center;justify-content:center;
+    background:rgba(31,75,115,.4);backdrop-filter:blur(6px);padding:18px}
+  #bulkDel.on{display:flex}
+  #bulkDel .exsheet{width:min(460px,100%)}
+  .bdLead{font-size:12px;line-height:1.9;color:var(--ink-soft);font-weight:500;margin:8px 0 14px}
+  .bdLead b{color:#2E3A45;font-weight:700}
+  .bdRow{display:flex;align-items:center;gap:10px;margin:0 0 12px;flex-wrap:wrap}
+  .bdLbl{font-size:12px;font-weight:700;color:var(--ink-soft);flex:0 0 auto}
+  .bdChips{display:flex;gap:6px;flex-wrap:wrap}
+  .bdChip{border:1.5px solid rgba(120,150,180,.34);background:#fff;border-radius:999px;
+    padding:7px 13px;font-family:var(--serif);font-size:12.5px;font-weight:600;color:var(--ink-soft);cursor:pointer}
+  .bdChip:hover{border-color:#E24C4C;color:#E24C4C}
+  .bdChip.on{background:#E24C4C;border-color:#E24C4C;color:#fff}
+  .bdPreview{border-radius:12px;padding:13px;background:rgba(226,76,76,.07);
+    border:1px solid rgba(226,76,76,.2);font-size:12.5px;line-height:1.8;color:var(--ink-soft);
+    font-weight:600;text-align:center;margin:0 0 14px}
+  .bdPreview b{color:#E24C4C;font-size:17px;font-family:var(--latin)}
+  .bdGo{background:linear-gradient(135deg,#E24C4C,#C13B3B)}
+  .bdGo:disabled{opacity:.42;cursor:not-allowed}
+  .bdNote{font-size:10.5px;line-height:1.8;color:var(--ink-soft);opacity:.85;margin:10px 0 0;text-align:center}
+  .agreeMinor{display:block;margin-top:4px;font-size:10.5px;line-height:1.7;color:var(--ink-soft);opacity:.9;font-weight:600}
+  .tmTodo{display:inline-block;background:#FFF3C4;border:1.5px dashed #D9A400;border-radius:6px;
+    padding:2px 8px;color:#8A6A00;font-weight:700;margin:2px 0}
+  .tmWarn{background:rgba(226,76,76,.08);border:1px solid rgba(226,76,76,.28);border-radius:10px;
+    padding:10px 12px;font-size:11px;line-height:1.85;color:#A33;font-weight:600}
+  .tmWarn b{color:#8A2020}
   .exsheet{width:min(620px,100%)}
   .exsheet h2 b{font-family:var(--serif);color:#2F6FB5;font-weight:600}
   .exlead{font-size:12px;line-height:1.9;color:var(--ink-soft);font-weight:500;margin:8px 0 14px}
@@ -622,6 +648,7 @@
       <button class="abtn" id="statsBtn" type="button">📊 統計</button>
       <button class="abtn" id="extractBtn" type="button">🎨 抽出</button>
       <button class="abtn" id="delModeBtn" type="button">🗑 削除モード</button>
+      <button class="abtn" id="bulkDelBtn" type="button">🧹 一括削除</button>
       <button class="abtn" id="expCsvBtn" type="button">⬇ CSV</button>
       <button class="abtn" id="expJsonBtn" type="button">⬇ JSON</button>
       <button class="abtn gold" id="assembleBtn" type="button">✨ お披露目</button>
@@ -650,7 +677,7 @@
   <div class="sblock">
     <span class="snum">02 — 810 Pieces</span>
     <h3>810ピースに込めた意味</h3>
-    <p>ピースウィークの6日間（8月1日〜6日）で集めるのは、<b>810の想い</b>。8月6日、それがひとつの円になり、「2045年の広島」の絵が生まれます。</p>
+    <p>ピースウィークの6日間（8月1日〜6日）で集めるのは、<b>2045年への想い</b>。8月6日、それがひとつの円になり、「2045年の広島」の絵が生まれます。</p>
     <p>そして円はそこで終わりません。<b>毎年10ピースずつ</b>みんなで育てていき、被爆100年の2045年に、ちょうど<b>1000ピース</b>で完成します。20年かけて、未来へ受け渡していくパズルです。</p>
   </div>
   <div class="sblock">
@@ -717,7 +744,7 @@
       <div class="picknote" id="pickNote" hidden>✓ 場所を選びました — 「パズルに置く」でここに置きます</div>
       <label class="agree" id="agreeRow">
         <input type="checkbox" id="agreeChk">
-        <span>投稿内容の公開と、絵の制作・展示・広報への利用に同意します（<button type="button" class="linklike" id="termsBtn1">利用規約</button>）</span>
+        <span>投稿内容の公開と、絵の制作・展示・広報への利用に同意します（<button type="button" class="linklike" id="termsBtn1">利用規約</button>）<br><small class="agreeMinor">18歳未満の方は、保護者の方の同意を得てからチェックしてください。</small></span>
       </label>
       <button class="place wcta" id="wPlace" type="button">パズルに置く</button>
       <button class="tskip" id="wBack" type="button">← 色とメッセージをなおす</button>
@@ -728,7 +755,7 @@
         <path d="M20 33 l9 9 16 -18" fill="none" stroke="#3E8EE8" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </div>
       <h2 class="wh">あなたの未来を、<br>受け取りました。</h2>
-      <p class="wsub">あなたのピースが、光の円にはまりました。<br>810ピースそろったら、<b>8月6日、メルパルク</b>で“未来”をお披露目。</p>
+      <p class="wsub">あなたのピースが、光の円にはまりました。<br><b>8月6日、メルパルク</b>で、集まった想いがひとつの絵になります。</p>
       <div class="wnext">
         <button class="wlink" id="wShare" type="button">🤝 他の人とも未来を創る<span>このプロジェクトを共有する</span></button>
         <button class="wlink" id="wEvents" type="button">🌻 この夏、ピースメーカーになる<span>イベントを見る</span></button>
@@ -747,7 +774,7 @@
     <p>「ピース」は、平和の <b>Peace</b> と、パズルの <b>Piece</b>。<br>
     あなたの<b>好きな色</b>と<b>2045年の広島への想い</b>が、ひとつのピースになります。<br>
     平和を願うだけでなく、<b>未来を一緒に作る</b>プロジェクトです。</p>
-    <p>8月1日から、みんなのピースが<b>中心の光から円になって外へ広がっていきます</b>。810ピースがそろったら、みんなの想いをもとにした一枚の絵「2045年の広島」が、<b>8月6日のお披露目会（メルパルク）</b>で初めて公開されます。その後も円は毎年10ピースずつ育ち、被爆100年の<b>2045年に、1000ピース</b>で完成します。</p>
+    <p>8月1日から、みんなのピースが<b>中心の光から円になって外へ広がっていきます</b>。会期中に集まった想いをもとにした一枚の絵「2045年の広島」が、<b>8月6日のお披露目会（メルパルク）</b>で初めて公開されます。<b>この夏の目標は810ピース</b>。円はその後も毎年育ち、被爆100年の<b>2045年に、1000ピース</b>で完成します。<b>埋まらなかったところは、これから先の誰かの場所</b>です。</p>
     <div class="steps">
       <div><i>1</i>好きな色をえらぶ</div>
       <div><i>2</i>2045年の広島への想いを描く</div>
@@ -778,7 +805,7 @@
     <h2 id="tmTitle">利用規約・プライバシー</h2>
     <div class="tmbody">
       <h3>1. この企画について</h3>
-      <p>Piece Project（ピースウィーク）は、Hiroshima Peace Week 2026 の一環として行う参加型アート企画です。参加者の「好きな色」と「2045年の広島への想い」を810ピースのパズルとして集め、一枚の絵をつくります。</p>
+      <p>Piece Project（ピースウィーク）は、Hiroshima Peace Week 2026 の一環として行う参加型アート企画です。参加者の「好きな色」と「2045年の広島への想い」をパズルのピースとして集め（この夏の目標は810ピース）、一枚の絵をつくります。</p>
       <h3>2. 投稿の公開と利用について</h3>
       <p>投稿いただいた内容（色・メッセージ・ニックネーム・投稿日時）は、本サイト上で公開されます。また、投稿内容は次の目的で無償で利用されることに同意いただきます: ①「2045年の広島」の絵の制作素材（AIによる画像生成を含む）、②お披露目会・会場での展示、③本企画の広報（SNS・印刷物・報道対応等）。利用の際に氏名表示は行いません。</p>
       <h3>3. 書いてはいけないこと</h3>
@@ -786,14 +813,17 @@
       <h3>4. 投稿の削除</h3>
       <p>自分の投稿の削除を希望する場合は、お問い合わせ先までご連絡ください（内容と投稿日時をお知らせください）。</p>
       <h3>5. 個人情報の取り扱い</h3>
-      <p>本サイトが収集するのは、任意入力のニックネーム・投稿内容・投稿日時のみです。データはデータベースサービス（Supabase）に保存されます。法令に基づく場合を除き、第三者に提供しません。</p>
+      <p>本サイトが収集するのは、①任意入力のニックネーム、②投稿内容（色・メッセージ）、③投稿日時、④<b>投稿時のIPアドレス</b>です。IPアドレスは、いたずらや機械的な大量投稿からこの企画を守る目的（投稿の回数制限）にのみ使用し、サイト上に公開することはありません。IPアドレスは<b>本企画の終了後（2026年9月末を目安）に削除</b>します。データはデータベースサービス（Supabase）に保存されます。法令に基づく場合を除き、第三者に提供しません。</p>
       <h3>6. 未成年の方へ</h3>
-      <p>18歳未満の方は、保護者の方の了解のもとで参加してください。</p>
+      <p>18歳未満の方は、<b>保護者の方の同意を得たうえで</b>参加してください。投稿内容は、上記2のとおり、サイト上での公開・絵の制作素材（AIによる画像生成を含む）・会場での展示・広報に利用されます。保護者の方は、この点をご確認のうえ同意をお願いします。保護者の方からの削除のご依頼は、下記のお問い合わせ先で随時受け付けます。</p>
       <h3>7. 免責</h3>
       <p>システムの障害・保守等により、予告なくサービスを停止・変更する場合があります。</p>
       <h3>8. お問い合わせ</h3>
-      <p>Piece Project 運営（Hiroshima Peace Week 2026）※連絡先は準備中です。</p>
-      <p class="tmdate">2026年7月 制定（ドラフト）</p>
+      <p><span class="tmTodo">【要記入】運営主体の正式名称</span><br>
+      <span class="tmTodo">【要記入】お問い合わせ用メールアドレス</span><br>
+      Piece Project 運営（Hiroshima Peace Week 2026）</p>
+      <p class="tmWarn">⚠ 運営の方へ: この2箇所を埋めるまで、参加者の募集を開始しないでください。規約は「投稿をAI画像生成の素材・展示・広報に無償で利用する」という<b>利用許諾を参加者から得る契約</b>であり、連絡先の記載がないと、参加者が削除を求める手段を持たないまま同意させることになります。（index.html 内の「要記入」で検索）</p>
+      <p class="tmdate">2026年7月 制定（ドラフト・法務確認中）</p>
     </div>
     <button class="cta excta" id="tmOk" type="button">とじる</button>
   </div>
@@ -833,6 +863,29 @@
     <span class="tag">Dashboard</span>
     <h2 id="stTitle">投稿の<b>いま</b></h2>
     <div id="stBody"></div>
+  </div>
+</div>
+
+<!-- 緊急一括削除（運営用・荒らし対策の復旧手段） -->
+<div id="bulkDel" role="dialog" aria-modal="true" aria-labelledby="bdTitle">
+  <div class="sheet exsheet">
+    <button id="bdClose" type="button" aria-label="とじる">×</button>
+    <span class="tag">Emergency — bulk moderation</span>
+    <h2 id="bdTitle">まとめて<b>片づける</b></h2>
+    <p class="bdLead">荒らしなどで大量のピースが入った時の復旧用です。<b>時間を指定して、その間に入ったピースをまとめて非表示</b>にします。1枚ずつの削除は「🗑 削除モード」を使ってください。</p>
+    <div class="bdRow">
+      <span class="bdLbl">直近</span>
+      <div class="bdChips" id="bdChips">
+        <button class="bdChip" type="button" data-min="10">10分</button>
+        <button class="bdChip" type="button" data-min="30">30分</button>
+        <button class="bdChip" type="button" data-min="60">1時間</button>
+        <button class="bdChip" type="button" data-min="180">3時間</button>
+        <button class="bdChip" type="button" data-min="1440">24時間</button>
+      </div>
+    </div>
+    <div class="bdPreview" id="bdPreview">時間を選ぶと、消える枚数がここに出ます</div>
+    <button class="cta bdGo" id="bdGo" type="button" disabled>選んだ範囲を非表示にする</button>
+    <p class="bdNote">サーバ上で非表示になります（データ自体は残るため、Supabaseのダッシュボードから復元可能）。実行には管理パスワードが必要です。</p>
   </div>
 </div>
 
@@ -925,7 +978,7 @@
           </svg>
         </div>
         <h3>みんなの想いにふれる</h3>
-        <p>円のピースをタップすると、一人ひとりの想いが読めます。<br>810ピースそろったら、8月6日、メルパルクでお披露目。</p>
+        <p>円のピースをタップすると、一人ひとりの想いが読めます。<br>8月6日、メルパルクで、集まった想いをお披露目。</p>
       </section>
     </div>
     <div class="tdots" id="tutDots"></div>
@@ -1271,6 +1324,10 @@ function sbSubmit(idx, tries) {
         if ((tries || 0) < 3) sbSubmit(alt, (tries || 0) + 1);
         toast('その場所は先に置かれたため、近くに置きました');
       } else { updateCounter(); drawBoard(); }
+      return;
+    }
+    if (r.status === 429) { // サーバ側のレート制限（同一回線から短時間に多数）
+      sbUndo(idx, pc, '短い時間に何度も投稿はできません。少し時間をおいてから、もう一度お試しください');
       return;
     }
     if (r.status === 400) { // サーバ側のNG判定など
@@ -2232,6 +2289,90 @@ document.getElementById('statsBtn').addEventListener('click', openStats);
 stClose.addEventListener('click', closeStats);
 stats.addEventListener('click', function (e) { if (e.target === stats) closeStats(); });
 
+/* ---- 緊急一括削除（荒らし復旧用） ----
+   サーバの hide_pieces_bulk(p_pass, p_since, p_until, p_ip) を呼ぶ。
+   SQLは supabase_P0-1_rate_limit_and_bulk_hide.sql を適用しておくこと。 */
+var bulkDel = document.getElementById('bulkDel');
+var bdClose = document.getElementById('bdClose');
+var bdChips = document.getElementById('bdChips');
+var bdPreview = document.getElementById('bdPreview');
+var bdGo = document.getElementById('bdGo');
+var bdMin = 0;
+
+function bdCount(min) { // 直近min分に入ったピースの枚数を数える
+  var since = Date.now() - min * 60000, n = 0;
+  for (var i = 0; i < pieces.length; i++) {
+    var p = pieces[i];
+    if (p && p.ts && new Date(p.ts).getTime() >= since) n++;
+  }
+  return n;
+}
+function bdRefresh() {
+  if (!bdMin) {
+    bdPreview.innerHTML = '時間を選ぶと、消える枚数がここに出ます';
+    bdGo.disabled = true; return;
+  }
+  var n = bdCount(bdMin);
+  bdPreview.innerHTML = n === 0
+    ? 'この範囲に投稿はありません'
+    : '直近' + (bdMin < 60 ? bdMin + '分' : (bdMin / 60) + '時間') + 'の <b>' + n + '</b> 枚を非表示にします';
+  bdGo.disabled = (n === 0);
+}
+function openBulkDel() {
+  bdMin = 0;
+  Array.prototype.forEach.call(bdChips.children, function (c) { c.classList.remove('on'); });
+  bdRefresh();
+  bulkDel.classList.add('on'); bdClose.focus();
+}
+function closeBulkDel() { bulkDel.classList.remove('on'); }
+document.getElementById('bulkDelBtn').addEventListener('click', openBulkDel);
+bdClose.addEventListener('click', closeBulkDel);
+bulkDel.addEventListener('click', function (e) { if (e.target === bulkDel) closeBulkDel(); });
+bdChips.addEventListener('click', function (e) {
+  var b = e.target.closest('.bdChip'); if (!b) return;
+  Array.prototype.forEach.call(bdChips.children, function (c) { c.classList.remove('on'); });
+  b.classList.add('on');
+  bdMin = parseInt(b.dataset.min, 10);
+  bdRefresh();
+});
+bdGo.addEventListener('click', function () {
+  if (!bdMin) return;
+  var n = bdCount(bdMin);
+  var label = bdMin < 60 ? bdMin + '分' : (bdMin / 60) + '時間';
+  if (!window.confirm('直近' + label + 'に投稿された ' + n + ' 枚を非表示にします。\nこの操作は参加者の投稿を消します。よろしいですか？')) return;
+
+  if (!SB_ON) { // デモ/セルフテスト時はローカルのみ
+    var since = Date.now() - bdMin * 60000, done = 0;
+    for (var i = pieces.length - 1; i >= 0; i--) {
+      var p = pieces[i];
+      if (p && p.ts && new Date(p.ts).getTime() >= since) { deletePiece(i); done++; }
+    }
+    toast(done + ' 枚を非表示にしました（デモ）'); closeBulkDel(); return;
+  }
+  if (!adminPass) { toast('サーバ削除にはパスワードの再入力が必要です'); closeBulkDel(); openGate(); return; }
+
+  bdGo.disabled = true; bdGo.textContent = '処理中…';
+  var sinceIso = new Date(Date.now() - bdMin * 60000).toISOString();
+  fetch(SB_URL + '/rest/v1/rpc/hide_pieces_bulk', {
+    method: 'POST', headers: sbHeaders(),
+    body: JSON.stringify({ p_pass: adminPass, p_since: sinceIso, p_until: null, p_ip: null })
+  }).then(function (r) {
+    if (r.status === 404) { toast('サーバにhide_pieces_bulkがありません。SQLの適用がまだのようです'); return null; }
+    return r.json();
+  }).then(function (cnt) {
+    bdGo.disabled = false; bdGo.textContent = '選んだ範囲を非表示にする';
+    if (cnt === null) return;
+    if (typeof cnt !== 'number') { toast('一括削除に失敗しました（パスワードを確認してください）'); return; }
+    if (cnt === 0) { toast('0枚でした。パスワードが違う可能性があります'); return; }
+    toast(cnt + ' 枚を非表示にしました');
+    closeBulkDel();
+    sbFetchAll(); // サーバの正を取り直して盤面を再構築
+  }).catch(function () {
+    bdGo.disabled = false; bdGo.textContent = '選んだ範囲を非表示にする';
+    toast('通信エラーで一括削除できませんでした');
+  });
+});
+
 delModeBtn.addEventListener('click', function () {
   adminDelete = !adminDelete;
   delModeBtn.classList.toggle('danger', adminDelete);
@@ -2460,7 +2601,7 @@ function finishAssemble() {
     clearTimeout(finaleT); finaleT = setTimeout(function () { finale.classList.remove('on'); }, 3600);
     sndReveal(); vibrate([20, 60, 20, 60, 30]);
   }
-  toast('8月6日 — 810の想いが、ひとつの未来に。');
+  toast('8月6日 — みんなの想いが、ひとつの未来に。');
 }
 resetBtn.addEventListener('click', function () {
   hidePop(); seed(true);
@@ -2494,6 +2635,7 @@ document.addEventListener('keydown', function (e) {
   else if (events.classList.contains('on')) closeEvents();
   else if (pick.classList.contains('on')) closePick();
   else if (stats.classList.contains('on')) closeStats();
+  else if (bulkDel.classList.contains('on')) closeBulkDel();
   else if (extract.classList.contains('on')) closeExtract();
   else if (tut.classList.contains('on')) closeTut();
   else if (wiz.classList.contains('on')) closeWiz();
@@ -2553,7 +2695,7 @@ if (document.fonts && document.fonts.ready) document.fonts.ready.then(function (
 
 /* test hooks */
 window.PW = {
-  version: '8.6',
+  version: '8.7',
   hash: function (s) { sha256hex(String(s), function (h) { console.log('ADMIN_HASH:', h); }); return '（コンソールにハッシュを出力しました）'; },
   place: function (c, m, n) { return placePiece(nextEmpty(), c || PALETTE[0], m || 'テスト', n || '', true); },
   assemble: assemble, reset: function () { seed(true); }, count: function () { return placed; }, target: TARGET,
