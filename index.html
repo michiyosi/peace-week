@@ -479,11 +479,7 @@
   .cta.bdGo:disabled{opacity:.42;cursor:not-allowed;box-shadow:none}
   .bdNote{font-size:10.5px;line-height:1.8;color:var(--ink-soft);opacity:.85;margin:10px 0 0;text-align:center}
   .agreeMinor{display:block;margin-top:4px;font-size:10.5px;line-height:1.7;color:var(--ink-soft);opacity:.9;font-weight:600}
-  .tmTodo{display:inline-block;background:#FFF3C4;border:1.5px dashed #D9A400;border-radius:6px;
-    padding:2px 8px;color:#8A6A00;font-weight:700;margin:2px 0}
-  .tmWarn{background:rgba(226,76,76,.08);border:1px solid rgba(226,76,76,.28);border-radius:10px;
-    padding:10px 12px;font-size:11px;line-height:1.85;color:#A33;font-weight:600}
-  .tmWarn b{color:#8A2020}
+  .tmMail{color:#2F6FB5;font-weight:700;text-decoration:underline;word-break:break-all}
   .exsheet{width:min(620px,100%)}
   .exsheet h2 b{font-family:var(--serif);color:#2F6FB5;font-weight:600}
   .exlead{font-size:12px;line-height:1.9;color:var(--ink-soft);font-weight:500;margin:8px 0 14px}
@@ -689,7 +685,7 @@
   <div class="scta">
     <h3>あなたの一つの想いが、未来をつくる。</h3>
     <button class="place wide" id="drawBtn2" type="button">＋ 私も未来を描く</button>
-    <div class="sfoot">PIECE PROJECT — HIROSHIMA 2045 · <button type="button" class="linklike" id="termsBtn2">利用規約・プライバシー</button></div>
+    <div class="sfoot">PIECE PROJECT — HIROSHIMA 2045 · 主催: Piece Week実行委員会 · <button type="button" class="linklike" id="termsBtn2">利用規約・プライバシー</button></div>
   </div>
 </section>
 
@@ -805,7 +801,7 @@
     <h2 id="tmTitle">利用規約・プライバシー</h2>
     <div class="tmbody">
       <h3>1. この企画について</h3>
-      <p>Piece Project（ピースウィーク）は、Hiroshima Peace Week 2026 の一環として行う参加型アート企画です。参加者の「好きな色」と「2045年の広島への想い」をパズルのピースとして集め（この夏の目標は810ピース）、一枚の絵をつくります。</p>
+      <p>Piece Project（ピースウィーク）は、<b>Piece Week実行委員会</b>が Hiroshima Peace Week 2026 の一環として行う参加型アート企画です。参加者の「好きな色」と「2045年の広島への想い」をパズルのピースとして集め（この夏の目標は810ピース）、一枚の絵をつくります。本規約は、本サイトからご投稿いただく際の取り扱いを定めるものです。</p>
       <h3>2. 投稿の公開と利用について</h3>
       <p>投稿いただいた内容（色・メッセージ・ニックネーム・投稿日時）は、本サイト上で公開されます。また、投稿内容は次の目的で無償で利用されることに同意いただきます: ①「2045年の広島」の絵の制作素材（AIによる画像生成を含む）、②お披露目会・会場での展示、③本企画の広報（SNS・印刷物・報道対応等）。利用の際に氏名表示は行いません。</p>
       <h3>3. 書いてはいけないこと</h3>
@@ -819,11 +815,10 @@
       <h3>7. 免責</h3>
       <p>システムの障害・保守等により、予告なくサービスを停止・変更する場合があります。</p>
       <h3>8. お問い合わせ</h3>
-      <p><span class="tmTodo">【要記入】運営主体の正式名称</span><br>
-      <span class="tmTodo">【要記入】お問い合わせ用メールアドレス</span><br>
-      Piece Project 運営（Hiroshima Peace Week 2026）</p>
-      <p class="tmWarn">⚠ 運営の方へ: この2箇所を埋めるまで、参加者の募集を開始しないでください。規約は「投稿をAI画像生成の素材・展示・広報に無償で利用する」という<b>利用許諾を参加者から得る契約</b>であり、連絡先の記載がないと、参加者が削除を求める手段を持たないまま同意させることになります。（index.html 内の「要記入」で検索）</p>
-      <p class="tmdate">2026年7月 制定（ドラフト・法務確認中）</p>
+      <p><b>Piece Week実行委員会</b>（Piece Project 運営）<br>
+      <a class="tmMail" href="mailto:kongshifei70@gmail.com">kongshifei70@gmail.com</a></p>
+      <p>投稿の削除のご依頼、内容についてのご相談は、上記までお気軽にご連絡ください。</p>
+      <p class="tmdate">2026年7月 制定 ／ Piece Week実行委員会</p>
     </div>
     <button class="cta excta" id="tmOk" type="button">とじる</button>
   </div>
@@ -2695,7 +2690,7 @@ if (document.fonts && document.fonts.ready) document.fonts.ready.then(function (
 
 /* test hooks */
 window.PW = {
-  version: '8.7',
+  version: '8.8',
   hash: function (s) { sha256hex(String(s), function (h) { console.log('ADMIN_HASH:', h); }); return '（コンソールにハッシュを出力しました）'; },
   place: function (c, m, n) { return placePiece(nextEmpty(), c || PALETTE[0], m || 'テスト', n || '', true); },
   assemble: assemble, reset: function () { seed(true); }, count: function () { return placed; }, target: TARGET,
