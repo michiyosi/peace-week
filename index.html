@@ -355,7 +355,7 @@
 
   /* ---------- 管理モード ---------- */
   .adminBar[hidden]{display:none !important}
-  .adminBar{display:flex;align-items:center;gap:6px;flex-wrap:wrap;justify-content:center;
+  .adminBar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:center;
     background:rgba(31,75,115,.85);backdrop-filter:blur(6px);border-radius:14px;
     padding:8px 12px;margin-bottom:2px;box-shadow:0 6px 20px rgba(20,50,90,.3)}
   .abadge{font-family:var(--latin);font-style:italic;font-size:10px;letter-spacing:.24em;color:#9CC7FF;
@@ -561,10 +561,26 @@
   body.waiting #boardWrap{opacity:0}
   body.waiting.gathering #boardWrap{opacity:1}
   #boardWrap{transition:opacity 2.2s ease}
-  /* 全員配信ボタン（8/6に押す本番のボタン。他と明確に見分けがつくように） */
-  .abtn.live{background:linear-gradient(135deg,#E8434F,#B8232F);border-color:#B8232F;color:#fff;font-weight:700}
+  /* ===== 運営バーのグループ分け =====
+     11個をべた並びにすると当日どれを押すか分からない。用途ごとに囲い、
+     「8月6日に押すのはこれ」を一目で分かるようにする。 */
+  .agrp{display:flex;align-items:center;gap:6px;flex-wrap:wrap;
+    padding:7px 10px;border-radius:12px;background:rgba(255,255,255,.07);
+    border:1px solid rgba(255,255,255,.14)}
+  .alabel{font-family:var(--serif);font-size:10px;font-weight:700;letter-spacing:.08em;
+    color:rgba(255,255,255,.72);white-space:nowrap;margin-right:2px}
+  .ahint{font-size:10px;color:rgba(255,255,255,.6);font-weight:600;white-space:nowrap}
+  /* 本番のグループだけ、赤く縁取って別格にする */
+  .agrp-main{background:rgba(226,60,70,.16);border-color:rgba(255,120,130,.5)}
+  .agrp-main .alabel{color:#FFC9CD;font-size:11px}
+  .agrp-end{background:none;border-color:transparent}
+  /* 全員配信ボタン（8/6に押す唯一のボタン。他と絶対に見分けがつくように大きく） */
+  .abtn.live{background:linear-gradient(135deg,#E8434F,#B8232F);border-color:#B8232F;
+    color:#fff;font-weight:700;font-size:14px;padding:11px 18px;
+    box-shadow:0 4px 16px rgba(184,35,47,.45)}
   .abtn.live:hover{filter:brightness(1.08)}
-  .abtn.live:disabled{opacity:.5}
+  .abtn.live:disabled{opacity:.5;box-shadow:none}
+  @media (max-width:560px){ .ahint{display:none} }
   /* 全員配信のカウントダウン */
   .liveCd{position:fixed;left:50%;top:12px;transform:translateX(-50%);z-index:65;display:none;
     background:rgba(184,35,47,.94);color:#fff;border-radius:999px;padding:9px 20px;
@@ -805,19 +821,36 @@
   </div>
 
   <div id="homeBar">
+    <!-- 運営バー。用途ごとに区切る。
+         11個をべた並びにすると、当日どれを押すのか分からず、
+         「この画面だけ」と「全員に配信」を押し間違える事故が起きる。 -->
     <div class="adminBar" id="adminBar" hidden>
-      <span class="abadge">ADMIN</span>
-      <button class="abtn" id="statsBtn" type="button">📊 統計</button>
-      <button class="abtn" id="extractBtn" type="button">🎨 抽出</button>
-      <button class="abtn" id="delModeBtn" type="button">🗑 削除モード</button>
-      <button class="abtn" id="bulkDelBtn" type="button">🧹 一括削除</button>
-      <button class="abtn" id="expCsvBtn" type="button">⬇ CSV</button>
-      <button class="abtn" id="expJsonBtn" type="button">⬇ JSON</button>
-      <button class="abtn gold" id="assembleBtn" type="button">✨ お披露目（この画面だけ）</button>
-      <button class="abtn live" id="broadcastBtn" type="button">📡 お披露目を全員に配信</button>
-      <button class="abtn" id="showResetBtn" type="button">⟲ 配信を待機に戻す</button>
-      <button class="abtn" id="resetBtn" type="button">↺ リセット</button>
-      <button class="abtn" id="adminOut" type="button">× 終了</button>
+      <div class="agrp agrp-main">
+        <span class="alabel">8月6日 本番</span>
+        <button class="abtn live" id="broadcastBtn" type="button">📡 お披露目を全員に配信</button>
+        <span class="ahint">押すと8秒後、会場もスマホも同時に光ります</span>
+      </div>
+      <div class="agrp">
+        <span class="alabel">ふだん見る</span>
+        <button class="abtn" id="statsBtn" type="button">📊 統計</button>
+        <button class="abtn" id="expCsvBtn" type="button">⬇ CSV</button>
+        <button class="abtn" id="expJsonBtn" type="button">⬇ JSON</button>
+      </div>
+      <div class="agrp">
+        <span class="alabel">気になる投稿を消す</span>
+        <button class="abtn" id="delModeBtn" type="button">🗑 1枚ずつ</button>
+        <button class="abtn" id="bulkDelBtn" type="button">🧹 まとめて</button>
+      </div>
+      <div class="agrp">
+        <span class="alabel">準備・確認</span>
+        <button class="abtn" id="extractBtn" type="button">🎨 絵のもとを抽出</button>
+        <button class="abtn gold" id="assembleBtn" type="button">✨ 演出をひとりで確認</button>
+        <button class="abtn" id="showResetBtn" type="button">⟲ 配信を待機に戻す</button>
+        <button class="abtn" id="resetBtn" type="button">↺ サーバと再同期</button>
+      </div>
+      <div class="agrp agrp-end">
+        <button class="abtn" id="adminOut" type="button">× 管理モードを終了</button>
+      </div>
     </div>
     <button class="place wide" id="drawBtn" type="button">＋ 私も未来を描く</button>
     <div class="homeLinks">
@@ -3048,7 +3081,14 @@ resetBtn.addEventListener('click', function () {
   if (SB_ON) { sbFetchAll(); toast('サーバと再同期しました'); }
   else toast('はじめからにしました');
 });
-assembleBtn.addEventListener('click', assemble);
+/* 「演出をひとりで確認」= この画面の中だけで再生する。配信はしない。
+   当日これを押してしまうと、会場だけ光って参加者のスマホには何も起きない。
+   赤い配信ボタンと取り違えないよう、押した時点でその旨を明示する。 */
+assembleBtn.addEventListener('click', function () {
+  if (SB_ON && !window.confirm('この画面の中だけで演出を再生します。\n\n※参加者のスマホや、他の画面には配信されません。\n　本番は赤い「📡 お披露目を全員に配信」を押してください。\n\n確認用として再生しますか？')) return;
+  toast('この画面だけで再生します（配信していません）');
+  assemble();
+});
 
 /* ---------- toast ---------- */
 var toastT, toastEl = document.getElementById('toast');
@@ -3145,7 +3185,7 @@ if (document.fonts && document.fonts.ready) document.fonts.ready.then(function (
 
 /* test hooks */
 window.PW = {
-  version: '9.7',
+  version: '9.8',
   hash: function (s) { sha256hex(String(s), function (h) { console.log('ADMIN_HASH:', h); }); return '（コンソールにハッシュを出力しました）'; },
   place: function (c, m, n) { return placePiece(nextEmpty(), c || PALETTE[0], m || 'テスト', n || '', true); },
   assemble: assemble, reset: function () { seed(true); }, count: function () { return placed; }, target: TARGET,
