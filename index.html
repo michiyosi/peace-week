@@ -3823,6 +3823,13 @@ if (STAGE) (function () {
     };
     probe.src = 'art.jpg?v=' + Date.now();
   })();
+  /* リハ・緊急用: 実行中に作品画像を差し込む。
+     例: PW_setFinale('og.png')。art.jpg のアップロードを忘れた場合の当日の保険にもなる */
+  window.PW_setFinale = function (src) {
+    document.getElementById('finaleImg').src = src;
+    finaleReady = true;
+    return 'finale image set: ' + src;
+  };
   document.getElementById('faRead').addEventListener('click', function () {
     finaleArt.classList.remove('show');
     setTimeout(function () { finaleArt.classList.remove('on'); }, 900);
