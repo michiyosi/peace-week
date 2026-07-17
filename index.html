@@ -547,11 +547,20 @@
   .lwInner{transition:opacity 1.4s ease, transform 1.4s ease}
   #liveWait.gathering .lwInner{opacity:0;transform:translateY(-18px);pointer-events:none}
   #liveWait.gathering::before{opacity:0;transition:opacity 2s ease}
+  /* 集まる間、待機画面の空の背景だけをゆっくり透かす。
+     ピース（canvas）は残したまま背景が引くので、漂っていた粒がそのまま
+     盤面の上へ吸い込まれていくように見える。 */
+  #liveWait{transition:background-color 2.6s ease}
+  #liveWait.gathering{background:transparent}
   /* 背景は、集まりきる頃に透けて盤面が現れる */
   #liveWait.handing{transition:opacity 1.2s ease;opacity:0;pointer-events:none}
-  /* 盤面は既定で伏せておき、集まる演出の後半でそっと現れる */
+  /* 盤面は既定で伏せておき、集まる演出が始まったらそっと現れる。
+     ※ body.waiting を外して盤面を出す作りにすると、待機画面(#liveWait)の表示条件も
+       同じ body.waiting なのでキャンバスごと消え、ピースが見えないまま集まってしまう。
+       「待機画面を出す」と「盤面を伏せる」は別の条件で持つ。 */
   body.waiting #boardWrap{opacity:0}
-  #boardWrap{transition:opacity 1.6s ease}
+  body.waiting.gathering #boardWrap{opacity:1}
+  #boardWrap{transition:opacity 2.2s ease}
   /* 全員配信ボタン（8/6に押す本番のボタン。他と明確に見分けがつくように） */
   .abtn.live{background:linear-gradient(135deg,#E8434F,#B8232F);border-color:#B8232F;color:#fff;font-weight:700}
   .abtn.live:hover{filter:brightness(1.08)}
@@ -3131,7 +3140,7 @@ if (document.fonts && document.fonts.ready) document.fonts.ready.then(function (
 
 /* test hooks */
 window.PW = {
-  version: '9.6',
+  version: '9.6.1',
   hash: function (s) { sha256hex(String(s), function (h) { console.log('ADMIN_HASH:', h); }); return '（コンソールにハッシュを出力しました）'; },
   place: function (c, m, n) { return placePiece(nextEmpty(), c || PALETTE[0], m || 'テスト', n || '', true); },
   assemble: assemble, reset: function () { seed(true); }, count: function () { return placed; }, target: TARGET,
@@ -3530,8 +3539,8 @@ if (STAGE) (function () {
       return;
     }
     if (raf) cancelAnimationFrame(raf);
-    liveWait.classList.add('gathering');          // ③ 文字が引く
-    document.body.classList.remove('waiting');    // 盤面がゆっくり現れはじめる
+    liveWait.classList.add('gathering');          // ③ 文字が引く（待機画面は出したまま）
+    document.body.classList.add('gathering');     // 盤面が後ろでゆっくり現れはじめる
     setTimeout(function () { gather(handOff); }, 900);
   };
 
