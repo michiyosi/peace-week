@@ -484,8 +484,18 @@
   /* ===== 8/6 オンライン同時公開ページの待機画面 ===== */
   #liveWait{position:fixed;inset:0;z-index:40;display:none;overflow-y:auto;
     background:linear-gradient(180deg,#2E6FA8 0%,#4A93C8 38%,#8FC4E4 72%,#CDE6F5 100%)}
-  body.live #liveWait{display:block}
-  body.live{overflow:hidden}
+  /* 待機画面は「会場の投影」でも「オンライン」でも出す。
+     ゆきな・そらが話している間、大画面はこの「ピースが漂う世界」でありたい（資料①）。 */
+  body.waiting #liveWait{display:block}
+  body.waiting{overflow:hidden}
+  /* 会場の投影では、案内カード・カウントダウン・規約は出さない（遠くから読めないし邪魔）。
+     漂うピースと見出しだけの、静かな画面にする。 */
+  body.waiting:not(.livemode) .lwCards,
+  body.waiting:not(.livemode) .lwCd,
+  body.waiting:not(.livemode) .lwFoot{display:none}
+  body.waiting:not(.livemode) .lwInner{padding-top:26vh}
+  body.waiting:not(.livemode) .lwTitle{font-size:clamp(30px,5.4vw,58px)}
+  body.waiting:not(.livemode) .lwLead{font-size:clamp(13px,1.5vw,19px)}
   /* ※盤面(#boardWrap)は隠さない。隠すとサイズが0になり、切り替え時に描画が崩れる。
      待機画面が不透明な背景で全面を覆うので、見た目には出てこない。 */
   #driftCanvas{position:fixed;inset:0;width:100%;height:100%;pointer-events:none}
@@ -530,9 +540,18 @@
   .lwFoot{margin:6px 0 0;font-size:11px;line-height:1.9;color:#EAF4FC;font-weight:600;
     text-shadow:0 2px 10px rgba(10,45,85,.5)}
   .lwFoot .linklike{color:#fff;text-decoration:underline}
-  /* 配信が来たら待機画面をやわらかく消す */
-  #liveWait.fading{animation:lwOut 1.1s ease forwards}
-  @keyframes lwOut{to{opacity:0;transform:scale(1.04);visibility:hidden}}
+  /* ===== 配信を受けてからの流れ（資料②〜⑤） =====
+     ③ 文字が静かに引く → ピースが中央へ集まりはじめる
+     ④ 円になった瞬間、中心から光が広がる（既存の演出へ引き渡す）
+     文字とピースを同時に動かすと画面が散らかるので、文字を先に消して視線を中央へ集める。 */
+  .lwInner{transition:opacity 1.4s ease, transform 1.4s ease}
+  #liveWait.gathering .lwInner{opacity:0;transform:translateY(-18px);pointer-events:none}
+  #liveWait.gathering::before{opacity:0;transition:opacity 2s ease}
+  /* 背景は、集まりきる頃に透けて盤面が現れる */
+  #liveWait.handing{transition:opacity 1.2s ease;opacity:0;pointer-events:none}
+  /* 盤面は既定で伏せておき、集まる演出の後半でそっと現れる */
+  body.waiting #boardWrap{opacity:0}
+  #boardWrap{transition:opacity 1.6s ease}
   /* 全員配信ボタン（8/6に押す本番のボタン。他と明確に見分けがつくように） */
   .abtn.live{background:linear-gradient(135deg,#E8434F,#B8232F);border-color:#B8232F;color:#fff;font-weight:700}
   .abtn.live:hover{filter:brightness(1.08)}
@@ -1547,6 +1566,11 @@ var showArmed = false;      // 発火予約済みか（二重予約の防止）
 var clockOffset = 0;        // localNow + clockOffset ≒ serverNow
 var showTimer = null;
 
+/* お披露目の起点。既定は「いきなり組み上げ」。
+   待機画面（ピースが漂う画面）が出ている場合は、
+   LIVE/STAGE 側がこれを差し替えて「集まる演出 → 組み上げ」に繋ぐ。 */
+var startShow = function () { assemble(); };
+
 function serverNow() { return Date.now() + clockOffset; }
 
 function showPoll() {
@@ -1591,7 +1615,7 @@ function showPoll() {
         if (delay <= 0) {
           showArmed = true;
           if (showTimer) { clearTimeout(showTimer); showTimer = null; }
-          assemble();
+          startShow();
           return;
         }
         // まだ未来 → その瞬間ちょうどに発火するよう予約（前面なら誤差10ms台）
@@ -1599,7 +1623,7 @@ function showPoll() {
           showArmed = true;
           try { if (typeof showCountdown === 'function' && !STAGE) showCountdown(at); } catch (e) {}
           showTimer = setTimeout(function () {
-            if (!revealed && !assembling) assemble();
+            if (!revealed && !assembling) startShow();
           }, delay);
         }
       }
@@ -3107,7 +3131,7 @@ if (document.fonts && document.fonts.ready) document.fonts.ready.then(function (
 
 /* test hooks */
 window.PW = {
-  version: '9.5.2',
+  version: '9.6',
   hash: function (s) { sha256hex(String(s), function (h) { console.log('ADMIN_HASH:', h); }); return '（コンソールにハッシュを出力しました）'; },
   place: function (c, m, n) { return placePiece(nextEmpty(), c || PALETTE[0], m || 'テスト', n || '', true); },
   assemble: assemble, reset: function () { seed(true); }, count: function () { return placed; }, target: TARGET,
@@ -3315,8 +3339,10 @@ if (Q.has('selftest') && qn('selftest', 0) > 0) {
    お披露目まで: ピースが漂う待機画面＋開催案内＋カウントダウン
    配信を受信: 待機画面がやわらかく消え、そのまま演出へ
    ============================================================ */
-if (LIVE) (function () {
-  document.body.classList.add('live');
+if (STAGE) (function () {
+  /* 待機画面＋集まる演出。会場の投影(?stage=1)とオンライン(?live=1)の両方で動く。
+     すでにお披露目が終わっている場合（遅れて開いた人）は、待機画面を出さずに完成絵へ。 */
+  document.body.classList.add('waiting');
   try { closeTut(); } catch (e) {}
 
   var liveWait = document.getElementById('liveWait');
@@ -3405,47 +3431,121 @@ if (LIVE) (function () {
   if (REDUCED()) drawDrift(0);            // 動きを減らす設定では静止画1枚
   else raf = requestAnimationFrame(loop);
 
-  /* ---- カウントダウン ---- */
-  var lwCdVal = document.getElementById('lwCdVal');
-  function tick() {
-    var left = SHOW_AT - Date.now();
-    if (left <= 0) { lwCdVal.innerHTML = '<b>まもなく</b>'; return; }
-    var d = Math.floor(left / 86400000);
-    var h = Math.floor(left / 3600000) % 24;
-    var m = Math.floor(left / 60000) % 60;
-    var s = Math.floor(left / 1000) % 60;
-    lwCdVal.innerHTML = (d > 0 ? '<b>' + d + '</b>日 ' : '') + '<b>' + h + '</b>時間 <b>' + m + '</b>分 <b>' + s + '</b>秒';
+  /* ---- カウントダウン・音の準備・規約リンク（オンラインの視聴者向けのみ） ---- */
+  if (LIVE) {
+    var lwCdVal = document.getElementById('lwCdVal');
+    (function tick() {
+      var left = SHOW_AT - Date.now();
+      if (left <= 0) { lwCdVal.innerHTML = '<b>まもなく</b>'; }
+      else {
+        var d = Math.floor(left / 86400000);
+        var h = Math.floor(left / 3600000) % 24;
+        var m = Math.floor(left / 60000) % 60;
+        var s = Math.floor(left / 1000) % 60;
+        lwCdVal.innerHTML = (d > 0 ? '<b>' + d + '</b>日 ' : '') + '<b>' + h + '</b>時間 <b>' + m + '</b>分 <b>' + s + '</b>秒';
+      }
+      setTimeout(tick, 1000);
+    })();
+
+    /* ブラウザは、ユーザーが一度も触っていないページで音を鳴らせない。
+       当日いきなり音を出すのは技術的に不可能なので、先に押してもらう。 */
+    var lwSound = document.getElementById('lwSound');
+    lwSound.addEventListener('click', function () {
+      setSound(true);
+      try { sndClick(); } catch (e) {}
+      lwSound.classList.add('on');
+      lwSound.textContent = '🔊 音の準備ができました';
+      document.getElementById('lwSoundNote').textContent = '当日は、このまま音つきでご覧いただけます。';
+    });
+    document.getElementById('lwTerms').addEventListener('click', openTerms);
   }
-  tick(); setInterval(tick, 1000);
 
-  /* ---- 音の準備（ブラウザは無操作のページで音を鳴らせない） ---- */
-  var lwSound = document.getElementById('lwSound');
-  lwSound.addEventListener('click', function () {
-    setSound(true);
-    try { sndClick(); } catch (e) {}
-    lwSound.classList.add('on');
-    lwSound.textContent = '🔊 音の準備ができました';
-    document.getElementById('lwSoundNote').textContent = '当日は、このまま音つきでご覧いただけます。';
-  });
-  document.getElementById('lwTerms').addEventListener('click', openTerms);
-
-  /* ---- 配信を受けたら待機画面を消して演出へ ---- */
+  /* ============================================================
+     資料③〜④: 漂っていたピースが中央へ集まり、ひとつの円になる
+     ------------------------------------------------------------
+     ここが演出の要。フェードで入れ替えると「別の画面に切り替わった」に見え、
+     「みんなのピースが集まってひとつになった」という企画の意味が伝わらない。
+     漂っていたその粒が、そのまま中心へ吸い寄せられて円になる必要がある。
+     ============================================================ */
   var handed = false;
-  setInterval(function () {
-    if (handed) return;
-    if (revealed || assembling || SHOW_PHASE === 'armed' || SHOW_PHASE === 'revealed') {
-      handed = true;
-      if (raf) cancelAnimationFrame(raf);
-      liveWait.classList.add('fading');
-      setTimeout(function () {
-        // body.stage は起動時から付いている（LIVEはSTAGEに含まれる）。
-        // 待機画面を外すだけで、その下の投影と同じ画面が現れる。
-        document.body.classList.remove('live');
-        liveWait.style.display = 'none';
-        try { resize(); drawBoard(); } catch (e) {}
-      }, REDUCED() ? 0 : 1000);
+
+  function gather(onDone) {
+    var DUR = 3400;
+    var cx = W / 2, cy = H / 2;
+    for (var i = 0; i < drifts.length; i++) {
+      var d = drifts[i];
+      d.sx = d.x; d.sy = d.y; d.sa = d.a;
+      d.dly = Math.random() * 900;              // 少しずつ動き出す（一斉だと機械的）
+      d.spin = (Math.random() - 0.5) * 0.05;
     }
-  }, 300);
+    var t0 = performance.now();
+    (function step(now) {
+      var t = now - t0;
+      ctx.clearRect(0, 0, W, H);
+      var allDone = true;
+      for (var i = 0; i < drifts.length; i++) {
+        var d = drifts[i];
+        var f = Math.min(Math.max((t - d.dly) / DUR, 0), 1);
+        if (f < 1) allDone = false;
+        var e = 1 - Math.pow(1 - f, 3);          // 最初ゆっくり、中心へ吸い込まれる
+        var x = d.sx + (cx - d.sx) * e;
+        var y = d.sy + (cy - d.sy) * e;
+        var sc = 1 - e * 0.72;                    // 近づくほど小さく
+        var a = d.sa * (1 - Math.pow(f, 1.8));    // 中心で溶けるように消える
+        if (a <= 0.01) continue;
+        ctx.save();
+        ctx.translate(x, y);
+        ctx.rotate(d.rot + d.spin * t * 0.02);
+        ctx.scale(sc, sc);
+        ctx.globalAlpha = a;
+        ctx.fillStyle = d.color; ctx.fill(d.path);
+        ctx.lineWidth = 2; ctx.strokeStyle = 'rgba(255,255,255,.9)'; ctx.stroke(d.path);
+        ctx.restore();
+      }
+      if (!allDone) requestAnimationFrame(step);
+      else onDone();
+    })(t0);
+  }
+
+  function handOff() {
+    liveWait.classList.add('handing');
+    setTimeout(function () {
+      document.body.classList.remove('waiting');
+      liveWait.style.display = 'none';
+      try { resize(); drawBoard(); } catch (e) {}
+      assemble();                                 // ④⑤ 光が広がる→完成絵（既存の演出）
+    }, 700);
+  }
+
+  /* startShow を差し替える。配信の発火時刻ちょうどに、ここから始まる。 */
+  startShow = function () {
+    if (handed) return;
+    handed = true;
+    if (REDUCED()) {                              // 動きを減らす設定では演出を省く
+      if (raf) cancelAnimationFrame(raf);
+      document.body.classList.remove('waiting');
+      liveWait.style.display = 'none';
+      try { resize(); drawBoard(); } catch (e) {}
+      assemble();
+      return;
+    }
+    if (raf) cancelAnimationFrame(raf);
+    liveWait.classList.add('gathering');          // ③ 文字が引く
+    document.body.classList.remove('waiting');    // 盤面がゆっくり現れはじめる
+    setTimeout(function () { gather(handOff); }, 900);
+  };
+
+  /* すでに終わっている（遅れて開いた人）→ 待機画面を出さずに完成絵へ */
+  var lateCheck = setInterval(function () {
+    if (handed) { clearInterval(lateCheck); return; }
+    if (revealed || SHOW_PHASE === 'revealed') {
+      handed = true; clearInterval(lateCheck);
+      if (raf) cancelAnimationFrame(raf);
+      document.body.classList.remove('waiting');
+      liveWait.style.display = 'none';
+      try { resize(); drawBoard(); } catch (e) {}
+    }
+  }, 400);
 })();
 
 /* ============================================================
@@ -3489,7 +3589,10 @@ if (STAGE) (function () {
   }
   window.addEventListener('mousemove', poke); poke();
 
-  function go() { if (OPERATOR && !assembling && !revealed) assemble(); }
+  /* 運営の「お披露目」も startShow を通す。
+     直接 assemble() を呼ぶと、リハで①（ピースが漂う）→③（集まる）が飛ばされ、
+     当日と違う流れを練習することになる。リハは本番と同じ道を通らなければ意味がない。 */
+  function go() { if (OPERATOR && !assembling && !revealed) startShow(); }
   function full() {
     if (document.fullscreenElement) document.exitFullscreen();
     else document.documentElement.requestFullscreen && document.documentElement.requestFullscreen();
@@ -3497,7 +3600,8 @@ if (STAGE) (function () {
   if (OPERATOR) {
     document.getElementById('sgGo').addEventListener('click', go);
     document.getElementById('sgFlip').addEventListener('click', function () { if (!flipBtn.hidden) flipBtn.click(); });
-    document.getElementById('sgReset').addEventListener('click', function () { seed(true); hud(); });
+    // ①（ピースが漂う）から通しでやり直す。盤面のリセットだけでは待機画面が戻らないため。
+    document.getElementById('sgReset').addEventListener('click', function () { location.reload(); });
     document.getElementById('sgFull').addEventListener('click', full);
     document.getElementById('sgDiag').addEventListener('click', function () { buildDiag(); diag.classList.add('on'); });
     document.getElementById('diagClose').addEventListener('click', function () { diag.classList.remove('on'); });
@@ -3511,7 +3615,7 @@ if (STAGE) (function () {
     if (!OPERATOR) return;
     if (e.key === ' ') { e.preventDefault(); go(); }
     else if (k === 'f') { if (!flipBtn.hidden) flipBtn.click(); }
-    else if (k === 'r') { seed(true); hud(); }
+    else if (k === 'r') { location.reload(); }
     else if (k === 'd') { buildDiag(); diag.classList.toggle('on'); }
   });
 
