@@ -496,6 +496,19 @@
   body.stage #boardWrap{margin:0;padding:0;height:100vh;display:flex;align-items:center;justify-content:center}
   body.stage #board{width:min(96vw,96vh);height:min(96vw,96vh);max-width:none}
   body.stage #pop{display:none !important}
+  /* 投影中に参加用モーダルが絶対に映り込まないようにする安全弁
+     （診断オーバーレイ #diag は除く。運営がDキーで意図的に開くもの） */
+  body.stage #tut,
+  body.stage #wiz,
+  body.stage #about,
+  body.stage #read,
+  body.stage #terms,
+  body.stage #events,
+  body.stage #gate,
+  body.stage #stats,
+  body.stage #bulkDel,
+  body.stage #extract,
+  body.stage #pick{display:none !important}
   /* 大画面の進捗表示（画面下・遠くから読める） */
   .stageHud{position:fixed;left:0;right:0;bottom:0;z-index:20;display:none;
     padding:2.2vh 3vw;text-align:center;pointer-events:none;
@@ -2787,7 +2800,8 @@ function boot() {
     sbFetchAll();
     setInterval(sbPoll, 12000); // 12秒ごとに、他の人のピースがポンと増える
   }
-  if (!(Q.has('tut') && qn('tut', 1) === 0)) setTimeout(openTut, 600); // 開いた直後に「つかいかた」窓
+  // 開いた直後に「つかいかた」窓（投影用のステージモードでは絶対に出さない）
+  if (!STAGE && !(Q.has('tut') && qn('tut', 1) === 0)) setTimeout(openTut, 600);
 }
 boot();
 if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { resize(); });
