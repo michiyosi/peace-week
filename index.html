@@ -930,7 +930,7 @@
     <button id="gateClose" type="button" aria-label="とじる">×</button>
     <span class="tag">Staff only</span>
     <h2>管理モード</h2>
-    <p class="exlead">運営用の画面です。パスワードを入力してください。</p>
+    <p class="exlead" id="gateLead">運営用の画面です。パスワードを入力してください。</p>
     <div class="field gfield">
       <input id="gatePw" type="password" autocomplete="off" placeholder="パスワード" aria-label="管理パスワード">
     </div>
@@ -2030,15 +2030,17 @@ bc.addEventListener('click', function (e) {
       var pcD = pieces[hit.i];
       if (window.confirm('このピースを削除しますか？\n「' + pcD.msg + '」' + (pcD.name ? ' — ' + pcD.name : ''))) {
         if (SB_ON && pcD.sbId) {
-          if (!adminPass) { toast('サーバ削除にはパスワードの再入力が必要です'); openGate(); return; }
-          var hitIdx = hit.i;
-          fetch(SB_URL + '/rest/v1/rpc/hide_piece', { method: 'POST', headers: sbHeaders(), body: JSON.stringify({ p_id: pcD.sbId, p_pass: adminPass }) })
-            .then(function (r) { return r.json(); })
-            .then(function (ok) {
-              if (ok === true) deletePiece(hitIdx);
-              else { toast('サーバ側の削除に失敗しました（パスワード不一致）'); }
-            })
-            .catch(function () { toast('通信エラーで削除できませんでした'); });
+          var hitIdx = hit.i, sbId = pcD.sbId;
+          // 鍵が要る。無ければ入力を求めて、確認は出し直さずそのまま削除へ
+          needPass(function () {
+            fetch(SB_URL + '/rest/v1/rpc/hide_piece', { method: 'POST', headers: sbHeaders(), body: JSON.stringify({ p_id: sbId, p_pass: adminPass }) })
+              .then(function (r) { return r.json(); })
+              .then(function (ok) {
+                if (ok === true) deletePiece(hitIdx);
+                else { toast('サーバ側の削除に失敗しました（パスワード不一致）'); }
+              })
+              .catch(function () { toast('通信エラーで削除できませんでした'); });
+          });
         } else deletePiece(hit.i);
       }
     }
@@ -2413,15 +2415,42 @@ function disableAdmin() {
   if (adminDelete) { adminDelete = false; delModeBtn.classList.remove('danger'); delModeBtn.textContent = '🗑 削除モード'; }
   try { sessionStorage.removeItem('pw_admin'); } catch (e) {}
 }
-function openGate() { gate.classList.add('on'); gatePw.value = ''; setTimeout(function () { gatePw.focus(); }, 60); }
-function closeGate() { gate.classList.remove('on'); }
+/* 解錠後に実行したい処理を覚えておく箱。
+   パスワードは sessionStorage に保存しない（保存すべきではない）ので、
+   リロード後は ADMINバーが出ていても adminPass は空になる。
+   その状態でサーバ操作を押すと「パスワードの再入力が必要です」で止まり、
+   運営からは「押しても何も起きない」ように見えていた。
+   → 鍵が要る操作は needPass() を通し、入力後にそのまま続きを実行する。 */
+var gatePending = null;
+
+function openGate(pending) {
+  gatePending = pending || null;
+  gate.classList.add('on'); gatePw.value = '';
+  var lead = document.getElementById('gateLead');
+  if (lead) lead.textContent = gatePending
+    ? 'この操作にはパスワードが必要です。入力すると、そのまま続きを実行します。'
+    : '運営用の画面です。パスワードを入力してください。';
+  setTimeout(function () { gatePw.focus(); }, 60);
+}
+function closeGate() { gate.classList.remove('on'); gatePending = null; }
+
+/* 鍵が要る操作の共通入口。パスワードが手元にあればそのまま実行、
+   無ければ入力を求めてから実行する。運営は「なぜまた聞かれるのか」と迷わない。 */
+function needPass(fn) {
+  if (adminPass) { fn(); return; }
+  openGate(fn);
+}
+
 function tryUnlock() {
   var v = gatePw.value;
   if (!v) { gatePw.focus(); return; }
   sha256hex(v, function (h) {
     if (h && h === ADMIN_HASH) {
       adminPass = v;
-      closeGate(); enableAdmin(); toast('管理モードを解錠しました');
+      var pending = gatePending;
+      closeGate(); enableAdmin();
+      if (pending) { toast('確認しました'); setTimeout(pending, 60); }
+      else toast('管理モードを解錠しました');
     } else {
       var sh = gate.querySelector('.gsheet');
       sh.classList.remove('gshake'); void sh.offsetWidth; sh.classList.add('gshake');
@@ -2549,8 +2578,12 @@ bdGo.addEventListener('click', function () {
     }
     toast(done + ' 枚を非表示にしました（デモ）'); closeBulkDel(); return;
   }
-  if (!adminPass) { toast('サーバ削除にはパスワードの再入力が必要です'); closeBulkDel(); openGate(); return; }
+  // 鍵が要る。無ければ入力を求めて、確認ダイアログは出し直さずそのまま実行へ
+  if (!adminPass) { needPass(bdRun); return; }
+  bdRun();
+});
 
+function bdRun() {
   bdGo.disabled = true; bdGo.textContent = '処理中…';
   var sinceIso = new Date(Date.now() - bdMin * 60000).toISOString();
   fetch(SB_URL + '/rest/v1/rpc/hide_pieces_bulk', {
@@ -2571,7 +2604,7 @@ bdGo.addEventListener('click', function () {
     bdGo.disabled = false; bdGo.textContent = '選んだ範囲を非表示にする';
     toast('通信エラーで一括削除できませんでした');
   });
-});
+}
 
 /* ---- 8/6本番: お披露目を全員に配信 ----
    これを押すと、会場の投影・広場のスマホ・家のPCが、8秒後に同時に光る。
@@ -2593,7 +2626,7 @@ function showCountdown(atMs) {
 
 function setShowState(phase, delaySec, onDone) {
   if (!SB_ON) { toast('デモ／リハでは配信しません'); return; }
-  if (!adminPass) { toast('配信にはパスワードの再入力が必要です'); openGate(); return; }
+  if (!adminPass) { needPass(function () { setShowState(phase, delaySec, onDone); }); return; }
   fetch(SB_URL + '/rest/v1/rpc/set_show_state', {
     method: 'POST', headers: sbHeaders(),
     body: JSON.stringify({ p_pass: adminPass, p_phase: phase, p_delay_seconds: delaySec })
@@ -2970,7 +3003,7 @@ if (document.fonts && document.fonts.ready) document.fonts.ready.then(function (
 
 /* test hooks */
 window.PW = {
-  version: '9.3.1',
+  version: '9.4',
   hash: function (s) { sha256hex(String(s), function (h) { console.log('ADMIN_HASH:', h); }); return '（コンソールにハッシュを出力しました）'; },
   place: function (c, m, n) { return placePiece(nextEmpty(), c || PALETTE[0], m || 'テスト', n || '', true); },
   assemble: assemble, reset: function () { seed(true); }, count: function () { return placed; }, target: TARGET,
@@ -3041,6 +3074,23 @@ function runSelfTest() {
 
       // 規約モーダル
       openTerms(); check('利用規約モーダルが開く', terms.classList.contains('on')); closeTerms();
+
+      // --- 回帰: リロード後にパスワードが消えても、鍵の要る操作が続行できるか ---
+      // sessionStorageには「解錠済み」の印しか保存しない（パスワードは保存しない）ため、
+      // リロード後は ADMINバーが出ていても adminPass が空になる。
+      // 以前はここで「パスワードの再入力が必要です」と言うだけで止まり、
+      // 運営からは「押しても何も起きない」ように見えていた（8/6の本番で踏むところだった）。
+      var savedPass = adminPass;
+      adminPass = '';
+      var ran = false;
+      needPass(function () { ran = true; });
+      check('鍵が無いと解錠画面が出る', gate.classList.contains('on') && !ran);
+      check('解錠画面に用件が表示される', (document.getElementById('gateLead').textContent || '').indexOf('続き') >= 0);
+      closeGate();
+      adminPass = 'dummy';
+      needPass(function () { ran = true; });
+      check('鍵があればそのまま実行される', ran === true);
+      adminPass = savedPass;
 
       // --- 配置（飛翔演出→完了） ---
       agreeChk.checked = true;
