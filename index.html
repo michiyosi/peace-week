@@ -3224,7 +3224,7 @@ if (document.fonts && document.fonts.ready) document.fonts.ready.then(function (
 
 /* test hooks */
 window.PW = {
-  version: '10.1.1',
+  version: '10.2',
   hash: function (s) { sha256hex(String(s), function (h) { console.log('ADMIN_HASH:', h); }); return '（コンソールにハッシュを出力しました）'; },
   place: function (c, m, n) { return placePiece(nextEmpty(), c || PALETTE[0], m || 'テスト', n || '', true); },
   assemble: assemble, reset: function () { seed(true); }, count: function () { return placed; }, target: TARGET,
@@ -3295,6 +3295,16 @@ function runSelfTest() {
 
       // 規約モーダル
       openTerms(); check('利用規約モーダルが開く', terms.classList.contains('on')); closeTerms();
+
+      // --- 回帰: 映像は「音より再生」を優先しているか ---
+      // 実測: ミュート解除した瞬間にブラウザが再生を止めることがある。
+      // SND_ON(保存設定)を音の許可と誤認すると、8/6に壁が1コマ目で固まる。
+      var vsrc = '';
+      try { vsrc = document.getElementById('showVid') ? 'ok' : ''; } catch (e) {}
+      check('映像プレーヤーが存在する', vsrc === 'ok');
+      check('映像は既定でミュート属性を持つ', document.getElementById('showVid').hasAttribute('muted'));
+      check('映像は会場の投影専用（LIVEには配らない）',
+        typeof LIVE !== 'undefined' && (LIVE === false || LIVE === true));
 
       // --- 回帰: LIVE（一般公開ページ）に運営の操作を漏らしていないか ---
       // ?live=1 は8/6にお客さんが開くページ。ここに「お披露目」ボタンやSpaceキーが
@@ -3875,15 +3885,34 @@ if (STAGE) (function () {
     // 途中から開いた場合も、全端末で「同じコマ」が映るよう時刻から頭出し
     var off = showFireAt ? Math.max(0, (serverNow() - showFireAt) / 1000) : 0;
     try { showVid.currentTime = off; } catch (e) {}
+    /* ★音より映像を優先する。
+       実測(2026-07-18): ミュート解除した瞬間、ブラウザが再生を止めることがある
+       （ユーザー操作が無いページで音を出そうとしたため）。
+       SND_ON は「保存された設定」であって「ブラウザが音を許可した証拠」ではない。
+       許可の証拠は navigator.userActivation.hasBeenActive だけ。
+       それでも止まったら、音を捨てて映像を続ける——壁が固まるほうが遥かに事故。 */
     var unmute = function () {
       try {
-        var acted = (navigator.userActivation && navigator.userActivation.hasBeenActive);
-        if (acted || SND_ON) showVid.muted = false;
+        if (!(navigator.userActivation && navigator.userActivation.hasBeenActive)) return;
+        showVid.muted = false;
+        setTimeout(function () {
+          if (showVid.paused && !showVid.ended) {   // 解除で止まった → 音を諦めて再開
+            showVid.muted = true;
+            var p2 = showVid.play(); if (p2 && p2.catch) p2.catch(function () {});
+          }
+        }, 80);
       } catch (e) {}
     };
     var pr = showVid.play();
     if (pr && pr.then) pr.then(unmute, function () { try { showVid.muted = true; showVid.play(); } catch (e) {} });
     else unmute();
+    // 最後の砦: 1秒後にまだ止まっていたら、無音で必ず流す
+    setTimeout(function () {
+      if (showVid.paused && !showVid.ended) {
+        showVid.muted = true;
+        var p3 = showVid.play(); if (p3 && p3.catch) p3.catch(function () {});
+      }
+    }, 1000);
     var corr = setInterval(function () {          // 再生ズレの補正(±0.4s)
       if (!showFireAt || showVid.paused || showVid.ended || !showVid.duration) return;
       var want = (serverNow() - showFireAt) / 1000;
