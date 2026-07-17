@@ -482,6 +482,60 @@
   .tmMail{color:#2F6FB5;font-weight:700;text-decoration:underline;word-break:break-all}
   .nameHint{margin:6px 2px 0;font-size:11px;line-height:1.7;color:var(--ink-soft);opacity:.92;font-weight:600}
   .nameHint b{color:#2E3A45;font-weight:700}
+
+  /* ===== STAGE: 屋外LEDビジョン用の大画面モード =====
+     遠距離（20〜50m）＋粗い画素ピッチが前提。細部は捨て、円と数字だけを大きく強く。 */
+  body.stage{overflow:hidden;background:linear-gradient(180deg,#1B4F86 0%,#2E6FA8 45%,#4A93C8 100%)}
+  body.stage header,
+  body.stage #homeBar,
+  body.stage #story,
+  body.stage .day-chip,
+  body.stage #emptyHint,
+  body.stage .cdown{display:none !important}
+  body.stage #app{max-width:none;padding:0;margin:0}
+  body.stage #boardWrap{margin:0;padding:0;height:100vh;display:flex;align-items:center;justify-content:center}
+  body.stage #board{width:min(96vw,96vh);height:min(96vw,96vh);max-width:none}
+  body.stage #pop{display:none !important}
+  /* 大画面の進捗表示（画面下・遠くから読める） */
+  .stageHud{position:fixed;left:0;right:0;bottom:0;z-index:20;display:none;
+    padding:2.2vh 3vw;text-align:center;pointer-events:none;
+    background:linear-gradient(0deg,rgba(10,40,75,.72),rgba(10,40,75,0))}
+  body.stage .stageHud{display:block}
+  .stageNum{font-family:var(--latin);font-size:7vh;font-weight:600;color:#fff;line-height:1;
+    letter-spacing:.02em;text-shadow:0 3px 18px rgba(0,20,50,.75)}
+  .stageNum b{font-size:11vh;font-weight:700;color:#FFE9A8}
+  .stageCap{margin-top:1vh;font-family:var(--serif);font-size:2.6vh;font-weight:700;color:#EAF4FC;
+    letter-spacing:.14em;text-shadow:0 2px 12px rgba(0,20,50,.8)}
+  /* リハ表示（本番と取り違えないための札） */
+  .rehBadge{position:fixed;top:0;left:0;z-index:60;display:none;
+    background:#E24C4C;color:#fff;font-family:var(--serif);font-weight:700;font-size:13px;
+    padding:6px 14px;border-bottom-right-radius:10px;letter-spacing:.1em}
+  body.rehearsal .rehBadge{display:block}
+  /* 操作パネル（リハ中だけ。マウスを動かすと出る） */
+  .stagePanel{position:fixed;top:0;right:0;z-index:60;display:none;gap:6px;padding:8px;
+    background:rgba(10,40,75,.82);border-bottom-left-radius:12px;backdrop-filter:blur(6px)}
+  body.stage .stagePanel{display:flex;flex-wrap:wrap;max-width:60vw;justify-content:flex-end}
+  body.stage.hideui .stagePanel{opacity:0;pointer-events:none;transition:opacity .4s}
+  .stagePanel button{border:1.5px solid rgba(255,255,255,.42);background:rgba(255,255,255,.1);
+    color:#fff;border-radius:9px;padding:7px 11px;font-size:12px;font-weight:700;cursor:pointer;
+    font-family:var(--serif)}
+  .stagePanel button:hover{background:rgba(255,255,255,.24)}
+  .stagePanel button.go{background:#E8A33C;border-color:#E8A33C;color:#3A2400}
+  /* 診断オーバーレイ */
+  .diag{position:fixed;inset:0;z-index:70;display:none;align-items:center;justify-content:center;
+    background:rgba(6,24,48,.93);padding:4vh}
+  .diag.on{display:flex}
+  .diagCard{width:min(760px,94vw);max-height:92vh;overflow:auto;background:#fff;border-radius:16px;padding:22px}
+  .diagCard h2{margin:0 0 4px;font-size:21px;color:#2F6FB5}
+  .diagRow{display:flex;gap:10px;padding:7px 0;border-bottom:1px solid rgba(120,150,180,.16);font-size:13.5px}
+  .diagRow span:first-child{flex:0 0 42%;color:var(--ink-soft);font-weight:700}
+  .diagRow span:last-child{flex:1;color:#2E3A45;font-weight:600;font-family:var(--latin)}
+  .diagRow.bad span:last-child{color:#E24C4C}
+  .diagRow.good span:last-child{color:#1F9E6B}
+  /* 視認性テスト用のパターン（LEDで細い線が飛ぶかを実地で見る） */
+  .diagBars{display:flex;gap:0;margin:14px 0 4px;height:56px;border-radius:8px;overflow:hidden}
+  .diagBars i{flex:1}
+  .diagNote{font-size:11.5px;line-height:1.8;color:var(--ink-soft);font-weight:600;margin:6px 0 0}
   .exsheet{width:min(620px,100%)}
   .exsheet h2 b{font-family:var(--serif);color:#2F6FB5;font-weight:600}
   .exlead{font-size:12px;line-height:1.9;color:var(--ink-soft);font-weight:500;margin:8px 0 14px}
@@ -984,6 +1038,30 @@
     <button class="tskip" id="tutSkip" type="button">スキップしてはじめる</button>
   </div>
 </div>
+<!-- ===== 大画面（ステージ）モード用のUI ===== -->
+<div class="rehBadge">● リハーサル用（本番データではありません）</div>
+<div class="stageHud">
+  <div class="stageNum"><b id="sgNum">0</b> / 810</div>
+  <div class="stageCap" id="sgCap">みんなの想いが、あつまっています</div>
+</div>
+<div class="stagePanel" id="stagePanel">
+  <button class="go" id="sgGo" type="button">▶ お披露目（Space）</button>
+  <button id="sgFlip" type="button">⇄ めくる（F）</button>
+  <button id="sgReset" type="button">↺ 最初から（R）</button>
+  <button id="sgFull" type="button">⛶ 全画面（Enter）</button>
+  <button id="sgDiag" type="button">🔍 画面情報（D）</button>
+</div>
+<div class="diag" id="diag">
+  <div class="diagCard">
+    <h2>この画面の情報</h2>
+    <p class="diagNote">18時のリハで、まずここを見てください。ビジョンの素性が一目で分かります。</p>
+    <div id="diagBody"></div>
+    <div class="diagBars" id="diagBars"></div>
+    <p class="diagNote"><b>↑この縞模様が大事です。</b>ビジョンから20〜50m離れて見てください。細い線が消えて灰色に見えるなら、その細さは本番でも消えます＝いまのピースの継ぎ目（2.5px）も消えるということです。何本目まで見分けられるかを控えて教えてください。</p>
+    <button class="cta" id="diagClose" type="button" style="margin-top:14px;width:100%">とじる</button>
+  </div>
+</div>
+
 <div id="toast" role="status"></div>
 
 <script>
@@ -1019,14 +1097,22 @@ var TARGET = 0;
 /* ---------- Supabase（本番データ保存）。?demo=1 でオフライン・デモに切替 ---------- */
 var SB_URL = 'https://onpwsqexqstunyemjjzr.supabase.co';
 var SB_KEY = 'sb_publishable_ROB27m0jG2DYzvo0dY-j0w_CWhmC7bD'; // 公開可能キー（RLSで保護）
+/* ---- 大画面（ステージ）モード / リハーサルモード ----
+   STAGE    : メルパルク屋外LEDビジョン用の投影ビュー。?stage=1
+   REHEARSAL: サーバに繋がず810件のダミーで動かす。?rehearsal=1、または
+              file:// で開いた時（USBから開くリハ用）に自動でON。
+   本番のビジョンは「実データ＋stage」、リハは「ダミー＋stage」で同じ絵になる。 */
+var IS_FILE = (location.protocol === 'file:');
+var REHEARSAL = IS_FILE || (Q.has('rehearsal') && qn('rehearsal', 0) > 0);
+var STAGE = REHEARSAL || (Q.has('stage') && qn('stage', 0) > 0);
 // セルフテスト中は本番DBを汚さないよう保存オフ（demo扱い）
-var SB_ON = !((Q.has('demo') && qn('demo', 0) > 0) || (Q.has('selftest') && qn('selftest', 0) > 0));
+var SB_ON = !((Q.has('demo') && qn('demo', 0) > 0) || (Q.has('selftest') && qn('selftest', 0) > 0) || REHEARSAL);
 function sbHeaders(extra) {
   var h = { apikey: SB_KEY, Authorization: 'Bearer ' + SB_KEY, 'Content-Type': 'application/json' };
   if (extra) for (var k in extra) h[k] = extra[k];
   return h;
 }
-var SEED_COUNT = Math.round(qn('seed', SB_ON ? 0 : 132));
+var SEED_COUNT = Math.round(qn('seed', SB_ON ? 0 : (REHEARSAL ? 810 : 132)));
 
 /* 空のパステル12色（水色・黄緑・黄色・オレンジ・ピンク・紫 系、透明感重視） */
 var PALETTE = [
@@ -1040,7 +1126,22 @@ var SEED_MESSAGES = [
   'ちがいを認め合おう','だれもひとりにしない','しあわせのおすそわけ','学びたい人が学べる世界',
   'やさしさが循環する街','川がきれいなままで','笑い声がひびく通りに','いのちを大切に',
   '国をこえて友だちに','未来のこどもへ、ありがとう','希望はここにある','小さな親切をたくさん',
-  'ゆめをあきらめない','平和のバトンをつなぐ','ここから世界へ','2045年も、この空の下で'
+  'ゆめをあきらめない','平和のバトンをつなぐ','ここから世界へ','2045年も、この空の下で',
+  // --- リハで810件に増やしても同じ言葉が並ばないよう拡充（デモ専用・本番投稿には影響なし）---
+  '孫と平和公園を歩いてる','世界中に友だちがいる','おいしいお好み焼きを食べてる','路面電車で海まで',
+  'だれもが本を読める街','夜空に星がよく見える','けんかしても仲直りできる','いのちの重さは同じ',
+  'ふるさとを誇れること','こわい音がしない毎日','だれかの隣にいてあげる','宮島まで泳げる海に',
+  '被爆二世として伝える','ことばがちがっても通じる','医者になって人を救う','おなじ空を見上げてる',
+  '子どもの声がうるさい街','戦争を知らない子どもたち','鶴を折らなくていい世界','川で泳ぐ子どもたち',
+  'おばあちゃんの話を継ぐ','平和がニュースにならない','手をふれば手をふりかえす','75年後も花が咲く',
+  'ドームが静かに立ってる','家族そろってごはん','だれも見捨てられない','広島から世界を変える',
+  '好きな人と生きてる','歌をうたっていられる','こわがらずに眠れる夜','みんなでお祭りしてる',
+  'ちがう国の子と遊ぶ','平和ってふつうのこと','語り継ぐ人でありたい','あの日を忘れない街で',
+  '学校に行けるしあわせ','まっすぐな目でいたい','けんかは話し合いで','土と緑がふえた街',
+  '海がきれいなままで','おかえりって言える家','人を許せる自分でいる','未来にツケを残さない',
+  'ゆっくり流れる時間','まだ見ぬ誰かのために','だれかの夢を応援する','たき火をかこんで笑う',
+  'せんそうって何？と聞かれる','広島が世界の希望に','小さな声も聞こえる街','ありがとうが飛びかう',
+  'いのちがつづいていく','ふつうの朝がくること','こどもに胸を張れる私','8月6日に笑ってる'
 ];
 var SEED_NAMES = ['ひろ','ゆき','そら','あい','けん','なな','みお','たく','りん','はると','ここ','—','—','—'];
 var PLACEHOLDERS = [
@@ -2693,7 +2794,7 @@ if (document.fonts && document.fonts.ready) document.fonts.ready.then(function (
 
 /* test hooks */
 window.PW = {
-  version: '8.9',
+  version: '9.0',
   hash: function (s) { sha256hex(String(s), function (h) { console.log('ADMIN_HASH:', h); }); return '（コンソールにハッシュを出力しました）'; },
   place: function (c, m, n) { return placePiece(nextEmpty(), c || PALETTE[0], m || 'テスト', n || '', true); },
   assemble: assemble, reset: function () { seed(true); }, count: function () { return placed; }, target: TARGET,
@@ -2848,6 +2949,100 @@ function renderSelfTest(results) {
 if (Q.has('selftest') && qn('selftest', 0) > 0) {
   setTimeout(function () { try { closeTut(); } catch (e) {} runSelfTest(); }, 900);
 }
+
+/* ============================================================
+   STAGE / REHEARSAL — 屋外LEDビジョン用の投影ビュー
+   ・?stage=1        本番のビジョン（実データ）
+   ・?rehearsal=1    ダミー810件・サーバ非接続
+   ・file:// で開く  自動で rehearsal + stage（USBから開く当日リハ用）
+   お披露目の再生に管理パスワードを要求しない（当日18時に解錠で詰まらせない）
+   ============================================================ */
+if (STAGE) (function () {
+  document.body.classList.add('stage');
+  if (REHEARSAL) document.body.classList.add('rehearsal');
+  try { closeTut(); } catch (e) {}
+
+  var sgNum = document.getElementById('sgNum');
+  var sgCap = document.getElementById('sgCap');
+  var diag = document.getElementById('diag');
+
+  // 進捗HUDを常に最新に
+  function hud() {
+    sgNum.textContent = placed.toLocaleString('en-US');
+    if (revealed) sgCap.textContent = 'みんなの想いが、ひとつの絵になりました';
+    else if (placed >= TARGET) sgCap.textContent = 'ぜんぶ、そろいました';
+    else sgCap.textContent = 'みんなの想いが、あつまっています';
+  }
+  setInterval(hud, 500); hud();
+  setTimeout(function () { resize(); drawBoard(); hud(); }, 60);
+
+  // マウスが止まったら操作パネルを隠す（本番投影中に映り込ませない）
+  var hideT;
+  function poke() {
+    document.body.classList.remove('hideui');
+    clearTimeout(hideT);
+    hideT = setTimeout(function () { document.body.classList.add('hideui'); }, 3000);
+  }
+  window.addEventListener('mousemove', poke); poke();
+
+  function go() { if (!assembling && !revealed) assemble(); }
+  function full() {
+    if (document.fullscreenElement) document.exitFullscreen();
+    else document.documentElement.requestFullscreen && document.documentElement.requestFullscreen();
+  }
+  document.getElementById('sgGo').addEventListener('click', go);
+  document.getElementById('sgFlip').addEventListener('click', function () { if (!flipBtn.hidden) flipBtn.click(); });
+  document.getElementById('sgReset').addEventListener('click', function () { seed(true); hud(); });
+  document.getElementById('sgFull').addEventListener('click', full);
+  document.getElementById('sgDiag').addEventListener('click', function () { buildDiag(); diag.classList.add('on'); });
+  document.getElementById('diagClose').addEventListener('click', function () { diag.classList.remove('on'); });
+
+  window.addEventListener('keydown', function (e) {
+    if (e.target.tagName === 'INPUT') return;
+    var k = e.key.toLowerCase();
+    if (e.key === ' ') { e.preventDefault(); go(); }
+    else if (k === 'f') { if (!flipBtn.hidden) flipBtn.click(); }
+    else if (k === 'r') { seed(true); hud(); }
+    else if (k === 'd') { buildDiag(); diag.classList.toggle('on'); }
+    else if (e.key === 'Enter') full();
+  });
+
+  /* ---- 画面診断: 18時のリハで「このビジョンは何者か」を5分で確定させる ---- */
+  function buildDiag() {
+    var w = window.innerWidth, h = window.innerHeight;
+    var dpr = window.devicePixelRatio || 1;
+    var ratio = (w / h);
+    var ratioTxt = ratio.toFixed(2) + ' : 1' + (Math.abs(ratio - 16 / 9) < .06 ? '（16:9）'
+      : Math.abs(ratio - 4 / 3) < .06 ? '（4:3）'
+        : Math.abs(ratio - 1) < .06 ? '（正方形）'
+          : ratio < 1 ? '（縦長）' : '');
+    var rows = [
+      ['画面の大きさ（CSS px）', w + ' × ' + h, ''],
+      ['実ピクセル', Math.round(w * dpr) + ' × ' + Math.round(h * dpr) + '（DPR ' + dpr + '）', ''],
+      ['縦横比', ratioTxt, ratio < 1 ? 'bad' : 'good'],
+      ['向き', ratio < 1 ? '縦長（要レイアウト調整）' : '横長', ratio < 1 ? 'bad' : 'good'],
+      ['円の直径（実ピクセル）', Math.round(Math.min(w, h) * 0.96 * dpr) + ' px', ''],
+      ['ピース1個の見た目', Math.round(Math.min(w, h) * 0.96 * dpr / 31) + ' px 程度', ''],
+      ['全画面', document.fullscreenElement ? 'ON' : 'OFF（Enterで切替）', document.fullscreenElement ? 'good' : ''],
+      ['ブラウザ', navigator.userAgent.slice(0, 68), ''],
+      ['Canvas', !!document.createElement('canvas').getContext('2d') ? '対応' : '非対応', !!document.createElement('canvas').getContext('2d') ? 'good' : 'bad'],
+      ['音（Web Audio）', (window.AudioContext || window.webkitAudioContext) ? '対応' : '非対応', (window.AudioContext || window.webkitAudioContext) ? 'good' : 'bad'],
+      ['動きを減らす設定', REDUCED() ? 'ON（演出が簡略化されます）' : 'OFF', REDUCED() ? 'bad' : 'good'],
+      ['データ', SB_ON ? '本番サーバに接続中' : 'ダミー' + placed + '件（サーバ非接続）', SB_ON ? 'good' : ''],
+      ['ネット接続', navigator.onLine ? 'あり' : 'なし（オフラインで動作中）', '']
+    ];
+    document.getElementById('diagBody').innerHTML = rows.map(function (r) {
+      return '<div class="diagRow ' + r[2] + '"><span>' + r[0] + '</span><span>' + r[1] + '</span></div>';
+    }).join('');
+    // 線の細さテスト: 1px〜6pxの白線を並べ、どこまで見分けられるかを実地で確認する
+    var bars = '';
+    [1, 2, 3, 4, 6, 8].forEach(function (px) {
+      bars += '<i style="background:repeating-linear-gradient(90deg,#fff 0 ' + px + 'px,#2E6FA8 ' + px + 'px ' + (px * 2) + 'px)" title="' + px + 'px"></i>';
+    });
+    document.getElementById('diagBars').innerHTML = bars;
+  }
+  window.PW_DIAG = buildDiag;
+})();
 </script>
 </body>
 </html>
