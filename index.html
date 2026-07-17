@@ -562,6 +562,17 @@
     background:radial-gradient(circle at 50% 44%,#FFFDF0 0%,rgba(255,246,214,.95) 26%,rgba(150,196,255,.30) 60%,rgba(6,16,36,0) 80%)}
   #bloomFlash.on{animation:bloomA 1.7s ease-out}
   @keyframes bloomA{0%{opacity:0}14%{opacity:1}100%{opacity:0}}
+  /* ⑤ 本物の作品をフルスクリーンで。閃光(z:45)の下・盤面の上に挟む */
+  #finaleArt{position:fixed;inset:0;z-index:44;display:none;opacity:0;
+    transition:opacity 1.8s ease;background:#050D1D}
+  #finaleArt.on{display:block}
+  #finaleArt.show{opacity:1}
+  #finaleArt img{width:100%;height:100%;object-fit:cover;display:block}
+  .faBtn{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);
+    border:1.5px solid rgba(255,255,255,.55);background:rgba(8,20,42,.62);color:#fff;
+    border-radius:999px;padding:10px 20px;font-family:var(--serif);font-size:13px;
+    font-weight:700;letter-spacing:.05em;cursor:pointer;backdrop-filter:blur(8px)}
+  .faBtn:hover{background:rgba(8,20,42,.85)}
   /* 背景は、集まりきる頃に透けて盤面が現れる */
   #liveWait.handing{transition:opacity 1.2s ease;opacity:0;pointer-events:none}
   /* 盤面は既定で伏せておき、集まる演出が始まったらそっと現れる。
@@ -613,7 +624,8 @@
   body.stage #app{max-width:none;padding:0;margin:0}
   body.stage #boardWrap{margin:0;padding:0;height:100vh;display:flex;align-items:center;justify-content:center}
   body.stage #board{width:min(96vw,96vh);height:min(96vw,96vh);max-width:none}
-  body.stage #pop{display:none !important}
+  /* ⑥のため、スマホ(live)ではピースのメッセージ表示を解禁。会場の投影だけ抑止 */
+  body.stage:not(.livemode) #pop{display:none !important}
   /* 投影中に参加用モーダルが絶対に映り込まないようにする安全弁
      （診断オーバーレイ #diag は除く。運営がDキーで意図的に開くもの） */
   body.stage #tut,
@@ -1240,6 +1252,12 @@
 <div class="rehBadge">● リハーサル用（本番データではありません）</div>
 <div class="liveCd" id="liveCd">まもなく、みんなの画面で同時にお披露目します <b id="liveCdN">8</b> 秒</div>
 <div id="bloomFlash" aria-hidden="true"></div>
+
+<!-- ⑤ 完成した絵が画面いっぱいに（art.jpg があるときだけ現れる） -->
+<div id="finaleArt">
+  <img id="finaleImg" alt="完成した一枚の絵「2045年の広島」">
+  <button class="faBtn" id="faRead" type="button">⇄ ピースをめくって、みんなの想いをよむ</button>
+</div>
 <div class="stageHud">
   <div class="stageNum"><b id="sgNum">0</b> / 810</div>
   <div class="stageCap" id="sgCap">みんなの想いが、あつまっています</div>
@@ -3196,7 +3214,7 @@ if (document.fonts && document.fonts.ready) document.fonts.ready.then(function (
 
 /* test hooks */
 window.PW = {
-  version: '9.9',
+  version: '10.0',
   hash: function (s) { sha256hex(String(s), function (h) { console.log('ADMIN_HASH:', h); }); return '（コンソールにハッシュを出力しました）'; },
   place: function (c, m, n) { return placePiece(nextEmpty(), c || PALETTE[0], m || 'テスト', n || '', true); },
   assemble: assemble, reset: function () { seed(true); }, count: function () { return placed; }, target: TARGET,
@@ -3637,103 +3655,199 @@ if (STAGE) (function () {
     }, 150);
   })();
 
-  function gather(onDone) {
-    /* 資料②③: 中心に光が生まれ、光の柱が回り、ピースが渦を巻いて吸い込まれていく。
-       直線的に集めると「移動」にしか見えない。渦(角度も動かす)にすると「引力」に見える。 */
-    var DUR = 3800;
+  /* ===== 絵コンテ②③④: 器 → ピースが飛来して円が組み上がる → 完成の脈動 =====
+     盤面の描画には頼らず、この演出専用に円を「形成」する。
+     ・② まず中心に白い光の円=「器」が現れる（矢印が示すのは移動ではなく引力）
+     ・③ ピースが画面の外から弧を描いて飛来し、中心から外へリング状に埋まっていく。
+          色は「実際に集まったピース」の色を使う——絵は自由にしても、意味は本物のまま
+     ・完成したリングは都度オフスクリーンに焼き込む(builtCv)。
+       毎フレーム描くのは「飛行中のピース」だけなので、枚数が増えても重くならない */
+  function showSequence(onDone) {
     var cx = W / 2, cy = H / 2;
-    for (var i = 0; i < drifts.length; i++) {
-      var d = drifts[i];
-      var vx2 = d.x - cx, vy2 = d.y - cy;
-      d.r0 = Math.hypot(vx2, vy2) || 1;
-      d.a0 = Math.atan2(vy2, vx2);
-      d.sc0 = d.sc; d.al0 = d.a;
-      d.dly = Math.random() * 1000;             // 少しずつ動き出す（一斉だと機械的）
-      d.done = false;
+    var R = Math.min(W, H) * 0.34;
+    var RINGS = 9, ringW = R / RINGS;
+
+    // 実際に集まったピースの色（無ければパレットから）
+    var realColors = [];
+    try { for (var rc = 0; rc < pieces.length; rc++) if (pieces[rc]) realColors.push(pieces[rc].color); } catch (e) {}
+    if (!realColors.length) realColors = PALETTE.slice();
+
+    // タイルの設計図: 中心の輪から外へ。到着時刻をリングごとにずらす
+    var tiles = [], ci = 0;
+    for (var ri = 0; ri < RINGS; ri++) {
+      var r = (ri + 0.5) * ringW;
+      var cnt = Math.max(6, Math.round(6.283 * r / ringW));
+      for (var j = 0; j < cnt; j++) {
+        var ta = (j / cnt) * 6.283 + ri * 0.35;
+        tiles.push({
+          r: r, a: ta,
+          color: realColors[(ci++) % realColors.length],
+          start: 600 + ri * 520 + (j / cnt) * 260 + Math.random() * 220,
+          dur: 750,
+          fromA: ta + (Math.random() * 2.4 - 1.2),
+          fromR: Math.max(W, H) * 0.72,
+          landed: false
+        });
+      }
     }
-    var pulses = [];                            // 吸い込まれた瞬間の波紋
+    var lastLand = 0;
+    for (var li = 0; li < tiles.length; li++) lastLand = Math.max(lastLand, tiles[li].start + tiles[li].dur);
+
+    // 完成部分の焼き込み先
+    var builtCv = document.createElement('canvas');
+    builtCv.width = builtCv.height = Math.ceil((R + ringW * 3) * 2 * DPR);
+    var bx = builtCv.getContext('2d');
+    bx.setTransform(DPR, 0, 0, DPR, 0, 0);
+    var bc = builtCv.width / (2 * DPR);
+
+    function stamp(tl) {
+      var sp = sprites[tl.color] || sprites[PALETTE[0]]; if (!sp) return;
+      var sz = ringW * 3.2;
+      bx.save();
+      bx.translate(bc + Math.cos(tl.a) * tl.r, bc + Math.sin(tl.a) * tl.r);
+      bx.rotate(tl.a + 1.5708);
+      bx.drawImage(sp.sharp, -sz / 2, -sz / 2, sz, sz);
+      bx.restore();
+    }
+
+    var pulses = [], doneAt = 0, chimed = false;
     var t0 = performance.now();
     (function step(now) {
       var t = now - t0;
       ctx.clearRect(0, 0, W, H);
-      drawStars(t, 0.5);
+      drawStars(t, 0.45);
       if (skyline) ctx.drawImage(skyline, 0, 0, W, H);
 
-      // 光の柱(ゆっくり回る)と中心の光球。加算合成で夜空に「光」として乗せる
-      var ramp = Math.min(Math.max((t - 250) / 1200, 0), 1);
+      // ② 器: 白い光の円がまず生まれる
+      var vs = Math.min(t / 900, 1);
       ctx.save();
       ctx.globalCompositeOperation = 'lighter';
+      var vg = ctx.createRadialGradient(cx, cy, R * 0.2, cx, cy, R * 1.12);
+      vg.addColorStop(0, 'rgba(255,252,238,' + (0.16 * vs) + ')');
+      vg.addColorStop(0.85, 'rgba(210,230,255,' + (0.10 * vs) + ')');
+      vg.addColorStop(1, 'rgba(210,230,255,0)');
+      ctx.fillStyle = vg; ctx.beginPath(); ctx.arc(cx, cy, R * 1.12, 0, 6.283); ctx.fill();
+      ctx.globalAlpha = 0.30 * vs;
+      ctx.strokeStyle = '#FFFFFF'; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.arc(cx, cy, R + ringW, 0, 6.283); ctx.stroke();
+
+      // 光の柱(③に向けてゆっくり強まる)
+      var ramp = Math.min(Math.max((t - 700) / 1600, 0), 1);
       for (var k = 0; k < 7; k++) {
-        var ang = t * 0.00012 + k * (6.283 / 7);
-        var L = Math.min(W, H) * 0.75;
+        var ang = t * 0.00011 + k * (6.283 / 7);
+        var L = Math.min(W, H) * 0.78;
         var g = ctx.createLinearGradient(cx, cy, cx + Math.cos(ang) * L, cy + Math.sin(ang) * L);
-        g.addColorStop(0, 'rgba(255,244,200,' + (0.15 * ramp) + ')');
+        g.addColorStop(0, 'rgba(255,244,200,' + (0.14 * ramp) + ')');
         g.addColorStop(1, 'rgba(255,244,200,0)');
         ctx.fillStyle = g;
         ctx.beginPath(); ctx.moveTo(cx, cy);
-        ctx.arc(cx, cy, L, ang - 0.045, ang + 0.045);
+        ctx.arc(cx, cy, L, ang - 0.042, ang + 0.042);
         ctx.closePath(); ctx.fill();
       }
-      var orbR = 24 + 92 * ramp + 6 * Math.sin(t * 0.004);
-      var orb = ctx.createRadialGradient(cx, cy, 0, cx, cy, orbR);
+      var orb = ctx.createRadialGradient(cx, cy, 0, cx, cy, 40 + 50 * ramp);
       orb.addColorStop(0, 'rgba(255,253,240,.95)');
-      orb.addColorStop(0.5, 'rgba(255,238,180,.55)');
       orb.addColorStop(1, 'rgba(255,238,180,0)');
-      ctx.fillStyle = orb;
-      ctx.beginPath(); ctx.arc(cx, cy, orbR, 0, 6.283); ctx.fill();
+      ctx.fillStyle = orb; ctx.beginPath(); ctx.arc(cx, cy, 40 + 50 * ramp, 0, 6.283); ctx.fill();
       ctx.restore();
 
-      var allDone = true;
-      for (var i2 = 0; i2 < drifts.length; i2++) {
-        var d2 = drifts[i2];
-        var f = Math.min(Math.max((t - d2.dly) / DUR, 0), 1);
-        if (f < 1) allDone = false;
-        else if (!d2.done) { d2.done = true; pulses.push({ t: t }); }
+      // 組み上がった部分
+      var bs = builtCv.width / DPR;
+      ctx.drawImage(builtCv, cx - bs / 2, cy - bs / 2, bs, bs);
+
+      // ③ 飛行中のピース: 外から弧を描いて自分の席へ
+      var allLanded = true;
+      for (var i = 0; i < tiles.length; i++) {
+        var tl = tiles[i];
+        if (tl.landed) continue;
+        var f = (t - tl.start) / tl.dur;
+        if (f < 0) { allLanded = false; continue; }
+        if (f >= 1) {
+          tl.landed = true; stamp(tl);
+          pulses.push({ t: t, r: tl.r });
+          continue;
+        }
+        allLanded = false;
         var e = 1 - Math.pow(1 - f, 3);
-        var r = d2.r0 * (1 - e);
-        var a2 = d2.a0 + 1.35 * e;               // ← 渦。角度も進めて吸い込まれる
-        var alpha = d2.al0 * (1 - Math.pow(f, 2.2));
-        if (alpha <= 0.01) continue;
-        var sp2 = sprites[d2.color]; if (!sp2) continue;
-        var img2 = d2.layer === 1 ? sp2.sharp : sp2.soft;
-        var sz2 = img2.width * (d2.sc0 * (1 - e * 0.8) + 0.05);
+        var rr = tl.fromR + (tl.r - tl.fromR) * e;
+        var aa = tl.fromA + (tl.a - tl.fromA) * e;
+        var sp = sprites[tl.color] || sprites[PALETTE[0]]; if (!sp) continue;
+        var sz = ringW * 3.2 * (1.5 - 0.5 * e);
         ctx.save();
-        ctx.translate(cx + Math.cos(a2) * r, cy + Math.sin(a2) * r);
-        ctx.rotate(d2.rot + e * 2.2);
-        ctx.globalAlpha = alpha;
-        ctx.drawImage(img2, -sz2 / 2, -sz2 / 2, sz2, sz2);
+        ctx.translate(cx + Math.cos(aa) * rr, cy + Math.sin(aa) * rr);
+        ctx.rotate(aa + 1.5708);
+        ctx.globalAlpha = Math.min(1, f * 3);
+        ctx.drawImage(sp.soft, -sz / 2, -sz / 2, sz, sz);
         ctx.restore();
       }
 
-      // 吸い込まれた瞬間、中心から小さな波紋がひろがる（想いが溜まっていく感じ）
-      ctx.save();
-      ctx.globalCompositeOperation = 'lighter';
+      // 着地の波紋
+      ctx.save(); ctx.globalCompositeOperation = 'lighter';
       for (var p3 = pulses.length - 1; p3 >= 0; p3--) {
-        var q = (t - pulses[p3].t) / 420;
+        var q = (t - pulses[p3].t) / 380;
         if (q >= 1) { pulses.splice(p3, 1); continue; }
-        ctx.globalAlpha = (1 - q) * 0.5;
-        ctx.strokeStyle = '#FFF7DC'; ctx.lineWidth = 2;
-        ctx.beginPath(); ctx.arc(cx, cy, 8 + q * 46, 0, 6.283); ctx.stroke();
+        ctx.globalAlpha = (1 - q) * 0.35;
+        ctx.strokeStyle = '#FFF7DC'; ctx.lineWidth = 1.5;
+        ctx.beginPath(); ctx.arc(cx, cy, pulses[p3].r + q * 30, 0, 6.283); ctx.stroke();
       }
-      ctx.restore();
-      ctx.globalAlpha = 1;
+      ctx.restore(); ctx.globalAlpha = 1;
 
-      if (!allDone || pulses.length) requestAnimationFrame(step);
-      else onDone();
+      // ③の頂点: すべて揃った瞬間、ひと呼吸の脈動（やさしい上昇音）
+      if (allLanded && t >= lastLand) {
+        if (!doneAt) {
+          doneAt = t;
+          if (!chimed) { chimed = true; try { sndChime(); vibrate([10, 40, 10]); } catch (e) {} }
+        }
+        var pq = (t - doneAt) / 850;
+        ctx.save(); ctx.globalCompositeOperation = 'lighter';
+        ctx.globalAlpha = Math.max(0, 0.5 - pq * 0.5);
+        ctx.strokeStyle = '#FFFDF0'; ctx.lineWidth = 3;
+        ctx.beginPath(); ctx.arc(cx, cy, (R + ringW) * (1 + pq * 0.25), 0, 6.283); ctx.stroke();
+        ctx.restore(); ctx.globalAlpha = 1;
+        if (pq >= 1) { onDone(); return; }
+      }
+      requestAnimationFrame(step);
     })(t0);
   }
 
-  function handOff() {
+  /* ⑤「完成した絵が画面いっぱいに」— 本物の作品画像の差し込み口。
+     リポジトリ直下に art.jpg を置くと(8/5の夜にアップロードするだけ)、
+     光がひらけた後、その画像がフルスクリーンで現れる。
+     無ければ従来どおり円形の完成絵にフォールバック(演出は破綻しない)。 */
+  var finaleArt = document.getElementById('finaleArt');
+  var finaleReady = false;
+  (function () {
+    var probe = new Image();
+    probe.onload = function () {
+      document.getElementById('finaleImg').src = probe.src;
+      finaleReady = true;
+    };
+    probe.src = 'art.jpg?v=' + Date.now();
+  })();
+  document.getElementById('faRead').addEventListener('click', function () {
+    finaleArt.classList.remove('show');
+    setTimeout(function () { finaleArt.classList.remove('on'); }, 900);
+  });
+
+  function finaleGo() {
     liveWait.classList.add('handing');
     setTimeout(function () {
       document.body.classList.remove('waiting');
       liveWait.style.display = 'none';
       try { resize(); drawBoard(); } catch (e) {}
-      assemble();                                 // ④⑤ 光が広がる→完成絵（既存の演出）
-    }, 700);
+      assemble();                                 // 満杯→即完成 → revealed=true → ④閃光(watcher)
+      if (finaleReady) {
+        // ④の閃光がいちばん明るい瞬間に、その裏で絵に差し替わる。
+        // 光がひらけたとき、そこに「2045年の広島」が画面いっぱいにある。
+        setTimeout(function () {
+          finaleArt.classList.add('on');
+          requestAnimationFrame(function () { finaleArt.classList.add('show'); });
+        }, 650);
+      }
+    }, 250);
   }
 
-  /* startShow を差し替える。配信の発火時刻ちょうどに、ここから始まる。 */
+  /* startShow を差し替える。配信の発火時刻ちょうどに、ここから始まる。
+     ② 器が現れる → ③ ピースが飛来し円が組み上がる → 脈動 → ④ 閃光 → ⑤ 絵 */
   startShow = function () {
     if (handed) return;
     handed = true;
@@ -3744,12 +3858,12 @@ if (STAGE) (function () {
       liveWait.style.display = 'none';
       try { resize(); drawBoard(); } catch (e) {}
       assemble();
+      if (finaleReady) { finaleArt.classList.add('on'); finaleArt.classList.add('show'); }
       return;
     }
     if (raf) cancelAnimationFrame(raf);
-    liveWait.classList.add('gathering');          // ③ 文字が引く（待機画面は出したまま）
-    document.body.classList.add('gathering');     // 盤面が後ろでゆっくり現れはじめる
-    setTimeout(function () { gather(handOff); }, 900);
+    liveWait.classList.add('gathering');          // 文字が静かに引く（夜空はそのまま）
+    setTimeout(function () { showSequence(finaleGo); }, 900);
   };
 
   /* すでに終わっている（遅れて開いた人）→ 待機画面を出さずに完成絵へ */
