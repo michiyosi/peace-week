@@ -855,7 +855,7 @@
       <div class="agrp agrp-main">
         <span class="alabel">8月6日 本番</span>
         <button class="abtn live" id="broadcastBtn" type="button">📡 お披露目を全員に配信</button>
-        <span class="ahint">押すと8秒後、会場もスマホも同時に光ります</span>
+        <span class="ahint">押すと12秒後、会場もスマホも同時に光ります</span>
       </div>
       <div class="agrp">
         <span class="alabel">ふだん見る</span>
@@ -1619,6 +1619,8 @@ function sbFetchAll(cb) {
 }
 function sbPoll() {
   if (!SB_ON || assembling) return;
+  if (revealed) return;          // お披露目後は新しいピースを取りに行かない（無駄な負荷）
+  if (STAGE && SHOW_PHASE !== 'waiting') return;  // 投影/公開ページは演出中に取りに行かない
   fetch(SB_URL + '/rest/v1/pieces?select=id,idx,color,message,name,created_at&id=gt.' + sbMaxId + '&order=id', { headers: sbHeaders() })
     .then(function (r) { return r.ok ? r.json() : []; })
     .then(function (rows) {
@@ -2858,9 +2860,10 @@ function setShowState(phase, delaySec, onDone) {
 }
 
 broadcastBtn.addEventListener('click', function () {
-  if (!window.confirm('お披露目を「全員の画面」で同時に再生します。\n\n会場の投影も、参加者のスマホも、オンラインで見ている人も、\n8秒後にいっせいに始まります。\n\n本当に始めますか？')) return;
+  if (!window.confirm('お披露目を「全員の画面」で同時に再生します。\n\n会場の投影も、参加者のスマホも、オンラインで見ている人も、\n12秒後にいっせいに始まります。\n\n本当に始めますか？')) return;
   broadcastBtn.disabled = true;
-  setShowState('armed', 8, function (res) {
+  // 12秒: 1000人規模ではポーリングを4秒に緩めるため、受信に8秒の余裕を持たせる
+  setShowState('armed', 12, function (res) {
     // 自分の画面も showPoll 経由で同じ時刻に発火する（特別扱いしない＝会場だけ早いのを防ぐ）
     var at = new Date(res.reveal_at).getTime();
     showCountdown(at);
@@ -3206,8 +3209,17 @@ function boot() {
   if (SB_ON) {
     sbFetchAll();
     setInterval(sbPoll, 12000); // 12秒ごとに、他の人のピースがポンと増える
+    /* ★お披露目の状態ポーリング（負荷の設計）
+       全員が3秒ごとに叩くと、1000人で 333リクエスト/秒 がずっと続く。
+       発火は「時刻」で揃える設計なので、本番が近いときだけ速く見ればいい。
+         ・お披露目の10分前まで … 30秒ごと（1000人で 33/秒）
+         ・10分前〜以降       … 4秒ごと（1000人で 250/秒）
+       配信の予約は12秒後なので、4秒間隔なら受信に8秒の余裕がある。 */
     showPoll();                 // お披露目の状態（遅れて開いた人にも完成絵を出す）
-    setInterval(showPoll, 3000); // 3秒ごと。発火は「時刻」で揃えるので間隔が粗くてもズレない
+    (function schedulePoll() {
+      var near = Date.now() > (SHOW_AT.getTime() - 10 * 60 * 1000);
+      setTimeout(function () { showPoll(); schedulePoll(); }, near ? 4000 : 30000);
+    })();
     // スマホがロック解除・アプリ復帰した瞬間に追いつく。
     // 背面タブはポーリング自体も間引かれる（最悪1分に1回）ため、
     // 「戻ってきた」合図を拾って即座に状態を取り直すのが確実。
@@ -3224,7 +3236,7 @@ if (document.fonts && document.fonts.ready) document.fonts.ready.then(function (
 
 /* test hooks */
 window.PW = {
-  version: '11.0',
+  version: '11.1',
   hash: function (s) { sha256hex(String(s), function (h) { console.log('ADMIN_HASH:', h); }); return '（コンソールにハッシュを出力しました）'; },
   place: function (c, m, n) { return placePiece(nextEmpty(), c || PALETTE[0], m || 'テスト', n || '', true); },
   assemble: assemble, reset: function () { seed(true); }, count: function () { return placed; }, target: TARGET,
