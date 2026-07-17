@@ -482,8 +482,12 @@
   .tmMail{color:#2F6FB5;font-weight:700;text-decoration:underline;word-break:break-all}
 
   /* ===== 8/6 オンライン同時公開ページの待機画面 ===== */
+  /* 夜テーマ。参考画像に合わせただけでなく、投影の物理に合わせた選択。
+     プロジェクターは「黒」を投影できない＝暗い背景は壁のまま残り、
+     光るピースだけが壁に描かれる。明るい空色だと巨大な白い長方形になる。
+     ※body.stage の背景と同一グラデにすること（集まる演出で透けたとき継ぎ目が見えないように） */
   #liveWait{position:fixed;inset:0;z-index:40;display:none;overflow-y:auto;
-    background:linear-gradient(180deg,#2E6FA8 0%,#4A93C8 38%,#8FC4E4 72%,#CDE6F5 100%)}
+    background:linear-gradient(180deg,#060F24 0%,#0B1C3B 42%,#153158 74%,#1E4066 100%)}
   /* 待機画面は「会場の投影」でも「オンライン」でも出す。
      ゆきな・そらが話している間、大画面はこの「ピースが漂う世界」でありたい（資料①）。 */
   body.waiting #liveWait{display:block}
@@ -552,6 +556,12 @@
      盤面の上へ吸い込まれていくように見える。 */
   #liveWait{transition:background-color 2.6s ease}
   #liveWait.gathering{background:transparent}
+  /* ④「光が広がる」— 円が完成した瞬間、画面全体をやわらかな光が包む。
+     canvasの加算合成だけでは画面端まで届かないので、全画面のオーバーレイで一拍の光を足す */
+  #bloomFlash{position:fixed;inset:0;z-index:45;pointer-events:none;opacity:0;
+    background:radial-gradient(circle at 50% 44%,#FFFDF0 0%,rgba(255,246,214,.95) 26%,rgba(150,196,255,.30) 60%,rgba(6,16,36,0) 80%)}
+  #bloomFlash.on{animation:bloomA 1.7s ease-out}
+  @keyframes bloomA{0%{opacity:0}14%{opacity:1}100%{opacity:0}}
   /* 背景は、集まりきる頃に透けて盤面が現れる */
   #liveWait.handing{transition:opacity 1.2s ease;opacity:0;pointer-events:none}
   /* 盤面は既定で伏せておき、集まる演出が始まったらそっと現れる。
@@ -593,7 +603,7 @@
 
   /* ===== STAGE: 屋外LEDビジョン用の大画面モード =====
      遠距離（20〜50m）＋粗い画素ピッチが前提。細部は捨て、円と数字だけを大きく強く。 */
-  body.stage{overflow:hidden;background:linear-gradient(180deg,#1B4F86 0%,#2E6FA8 45%,#4A93C8 100%)}
+  body.stage{overflow:hidden;background:linear-gradient(180deg,#060F24 0%,#0B1C3B 42%,#153158 74%,#1E4066 100%)}
   body.stage header,
   body.stage #homeBar,
   body.stage #story,
@@ -1229,6 +1239,7 @@
 
 <div class="rehBadge">● リハーサル用（本番データではありません）</div>
 <div class="liveCd" id="liveCd">まもなく、みんなの画面で同時にお披露目します <b id="liveCdN">8</b> 秒</div>
+<div id="bloomFlash" aria-hidden="true"></div>
 <div class="stageHud">
   <div class="stageNum"><b id="sgNum">0</b> / 810</div>
   <div class="stageCap" id="sgCap">みんなの想いが、あつまっています</div>
@@ -3185,7 +3196,7 @@ if (document.fonts && document.fonts.ready) document.fonts.ready.then(function (
 
 /* test hooks */
 window.PW = {
-  version: '9.8',
+  version: '9.9',
   hash: function (s) { sha256hex(String(s), function (h) { console.log('ADMIN_HASH:', h); }); return '（コンソールにハッシュを出力しました）'; },
   place: function (c, m, n) { return placePiece(nextEmpty(), c || PALETTE[0], m || 'テスト', n || '', true); },
   assemble: assemble, reset: function () { seed(true); }, count: function () { return placed; }, target: TARGET,
@@ -3402,7 +3413,15 @@ if (STAGE) (function () {
   var liveWait = document.getElementById('liveWait');
   var cv = document.getElementById('driftCanvas');
   var ctx = cv.getContext('2d');
-  var W = 0, H = 0, DPR = 1, drifts = [], raf = null;
+  var W = 0, H = 0, DPR = 1, drifts = [], stars = [], raf = null;
+  var sprites = {}, skyline = null;
+
+  /* ===== 疑似3D =====
+     本格3D(three.js/WebGL)は実測のうえ見送り(READMEに理由)。代わりにCanvas2Dで
+     奥行きの3要素をつくる: ①大きさ ②速度差(視差: 遠いものはゆっくり)
+     ③被写界深度(手前と奥はボケる)。さらに各ピースに「後光」を持たせて夜空に光らせる。
+     ピースは毎フレーム描かず、色ごとに一度だけオフスクリーンに焼き(スプライト)、
+     drawImageの拡縮だけで動かす。これで低速なスマホでも落ちない。 */
 
   /* 1枚の漂うピース。
      ツメは「付け根が細く、先が膨らむ」きのこ型。
@@ -3429,23 +3448,87 @@ if (STAGE) (function () {
     return p;
   }
 
+  function hexA(hex, a) {
+    if (!/^#[0-9a-fA-F]{6}$/.test(hex)) return 'rgba(255,255,255,' + a + ')';
+    return 'rgba(' + parseInt(hex.slice(1, 3), 16) + ',' + parseInt(hex.slice(3, 5), 16) + ',' + parseInt(hex.slice(5, 7), 16) + ',' + a + ')';
+  }
+
+  /* 色ごとに「後光つきピース」を焼く。blur>0 はボケ版(手前・奥のレイヤー用) */
+  function makeSprite(color, blur) {
+    var s = 56, pad = 34;
+    var c = document.createElement('canvas');
+    c.width = c.height = s + pad * 2;
+    var x = c.getContext('2d');
+    x.translate(c.width / 2, c.height / 2);
+    var halo = x.createRadialGradient(0, 0, s * 0.10, 0, 0, s * 0.92);
+    halo.addColorStop(0, 'rgba(255,255,255,.50)');
+    halo.addColorStop(0.45, hexA(color, 0.34));
+    halo.addColorStop(1, hexA(color, 0));
+    x.fillStyle = halo;
+    x.beginPath(); x.arc(0, 0, s * 0.92, 0, 6.283); x.fill();
+    try { if (blur) x.filter = 'blur(' + blur + 'px)'; } catch (e) {}
+    var p = driftPath(s * 0.72);
+    x.fillStyle = color; x.fill(p);
+    x.lineWidth = 2.4; x.strokeStyle = 'rgba(255,255,255,.95)'; x.stroke(p);
+    return c;
+  }
+  function buildSprites() {
+    sprites = {};
+    for (var i = 0; i < PALETTE.length; i++) {
+      sprites[PALETTE[i]] = { sharp: makeSprite(PALETTE[i], 0), soft: makeSprite(PALETTE[i], 5) };
+    }
+  }
+
+  /* 画面下の街のシルエット(参考画像①)。骨組みのドームを線で控えめに描く */
+  function buildSkyline() {
+    skyline = document.createElement('canvas');
+    skyline.width = Math.max(1, W * DPR); skyline.height = Math.max(1, H * DPR);
+    var x = skyline.getContext('2d');
+    x.setTransform(DPR, 0, 0, DPR, 0, 0);
+    var ink = 'rgba(3,9,22,.92)';
+    x.fillStyle = ink; x.strokeStyle = ink;
+    x.fillRect(0, H - 12, W, 12);
+    var dw = Math.min(84, W * 0.10), dx = W * 0.15, base = H - 12;
+    var domeR = dw * 0.5, domeCy = base - dw * 0.72;
+    x.fillRect(dx - dw * 0.62, domeCy, dw * 1.24, base - domeCy);   // 躯体
+    x.lineWidth = 3;
+    x.beginPath(); x.arc(dx, domeCy, domeR, Math.PI, 0); x.stroke();            // 外殻
+    x.lineWidth = 2;
+    x.beginPath(); x.ellipse(dx, domeCy, domeR * 0.55, domeR, 0, Math.PI, 0); x.stroke();
+    x.beginPath(); x.ellipse(dx, domeCy, domeR * 0.16, domeR, 0, Math.PI, 0); x.stroke();
+    x.beginPath(); x.moveTo(dx - domeR, domeCy); x.lineTo(dx + domeR, domeCy); x.stroke();
+    x.fillRect(W * 0.82, base - 34, 26, 34);                                     // 遠景のビル
+    x.fillRect(W * 0.87, base - 52, 34, 52);
+    x.fillRect(W * 0.93, base - 26, 22, 26);
+  }
+
   function makeDrifts() {
     drifts = [];
-    var n = Math.round(Math.min(46, Math.max(16, (W * H) / 26000)));
+    var n = Math.round(Math.min(44, Math.max(18, (W * H) / 30000)));
     for (var i = 0; i < n; i++) {
-      var s = 16 + Math.random() * 30;
+      // layer 0=遠景(小さく暗い) 1=中景(くっきり) 2=手前(大きくボケる)
+      var layer = Math.random() < 0.42 ? 0 : (Math.random() < 0.75 ? 1 : 2);
+      var sc = layer === 0 ? 0.30 + Math.random() * 0.20
+             : layer === 1 ? 0.55 + Math.random() * 0.35
+             : 1.15 + Math.random() * 0.70;
       drifts.push({
         x: Math.random() * W, y: Math.random() * H,
-        s: s, path: driftPath(s),
+        layer: layer, sc: sc,
         color: PALETTE[(Math.random() * PALETTE.length) | 0],
         rot: Math.random() * Math.PI * 2,
-        vr: (Math.random() - 0.5) * 0.0035,
-        vx: (Math.random() - 0.5) * 0.13,
-        vy: -0.05 - Math.random() * 0.12,     // ゆっくり上へ昇る
+        vr: (Math.random() - 0.5) * 0.003 * (layer + 1),
+        vx: (Math.random() - 0.5) * 0.10 * (0.4 + sc),
+        vy: -(0.028 + Math.random() * 0.055) * (0.4 + sc * 1.2),  // 手前ほど速い=視差
         ph: Math.random() * Math.PI * 2,
-        amp: 8 + Math.random() * 16,
-        a: 0.5 + Math.random() * 0.4
+        amp: 6 + Math.random() * 14,
+        a: layer === 2 ? 0.5 : (layer === 0 ? 0.55 : 0.9)
       });
+    }
+    stars = [];
+    var m = Math.round(Math.min(130, (W * H) / 13000));
+    for (var k = 0; k < m; k++) {
+      stars.push({ x: Math.random() * W, y: Math.random() * H * 0.82,
+        r: 0.4 + Math.random() * 1.3, ph: Math.random() * 6.28, sp: 0.0006 + Math.random() * 0.0012 });
     }
   }
 
@@ -3454,28 +3537,44 @@ if (STAGE) (function () {
     W = window.innerWidth; H = window.innerHeight;
     cv.width = W * DPR; cv.height = H * DPR;
     ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+    if (!sprites[PALETTE[0]]) buildSprites();   // スプライトはサイズ非依存なので一度だけ
+    buildSkyline();
     makeDrifts();
   }
 
-  function drawDrift(t) {
-    ctx.clearRect(0, 0, W, H);
+  function drawStars(t, dim) {
+    ctx.fillStyle = '#EAF4FF';
+    for (var i = 0; i < stars.length; i++) {
+      var st = stars[i];
+      ctx.globalAlpha = (0.30 + 0.45 * (0.5 + 0.5 * Math.sin(t * st.sp + st.ph))) * dim;
+      ctx.beginPath(); ctx.arc(st.x, st.y, st.r, 0, 6.283); ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+  }
+  function drawLayer(t, layer) {
     for (var i = 0; i < drifts.length; i++) {
-      var d = drifts[i];
+      var d = drifts[i]; if (d.layer !== layer) continue;
       d.x += d.vx; d.y += d.vy; d.rot += d.vr;
-      if (d.y < -60) { d.y = H + 50; d.x = Math.random() * W; }   // 上に抜けたら下から
-      if (d.x < -60) d.x = W + 50; else if (d.x > W + 60) d.x = -50;
-      var wob = Math.sin(t * 0.0006 + d.ph) * d.amp;
+      if (d.y < -90) { d.y = H + 80; d.x = Math.random() * W; }
+      if (d.x < -90) d.x = W + 80; else if (d.x > W + 90) d.x = -80;
+      var sp = sprites[d.color]; if (!sp) continue;
+      var img = layer === 1 ? sp.sharp : sp.soft;   // 中景だけピント、遠景と手前はボケ
+      var sz = img.width * d.sc;
       ctx.save();
-      ctx.translate(d.x + wob, d.y);
+      ctx.translate(d.x + Math.sin(t * 0.0006 + d.ph) * d.amp, d.y);
       ctx.rotate(d.rot);
       ctx.globalAlpha = d.a;
-      ctx.fillStyle = d.color;
-      ctx.fill(d.path);
-      ctx.globalAlpha = d.a * 0.9;
-      ctx.lineWidth = 2; ctx.strokeStyle = 'rgba(255,255,255,.9)';
-      ctx.stroke(d.path);
+      ctx.drawImage(img, -sz / 2, -sz / 2, sz, sz);
       ctx.restore();
     }
+  }
+  function drawDrift(t) {
+    ctx.clearRect(0, 0, W, H);
+    drawStars(t, 1);
+    drawLayer(t, 0);                                 // 遠景
+    drawLayer(t, 1);                                 // 中景
+    if (skyline) ctx.drawImage(skyline, 0, 0, W, H); // 街並みは中景より手前
+    drawLayer(t, 2);                                 // 手前(街より前を横切る=奥行き)
   }
 
   function loop(t) { drawDrift(t); raf = requestAnimationFrame(loop); }
@@ -3522,41 +3621,104 @@ if (STAGE) (function () {
      漂っていたその粒が、そのまま中心へ吸い寄せられて円になる必要がある。
      ============================================================ */
   var handed = false;
+  var viaShow = false;   // startShow経由か（遅れて開いた人には④の閃光を出さないため）
+
+  /* ④「光が広がる」— 円が完成した(revealedが立った)瞬間、画面全体を光が包む */
+  (function () {
+    var bloomEl = document.getElementById('bloomFlash');
+    var bloomed = false;
+    setInterval(function () {
+      if (bloomed || !revealed) return;
+      bloomed = true;
+      if (viaShow && !REDUCED()) {
+        bloomEl.classList.add('on');
+        setTimeout(function () { bloomEl.classList.remove('on'); }, 1800);
+      }
+    }, 150);
+  })();
 
   function gather(onDone) {
-    var DUR = 3400;
+    /* 資料②③: 中心に光が生まれ、光の柱が回り、ピースが渦を巻いて吸い込まれていく。
+       直線的に集めると「移動」にしか見えない。渦(角度も動かす)にすると「引力」に見える。 */
+    var DUR = 3800;
     var cx = W / 2, cy = H / 2;
     for (var i = 0; i < drifts.length; i++) {
       var d = drifts[i];
-      d.sx = d.x; d.sy = d.y; d.sa = d.a;
-      d.dly = Math.random() * 900;              // 少しずつ動き出す（一斉だと機械的）
-      d.spin = (Math.random() - 0.5) * 0.05;
+      var vx2 = d.x - cx, vy2 = d.y - cy;
+      d.r0 = Math.hypot(vx2, vy2) || 1;
+      d.a0 = Math.atan2(vy2, vx2);
+      d.sc0 = d.sc; d.al0 = d.a;
+      d.dly = Math.random() * 1000;             // 少しずつ動き出す（一斉だと機械的）
+      d.done = false;
     }
+    var pulses = [];                            // 吸い込まれた瞬間の波紋
     var t0 = performance.now();
     (function step(now) {
       var t = now - t0;
       ctx.clearRect(0, 0, W, H);
+      drawStars(t, 0.5);
+      if (skyline) ctx.drawImage(skyline, 0, 0, W, H);
+
+      // 光の柱(ゆっくり回る)と中心の光球。加算合成で夜空に「光」として乗せる
+      var ramp = Math.min(Math.max((t - 250) / 1200, 0), 1);
+      ctx.save();
+      ctx.globalCompositeOperation = 'lighter';
+      for (var k = 0; k < 7; k++) {
+        var ang = t * 0.00012 + k * (6.283 / 7);
+        var L = Math.min(W, H) * 0.75;
+        var g = ctx.createLinearGradient(cx, cy, cx + Math.cos(ang) * L, cy + Math.sin(ang) * L);
+        g.addColorStop(0, 'rgba(255,244,200,' + (0.15 * ramp) + ')');
+        g.addColorStop(1, 'rgba(255,244,200,0)');
+        ctx.fillStyle = g;
+        ctx.beginPath(); ctx.moveTo(cx, cy);
+        ctx.arc(cx, cy, L, ang - 0.045, ang + 0.045);
+        ctx.closePath(); ctx.fill();
+      }
+      var orbR = 24 + 92 * ramp + 6 * Math.sin(t * 0.004);
+      var orb = ctx.createRadialGradient(cx, cy, 0, cx, cy, orbR);
+      orb.addColorStop(0, 'rgba(255,253,240,.95)');
+      orb.addColorStop(0.5, 'rgba(255,238,180,.55)');
+      orb.addColorStop(1, 'rgba(255,238,180,0)');
+      ctx.fillStyle = orb;
+      ctx.beginPath(); ctx.arc(cx, cy, orbR, 0, 6.283); ctx.fill();
+      ctx.restore();
+
       var allDone = true;
-      for (var i = 0; i < drifts.length; i++) {
-        var d = drifts[i];
-        var f = Math.min(Math.max((t - d.dly) / DUR, 0), 1);
+      for (var i2 = 0; i2 < drifts.length; i2++) {
+        var d2 = drifts[i2];
+        var f = Math.min(Math.max((t - d2.dly) / DUR, 0), 1);
         if (f < 1) allDone = false;
-        var e = 1 - Math.pow(1 - f, 3);          // 最初ゆっくり、中心へ吸い込まれる
-        var x = d.sx + (cx - d.sx) * e;
-        var y = d.sy + (cy - d.sy) * e;
-        var sc = 1 - e * 0.72;                    // 近づくほど小さく
-        var a = d.sa * (1 - Math.pow(f, 1.8));    // 中心で溶けるように消える
-        if (a <= 0.01) continue;
+        else if (!d2.done) { d2.done = true; pulses.push({ t: t }); }
+        var e = 1 - Math.pow(1 - f, 3);
+        var r = d2.r0 * (1 - e);
+        var a2 = d2.a0 + 1.35 * e;               // ← 渦。角度も進めて吸い込まれる
+        var alpha = d2.al0 * (1 - Math.pow(f, 2.2));
+        if (alpha <= 0.01) continue;
+        var sp2 = sprites[d2.color]; if (!sp2) continue;
+        var img2 = d2.layer === 1 ? sp2.sharp : sp2.soft;
+        var sz2 = img2.width * (d2.sc0 * (1 - e * 0.8) + 0.05);
         ctx.save();
-        ctx.translate(x, y);
-        ctx.rotate(d.rot + d.spin * t * 0.02);
-        ctx.scale(sc, sc);
-        ctx.globalAlpha = a;
-        ctx.fillStyle = d.color; ctx.fill(d.path);
-        ctx.lineWidth = 2; ctx.strokeStyle = 'rgba(255,255,255,.9)'; ctx.stroke(d.path);
+        ctx.translate(cx + Math.cos(a2) * r, cy + Math.sin(a2) * r);
+        ctx.rotate(d2.rot + e * 2.2);
+        ctx.globalAlpha = alpha;
+        ctx.drawImage(img2, -sz2 / 2, -sz2 / 2, sz2, sz2);
         ctx.restore();
       }
-      if (!allDone) requestAnimationFrame(step);
+
+      // 吸い込まれた瞬間、中心から小さな波紋がひろがる（想いが溜まっていく感じ）
+      ctx.save();
+      ctx.globalCompositeOperation = 'lighter';
+      for (var p3 = pulses.length - 1; p3 >= 0; p3--) {
+        var q = (t - pulses[p3].t) / 420;
+        if (q >= 1) { pulses.splice(p3, 1); continue; }
+        ctx.globalAlpha = (1 - q) * 0.5;
+        ctx.strokeStyle = '#FFF7DC'; ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.arc(cx, cy, 8 + q * 46, 0, 6.283); ctx.stroke();
+      }
+      ctx.restore();
+      ctx.globalAlpha = 1;
+
+      if (!allDone || pulses.length) requestAnimationFrame(step);
       else onDone();
     })(t0);
   }
@@ -3575,6 +3737,7 @@ if (STAGE) (function () {
   startShow = function () {
     if (handed) return;
     handed = true;
+    viaShow = true;
     if (REDUCED()) {                              // 動きを減らす設定では演出を省く
       if (raf) cancelAnimationFrame(raf);
       document.body.classList.remove('waiting');
@@ -3692,6 +3855,8 @@ if (STAGE) (function () {
       ['全画面', document.fullscreenElement ? 'ON' : 'OFF（Enterで切替）', document.fullscreenElement ? 'good' : ''],
       ['ブラウザ', navigator.userAgent.slice(0, 68), ''],
       ['Canvas', !!document.createElement('canvas').getContext('2d') ? '対応' : '非対応', !!document.createElement('canvas').getContext('2d') ? 'good' : 'bad'],
+      (function () { try { var c3 = document.createElement('canvas'); var gl = c3.getContext('webgl2') ? '2.0' : (c3.getContext('webgl') ? '1.0' : ''); return ['WebGL(3D)', gl ? '対応 ' + gl : '非対応', gl ? 'good' : '']; } catch (e) { return ['WebGL(3D)', '確認エラー', '']; } })(),
+      ['WebGPU(次世代3D)', ('gpu' in navigator) ? '対応' : '未対応', ''],
       ['音（Web Audio）', (window.AudioContext || window.webkitAudioContext) ? '対応' : '非対応', (window.AudioContext || window.webkitAudioContext) ? 'good' : 'bad'],
       ['動きを減らす設定', REDUCED() ? 'ON（演出が簡略化されます）' : 'OFF', REDUCED() ? 'bad' : 'good'],
       ['データ', SB_ON ? '本番サーバに接続中' : 'ダミー' + placed + '件（サーバ非接続）', SB_ON ? 'good' : ''],
