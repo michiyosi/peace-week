@@ -593,6 +593,10 @@
   .stagePanel{position:fixed;top:0;right:0;z-index:60;display:none;gap:6px;padding:8px;
     background:rgba(10,40,75,.82);border-bottom-left-radius:12px;backdrop-filter:blur(6px)}
   body.stage .stagePanel{display:flex;flex-wrap:wrap;max-width:60vw;justify-content:flex-end}
+  /* ★LIVE（一般公開ページ）では運営の操作パネルを絶対に出さない。
+     出すと参加者が自分で「お披露目」を押せてしまい、8/6を待たずに完成絵が見えてしまう。
+     .live は待機画面が消えると外れるため、恒久的な .livemode で抑止する。 */
+  body.livemode .stagePanel{display:none !important}
   body.stage.hideui .stagePanel{opacity:0;pointer-events:none;transition:opacity .4s}
   .stagePanel button{border:1.5px solid rgba(255,255,255,.42);background:rgba(255,255,255,.1);
     color:#fff;border-radius:9px;padding:7px 11px;font-size:12px;font-weight:700;cursor:pointer;
@@ -3103,7 +3107,7 @@ if (document.fonts && document.fonts.ready) document.fonts.ready.then(function (
 
 /* test hooks */
 window.PW = {
-  version: '9.5',
+  version: '9.5.2',
   hash: function (s) { sha256hex(String(s), function (h) { console.log('ADMIN_HASH:', h); }); return '（コンソールにハッシュを出力しました）'; },
   place: function (c, m, n) { return placePiece(nextEmpty(), c || PALETTE[0], m || 'テスト', n || '', true); },
   assemble: assemble, reset: function () { seed(true); }, count: function () { return placed; }, target: TARGET,
@@ -3174,6 +3178,20 @@ function runSelfTest() {
 
       // 規約モーダル
       openTerms(); check('利用規約モーダルが開く', terms.classList.contains('on')); closeTerms();
+
+      // --- 回帰: LIVE（一般公開ページ）に運営の操作を漏らしていないか ---
+      // ?live=1 は8/6にお客さんが開くページ。ここに「お披露目」ボタンやSpaceキーが
+      // 効いてしまうと、当日を待たずに完成絵を自分で見られてしまい、企画が崩れる。
+      // ※このセルフテストは ?live=1 では走らない（selftestはSB_ON=falseの通常モード）ため、
+      //   CSSとフラグの整合をここで静的に検査する。
+      var liveCss = [...document.styleSheets].some(function (ss) {
+        try { return [...ss.cssRules].some(function (r) {
+          return r.selectorText && r.selectorText.indexOf('body.livemode .stagePanel') >= 0;
+        }); } catch (e) { return false; }
+      });
+      check('LIVEでは運営パネルをCSSで抑止', liveCss);
+      check('LIVEは操作パネルのDOMを持つが既定で非表示',
+        !!document.getElementById('stagePanel') && !document.body.classList.contains('livemode'));
 
       // --- 回帰: リロード後にパスワードが消えても、鍵の要る操作が続行できるか ---
       // sessionStorageには「解錠済み」の印しか保存しない（パスワードは保存しない）ため、
@@ -3440,7 +3458,13 @@ if (LIVE) (function () {
 if (STAGE) (function () {
   document.body.classList.add('stage');
   if (REHEARSAL) document.body.classList.add('rehearsal');
+  if (LIVE) document.body.classList.add('livemode');
   try { closeTut(); } catch (e) {}
+
+  /* ★LIVE（一般公開ページ）では、運営の操作を一切受け付けない。
+     一般の視聴者が自分で「お披露目」を押せると、8/6を待たずに完成絵が見えてしまう。
+     お披露目はサーバからの配信(showPoll)でのみ始まる。 */
+  var OPERATOR = !LIVE;
 
   var sgNum = document.getElementById('sgNum');
   var sgCap = document.getElementById('sgCap');
@@ -3465,26 +3489,30 @@ if (STAGE) (function () {
   }
   window.addEventListener('mousemove', poke); poke();
 
-  function go() { if (!assembling && !revealed) assemble(); }
+  function go() { if (OPERATOR && !assembling && !revealed) assemble(); }
   function full() {
     if (document.fullscreenElement) document.exitFullscreen();
     else document.documentElement.requestFullscreen && document.documentElement.requestFullscreen();
   }
-  document.getElementById('sgGo').addEventListener('click', go);
-  document.getElementById('sgFlip').addEventListener('click', function () { if (!flipBtn.hidden) flipBtn.click(); });
-  document.getElementById('sgReset').addEventListener('click', function () { seed(true); hud(); });
-  document.getElementById('sgFull').addEventListener('click', full);
-  document.getElementById('sgDiag').addEventListener('click', function () { buildDiag(); diag.classList.add('on'); });
-  document.getElementById('diagClose').addEventListener('click', function () { diag.classList.remove('on'); });
+  if (OPERATOR) {
+    document.getElementById('sgGo').addEventListener('click', go);
+    document.getElementById('sgFlip').addEventListener('click', function () { if (!flipBtn.hidden) flipBtn.click(); });
+    document.getElementById('sgReset').addEventListener('click', function () { seed(true); hud(); });
+    document.getElementById('sgFull').addEventListener('click', full);
+    document.getElementById('sgDiag').addEventListener('click', function () { buildDiag(); diag.classList.add('on'); });
+    document.getElementById('diagClose').addEventListener('click', function () { diag.classList.remove('on'); });
+  }
 
   window.addEventListener('keydown', function (e) {
     if (e.target.tagName === 'INPUT') return;
     var k = e.key.toLowerCase();
+    // 全画面は一般の視聴者にも許す（スマホで大きく見たい）。それ以外は運営のみ。
+    if (e.key === 'Enter') { full(); return; }
+    if (!OPERATOR) return;
     if (e.key === ' ') { e.preventDefault(); go(); }
     else if (k === 'f') { if (!flipBtn.hidden) flipBtn.click(); }
     else if (k === 'r') { seed(true); hud(); }
     else if (k === 'd') { buildDiag(); diag.classList.toggle('on'); }
-    else if (e.key === 'Enter') full();
   });
 
   /* ---- 画面診断: 18時のリハで「このビジョンは何者か」を5分で確定させる ---- */
