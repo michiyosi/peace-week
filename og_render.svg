@@ -1,0 +1,89 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#3F8FD8"/>
+      <stop offset="0.42" stop-color="#67AEE9"/>
+      <stop offset="0.78" stop-color="#A9D4F2"/>
+      <stop offset="1" stop-color="#DCEEFB"/>
+    </linearGradient>
+    <radialGradient id="sun" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#FFFDF4"/>
+      <stop offset="0.4" stop-color="#FFF0C6" stop-opacity="0.95"/>
+      <stop offset="1" stop-color="#FFE9A8" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="core" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="0.6" stop-color="#FFF0C6"/>
+      <stop offset="1" stop-color="#FFDE93"/>
+    </radialGradient>
+    <linearGradient id="glow" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.9"/>
+      <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1200" height="630" fill="url(#sky)"/>
+
+  <circle cx="1120" cy="-40" r="360" fill="url(#glow)" opacity="0.85"/>
+  <g stroke="#ffffff" stroke-opacity="0.16" stroke-width="2">
+    <line x1="1120" y1="-40" x2="560" y2="360"/>
+    <line x1="1120" y1="-40" x2="720" y2="420"/>
+    <line x1="1120" y1="-40" x2="900" y2="470"/>
+    <line x1="1120" y1="-40" x2="1080" y2="470"/>
+  </g>
+
+  <g fill="#ffffff" opacity="0.9">
+    <ellipse cx="150" cy="520" rx="120" ry="34"/>
+    <ellipse cx="250" cy="500" rx="90" ry="28"/>
+    <ellipse cx="1040" cy="560" rx="130" ry="34"/>
+  </g>
+
+  <g transform="translate(830,315)">
+    <circle r="250" fill="url(#sun)"/>
+    <g fill="none" stroke="#ffffff" stroke-opacity="0.5" stroke-width="2.5">
+      <circle r="60"/><circle r="98"/><circle r="136"/><circle r="174"/><circle r="212"/>
+    </g>
+    <g stroke="#ffffff" stroke-width="2.5" stroke-opacity="0.85">
+      <path d="M0,-98 A98,98 0 0,1 49,-84 L30,-52 A60,60 0 0,0 0,-60 Z" fill="#7CC4F0" fill-opacity="0.92"/>
+      <path d="M49,-84 A98,98 0 0,1 84,-49 L52,-30 A60,60 0 0,0 30,-52 Z" fill="#F7D97C" fill-opacity="0.92"/>
+      <path d="M84,-49 A98,98 0 0,1 98,0 L60,0 A60,60 0 0,0 52,-30 Z" fill="#A8E3B0" fill-opacity="0.92"/>
+      <path d="M98,0 A98,98 0 0,1 84,49 L52,30 A60,60 0 0,0 60,0 Z" fill="#F5A8C8" fill-opacity="0.92"/>
+      <path d="M84,49 A98,98 0 0,1 49,84 L30,52 A60,60 0 0,0 52,30 Z" fill="#C3A8E8" fill-opacity="0.92"/>
+      <path d="M49,84 A98,98 0 0,1 0,98 L0,60 A60,60 0 0,0 30,52 Z" fill="#F49A93" fill-opacity="0.92"/>
+      <path d="M0,98 A98,98 0 0,1 -49,84 L-30,52 A60,60 0 0,0 0,60 Z" fill="#66C6D2" fill-opacity="0.92"/>
+      <path d="M-49,84 A98,98 0 0,1 -84,49 L-52,30 A60,60 0 0,0 -30,52 Z" fill="#F49A62" fill-opacity="0.92"/>
+      <path d="M-84,49 A98,98 0 0,1 -98,0 L-60,0 A60,60 0 0,0 -52,30 Z" fill="#8B8BE0" fill-opacity="0.92"/>
+      <path d="M-98,0 A98,98 0 0,1 -84,-49 L-52,-30 A60,60 0 0,0 -60,0 Z" fill="#BADC7E" fill-opacity="0.92"/>
+      <path d="M-84,-49 A98,98 0 0,1 -49,-84 L-30,-52 A60,60 0 0,0 -52,-30 Z" fill="#7FD8DC" fill-opacity="0.92"/>
+      <path d="M-49,-84 A98,98 0 0,1 0,-98 L0,-60 A60,60 0 0,0 -30,-52 Z" fill="#F5B8CD" fill-opacity="0.92"/>
+    </g>
+    <g stroke="#ffffff" stroke-width="2.5" stroke-opacity="0.8" opacity="0.9">
+      <path d="M0,-136 A136,136 0 0,1 52,-125 L37,-93 A98,98 0 0,0 0,-98 Z" fill="#F7D97C" fill-opacity="0.85"/>
+      <path d="M96,-96 A136,136 0 0,1 125,-52 L90,-37 A98,98 0 0,0 69,-69 Z" fill="#7CC4F0" fill-opacity="0.85"/>
+      <path d="M136,0 A136,136 0 0,1 125,52 L90,37 A98,98 0 0,0 98,0 Z" fill="#F5A8C8" fill-opacity="0.85"/>
+      <path d="M52,125 A136,136 0 0,1 0,136 L0,98 A98,98 0 0,0 37,90 Z" fill="#A8E3B0" fill-opacity="0.85"/>
+      <path d="M-96,96 A136,136 0 0,1 -125,52 L-90,37 A98,98 0 0,0 -69,69 Z" fill="#C3A8E8" fill-opacity="0.85"/>
+      <path d="M-136,0 A136,136 0 0,1 -125,-52 L-90,-37 A98,98 0 0,0 -98,0 Z" fill="#F49A62" fill-opacity="0.85"/>
+      <path d="M-52,-125 A136,136 0 0,1 0,-136 L0,-98 A98,98 0 0,0 -37,-90 Z" fill="#66C6D2" fill-opacity="0.85"/>
+    </g>
+    <circle r="60" fill="url(#core)"/>
+    <text x="0" y="10" text-anchor="middle" font-family="'Noto Serif CJK JP', Georgia, serif" font-size="34" fill="#B9893B" font-style="italic">2045</text>
+  </g>
+
+  <g stroke="#ffffff" stroke-width="3" stroke-opacity="0.9">
+    <rect x="520" y="120" width="46" height="46" rx="10" fill="#F5B8CD" transform="rotate(-12 543 143)"/>
+    <rect x="1080" y="250" width="40" height="40" rx="9" fill="#BADC7E" transform="rotate(16 1100 270)"/>
+    <rect x="600" y="470" width="42" height="42" rx="9" fill="#F7D97C" transform="rotate(10 621 491)"/>
+  </g>
+
+  <text x="90" y="210" font-family="'Noto Serif CJK JP', Georgia, serif" font-size="88" fill="#ffffff" font-weight="700" letter-spacing="2">Piece Project</text>
+  <text x="92" y="300" font-family="'Noto Serif CJK JP', serif" font-size="41" fill="#ffffff" font-weight="600" letter-spacing="3">8月6日、人々が思う</text>
+  <text x="92" y="360" font-family="'Noto Serif CJK JP', serif" font-size="41" fill="#ffffff" font-weight="600" letter-spacing="3">“2045年の広島”を形に。</text>
+  <text x="94" y="430" font-family="'Noto Serif CJK JP', serif" font-size="24" fill="#EAF4FC" font-weight="500" letter-spacing="2">一つひとつの想いが、未来の広島をつくっていく。</text>
+
+  <g transform="translate(92,485)">
+    <rect x="0" y="0" width="430" height="46" rx="23" fill="#ffffff" fill-opacity="0.9"/>
+    <text x="26" y="30" font-family="'Noto Serif CJK JP', serif" font-size="21" fill="#2F6FB5" font-weight="600" letter-spacing="1">810のピースで、みんなの未来をつくる</text>
+  </g>
+  <text x="92" y="580" font-family="'Noto Serif CJK JP', Georgia, serif" font-size="18" fill="#DCEEFB" font-style="italic" letter-spacing="3">HIROSHIMA PIECE WEEK 2026 · 8/1–8/6 · メルパルク</text>
+</svg>
