@@ -3224,7 +3224,7 @@ if (document.fonts && document.fonts.ready) document.fonts.ready.then(function (
 
 /* test hooks */
 window.PW = {
-  version: '10.1',
+  version: '10.1.1',
   hash: function (s) { sha256hex(String(s), function (h) { console.log('ADMIN_HASH:', h); }); return '（コンソールにハッシュを出力しました）'; },
   place: function (c, m, n) { return placePiece(nextEmpty(), c || PALETTE[0], m || 'テスト', n || '', true); },
   assemble: assemble, reset: function () { seed(true); }, count: function () { return placed; }, target: TARGET,
@@ -3868,11 +3868,22 @@ if (STAGE) (function () {
     if (raf) cancelAnimationFrame(raf);
     liveWait.classList.add('gathering');          // 文字が引く
     showVideoBox.classList.add('on');
-    try { showVid.muted = false; } catch (e) {}   // 会場PCは操作済みなので音が出せる
+    // ★順序が命: ブラウザは「音つき自動再生」をブロックする。
+    //   まずミュートで確実に再生を始め、そのあと操作済みの端末だけ音を解除する。
+    //   会場PCは開演前に必ずクリック/Enterしているので音が出る。
+    try { showVid.muted = true; } catch (e) {}
     // 途中から開いた場合も、全端末で「同じコマ」が映るよう時刻から頭出し
     var off = showFireAt ? Math.max(0, (serverNow() - showFireAt) / 1000) : 0;
     try { showVid.currentTime = off; } catch (e) {}
-    var pr = showVid.play(); if (pr && pr.catch) pr.catch(function () {});
+    var unmute = function () {
+      try {
+        var acted = (navigator.userActivation && navigator.userActivation.hasBeenActive);
+        if (acted || SND_ON) showVid.muted = false;
+      } catch (e) {}
+    };
+    var pr = showVid.play();
+    if (pr && pr.then) pr.then(unmute, function () { try { showVid.muted = true; showVid.play(); } catch (e) {} });
+    else unmute();
     var corr = setInterval(function () {          // 再生ズレの補正(±0.4s)
       if (!showFireAt || showVid.paused || showVid.ended || !showVid.duration) return;
       var want = (serverNow() - showFireAt) / 1000;
