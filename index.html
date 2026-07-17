@@ -480,6 +480,55 @@
   .bdNote{font-size:10.5px;line-height:1.8;color:var(--ink-soft);opacity:.85;margin:10px 0 0;text-align:center}
   .agreeMinor{display:block;margin-top:4px;font-size:10.5px;line-height:1.7;color:var(--ink-soft);opacity:.9;font-weight:600}
   .tmMail{color:#2F6FB5;font-weight:700;text-decoration:underline;word-break:break-all}
+
+  /* ===== 8/6 オンライン同時公開ページの待機画面 ===== */
+  #liveWait{position:fixed;inset:0;z-index:40;display:none;overflow-y:auto;
+    background:linear-gradient(180deg,#2E6FA8 0%,#4A93C8 38%,#8FC4E4 72%,#CDE6F5 100%)}
+  body.live #liveWait{display:block}
+  body.live{overflow:hidden}
+  /* ※盤面(#boardWrap)は隠さない。隠すとサイズが0になり、切り替え時に描画が崩れる。
+     待機画面が不透明な背景で全面を覆うので、見た目には出てこない。 */
+  #driftCanvas{position:fixed;inset:0;width:100%;height:100%;pointer-events:none}
+  .lwInner{position:relative;z-index:2;max-width:760px;margin:0 auto;padding:7vh 22px 60px;text-align:center}
+  .lwTag{display:inline-block;font-family:var(--latin);font-style:italic;font-size:12px;
+    letter-spacing:.26em;color:#EAF4FC;background:rgba(255,255,255,.16);
+    border:1px solid rgba(255,255,255,.3);border-radius:999px;padding:6px 16px}
+  .lwTitle{margin:18px 0 14px;font-family:var(--serif);font-size:clamp(25px,5.2vw,42px);
+    font-weight:600;line-height:1.55;color:#fff;letter-spacing:.04em;
+    text-shadow:0 4px 26px rgba(10,45,85,.45)}
+  .lwLead{margin:0 0 26px;font-size:13.5px;line-height:2;color:#EAF4FC;font-weight:600;
+    text-shadow:0 2px 12px rgba(10,45,85,.5)}
+  .lwLead b{color:#FFE9A8}
+  .lwCd{display:inline-flex;align-items:baseline;gap:12px;margin:0 0 30px;
+    background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.32);
+    border-radius:16px;padding:12px 24px;backdrop-filter:blur(8px)}
+  .lwCdLbl{font-family:var(--serif);font-size:12.5px;font-weight:700;color:#EAF4FC;letter-spacing:.1em}
+  .lwCdVal{font-family:var(--latin);font-size:26px;font-weight:600;color:#fff}
+  .lwCdVal b{font-size:34px;color:#FFE9A8;margin:0 2px}
+  .lwCards{display:grid;gap:14px;grid-template-columns:1fr 1fr;text-align:left;margin:0 0 24px}
+  @media (max-width:640px){ .lwCards{grid-template-columns:1fr} .lwInner{padding-top:4vh} }
+  .lwCard{background:rgba(255,255,255,.94);border-radius:16px;padding:18px 18px 16px;
+    box-shadow:0 14px 40px rgba(10,45,85,.22)}
+  .lwCardH{display:block;font-family:var(--serif);font-size:13.5px;font-weight:700;
+    color:#2F6FB5;margin:0 0 10px}
+  .lwCard dl{margin:0;display:grid;grid-template-columns:auto 1fr;gap:6px 12px;
+    font-size:12px;line-height:1.85}
+  .lwCard dt{color:var(--ink-soft);font-weight:700;white-space:nowrap}
+  .lwCard dd{margin:0;color:#2E3A45;font-weight:600}
+  .lwP{margin:0 0 10px;font-size:12px;line-height:1.95;color:#2E3A45;font-weight:600}
+  .lwP b{color:#2F6FB5}
+  .lwNote{margin:0;font-size:10.5px;line-height:1.8;color:var(--ink-soft);font-weight:600}
+  .lwSound{margin:12px 0 8px;width:100%;border:1.5px solid #3E8EE8;background:#fff;
+    color:#2F6FB5;border-radius:11px;padding:10px;font-family:var(--serif);
+    font-size:12.5px;font-weight:700;cursor:pointer}
+  .lwSound:hover{background:#F2F8FD}
+  .lwSound.on{background:#3E8EE8;border-color:#3E8EE8;color:#fff}
+  .lwFoot{margin:6px 0 0;font-size:11px;line-height:1.9;color:#EAF4FC;font-weight:600;
+    text-shadow:0 2px 10px rgba(10,45,85,.5)}
+  .lwFoot .linklike{color:#fff;text-decoration:underline}
+  /* 配信が来たら待機画面をやわらかく消す */
+  #liveWait.fading{animation:lwOut 1.1s ease forwards}
+  @keyframes lwOut{to{opacity:0;transform:scale(1.04);visibility:hidden}}
   /* 全員配信ボタン（8/6に押す本番のボタン。他と明確に見分けがつくように） */
   .abtn.live{background:linear-gradient(135deg,#E8434F,#B8232F);border-color:#B8232F;color:#fff;font-weight:700}
   .abtn.live:hover{filter:brightness(1.08)}
@@ -513,7 +562,7 @@
   body.stage #wiz,
   body.stage #about,
   body.stage #read,
-  body.stage #terms,
+  body.stage:not(.live) #terms,   /* LIVEの待機画面からは規約を開けるようにする */
   body.stage #events,
   body.stage #gate,
   body.stage #stats,
@@ -1069,6 +1118,46 @@
   </div>
 </div>
 <!-- ===== 大画面（ステージ）モード用のUI ===== -->
+<!-- ===== 8/6 オンライン同時公開ページ（?live=1）の待機画面 =====
+     お披露目まで: ピースが漂う中に、開催の案内とカウントダウン。
+     配信を受け取ると liveWait が消え、そのまま演出へ移る。 -->
+<div id="liveWait">
+  <canvas id="driftCanvas" aria-hidden="true"></canvas>
+  <div class="lwInner">
+    <span class="lwTag">Hiroshima Piece Week 2026</span>
+    <h1 class="lwTitle">2045年の広島を、<br>みんなでひとつの絵に。</h1>
+    <p class="lwLead">この夏、市内各所で集まった「2045年の広島への想い」が、<br>8月6日、一枚の絵になります。<b>その瞬間を、ここで同時にご覧いただけます。</b></p>
+
+    <div class="lwCd" id="lwCd">
+      <span class="lwCdLbl">お披露目まで</span>
+      <span class="lwCdVal" id="lwCdVal">–</span>
+    </div>
+
+    <div class="lwCards">
+      <div class="lwCard">
+        <span class="lwCardH">◆ 会場でご覧になる方</span>
+        <dl>
+          <dt>日時</dt><dd>2026年8月6日（木）19:00〜（予定）</dd>
+          <dt>場所</dt><dd>メルパルク広島（HIROSHIMA GATE PARK メルパルク前 予定）</dd>
+          <dt>内容</dt><dd>ピースアート完成投影・企画説明・作品解説など<br>『Pride of Hiroshima ナイトミュージアム』18:00〜21:30 の中で実施</dd>
+          <dt>入場料</dt><dd>無料（どなたでもご参加いただけます）</dd>
+        </dl>
+      </div>
+      <div class="lwCard">
+        <span class="lwCardH">◆ オンラインでご覧になる方</span>
+        <p class="lwP">会場に来られない方も、<b>この画面のまま</b>お待ちください。<br>8月6日19:00〜（予定）、会場と<b>同じ瞬間</b>に、完成した絵が現れます。</p>
+        <p class="lwNote">事前のログインや入力は不要です。<br>このページを開いたままにしておいてください。</p>
+        <button class="lwSound" id="lwSound" type="button">🔈 音を出す準備をする</button>
+        <p class="lwNote lwSoundNote" id="lwSoundNote">※ブラウザの決まりで、一度タップしないと音が出せません。当日、音つきでご覧になりたい方は先に押しておいてください。</p>
+      </div>
+    </div>
+
+    <p class="lwFoot">主催: piece hiroshima ／ Hiroshima Piece Week 2026<br>
+      <button type="button" class="linklike" id="lwTerms">利用規約・プライバシー</button>
+    </p>
+  </div>
+</div>
+
 <div class="rehBadge">● リハーサル用（本番データではありません）</div>
 <div class="liveCd" id="liveCd">まもなく、みんなの画面で同時にお披露目します <b id="liveCdN">8</b> 秒</div>
 <div class="stageHud">
@@ -1135,7 +1224,14 @@ var SB_KEY = 'sb_publishable_ROB27m0jG2DYzvo0dY-j0w_CWhmC7bD'; // 公開可能�
    本番のビジョンは「実データ＋stage」、リハは「ダミー＋stage」で同じ絵になる。 */
 var IS_FILE = (location.protocol === 'file:');
 var REHEARSAL = IS_FILE || (Q.has('rehearsal') && qn('rehearsal', 0) > 0);
-var STAGE = REHEARSAL || (Q.has('stage') && qn('stage', 0) > 0);
+/* LIVE: 8/6のオンライン同時公開ページ（?live=1）。
+   会場に来られない人が、同じ瞬間を同じ画面で見るための場所。
+   お披露目まで＝ピースが漂う待機画面＋開催案内、お披露目＝配信を受けて再生。
+   演出そのものは会場の投影と同一なので、STAGEの土台をそのまま使う。 */
+var LIVE = (Q.has('live') && qn('live', 0) > 0);
+var STAGE = REHEARSAL || LIVE || (Q.has('stage') && qn('stage', 0) > 0);
+/* お披露目の日時（サイト全体でここだけを見る） */
+var SHOW_AT = new Date('2026-08-06T19:00:00+09:00');
 // セルフテスト中は本番DBを汚さないよう保存オフ（demo扱い）
 var SB_ON = !((Q.has('demo') && qn('demo', 0) > 0) || (Q.has('selftest') && qn('selftest', 0) > 0) || REHEARSAL);
 function sbHeaders(extra) {
@@ -2970,7 +3066,7 @@ reduceMQ.addEventListener ? reduceMQ.addEventListener('change', onRMChange) : re
 /* ---------- 8/6 カウントダウン & 深掘りセクションのCTA ---------- */
 (function () {
   var el = document.getElementById('cdown'), dEl = document.getElementById('cdays');
-  var target = new Date('2026-08-06T10:00:00+09:00');
+  var target = SHOW_AT;
   var days = Math.ceil((target - Date.now()) / 86400000);
   if (days > 1) { dEl.textContent = days; el.hidden = false; }
   else if (days >= 0) { el.innerHTML = '<b>まもなくお披露目</b> ─ この円が、一枚の絵に変わります'; el.hidden = false; }
@@ -3003,7 +3099,7 @@ if (document.fonts && document.fonts.ready) document.fonts.ready.then(function (
 
 /* test hooks */
 window.PW = {
-  version: '9.4',
+  version: '9.5',
   hash: function (s) { sha256hex(String(s), function (h) { console.log('ADMIN_HASH:', h); }); return '（コンソールにハッシュを出力しました）'; },
   place: function (c, m, n) { return placePiece(nextEmpty(), c || PALETTE[0], m || 'テスト', n || '', true); },
   assemble: assemble, reset: function () { seed(true); }, count: function () { return placed; }, target: TARGET,
@@ -3190,6 +3286,135 @@ function renderSelfTest(results) {
 if (Q.has('selftest') && qn('selftest', 0) > 0) {
   setTimeout(function () { try { closeTut(); } catch (e) {} runSelfTest(); }, 900);
 }
+
+/* ============================================================
+   LIVE — 8/6 オンライン同時公開ページ（?live=1）
+   会場に来られない人が、同じ瞬間を同じ画面で見るための場所。
+   お披露目まで: ピースが漂う待機画面＋開催案内＋カウントダウン
+   配信を受信: 待機画面がやわらかく消え、そのまま演出へ
+   ============================================================ */
+if (LIVE) (function () {
+  document.body.classList.add('live');
+  try { closeTut(); } catch (e) {}
+
+  var liveWait = document.getElementById('liveWait');
+  var cv = document.getElementById('driftCanvas');
+  var ctx = cv.getContext('2d');
+  var W = 0, H = 0, DPR = 1, drifts = [], raf = null;
+
+  /* 1枚の漂うピース。盤面のジグソーと同じ「きのこ型のツメ」で形を揃える */
+  function driftPath(s) {
+    var p = new Path2D(), k = s * 0.30, r = s * 0.5;
+    p.moveTo(-r, -r);
+    p.lineTo(-k, -r); p.bezierCurveTo(-k * 0.2, -r - k * 1.5, k * 0.2, -r - k * 1.5, k, -r);
+    p.lineTo(r, -r);
+    p.lineTo(r, -k); p.bezierCurveTo(r + k * 1.5, -k * 0.2, r + k * 1.5, k * 0.2, r, k);
+    p.lineTo(r, r);
+    p.lineTo(k, r); p.bezierCurveTo(k * 0.2, r + k * 1.5, -k * 0.2, r + k * 1.5, -k, r);
+    p.lineTo(-r, r);
+    p.lineTo(-r, k); p.bezierCurveTo(-r + k * 1.2, k * 0.2, -r + k * 1.2, -k * 0.2, -r, -k);
+    p.closePath();
+    return p;
+  }
+
+  function makeDrifts() {
+    drifts = [];
+    var n = Math.round(Math.min(46, Math.max(16, (W * H) / 26000)));
+    for (var i = 0; i < n; i++) {
+      var s = 16 + Math.random() * 30;
+      drifts.push({
+        x: Math.random() * W, y: Math.random() * H,
+        s: s, path: driftPath(s),
+        color: PALETTE[(Math.random() * PALETTE.length) | 0],
+        rot: Math.random() * Math.PI * 2,
+        vr: (Math.random() - 0.5) * 0.0035,
+        vx: (Math.random() - 0.5) * 0.13,
+        vy: -0.05 - Math.random() * 0.12,     // ゆっくり上へ昇る
+        ph: Math.random() * Math.PI * 2,
+        amp: 8 + Math.random() * 16,
+        a: 0.5 + Math.random() * 0.4
+      });
+    }
+  }
+
+  function resizeDrift() {
+    DPR = Math.min(window.devicePixelRatio || 1, 2);
+    W = window.innerWidth; H = window.innerHeight;
+    cv.width = W * DPR; cv.height = H * DPR;
+    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+    makeDrifts();
+  }
+
+  function drawDrift(t) {
+    ctx.clearRect(0, 0, W, H);
+    for (var i = 0; i < drifts.length; i++) {
+      var d = drifts[i];
+      d.x += d.vx; d.y += d.vy; d.rot += d.vr;
+      if (d.y < -60) { d.y = H + 50; d.x = Math.random() * W; }   // 上に抜けたら下から
+      if (d.x < -60) d.x = W + 50; else if (d.x > W + 60) d.x = -50;
+      var wob = Math.sin(t * 0.0006 + d.ph) * d.amp;
+      ctx.save();
+      ctx.translate(d.x + wob, d.y);
+      ctx.rotate(d.rot);
+      ctx.globalAlpha = d.a;
+      ctx.fillStyle = d.color;
+      ctx.fill(d.path);
+      ctx.globalAlpha = d.a * 0.9;
+      ctx.lineWidth = 2; ctx.strokeStyle = 'rgba(255,255,255,.9)';
+      ctx.stroke(d.path);
+      ctx.restore();
+    }
+  }
+
+  function loop(t) { drawDrift(t); raf = requestAnimationFrame(loop); }
+
+  resizeDrift();
+  window.addEventListener('resize', function () { clearTimeout(window.__dRt); window.__dRt = setTimeout(resizeDrift, 160); });
+  if (REDUCED()) drawDrift(0);            // 動きを減らす設定では静止画1枚
+  else raf = requestAnimationFrame(loop);
+
+  /* ---- カウントダウン ---- */
+  var lwCdVal = document.getElementById('lwCdVal');
+  function tick() {
+    var left = SHOW_AT - Date.now();
+    if (left <= 0) { lwCdVal.innerHTML = '<b>まもなく</b>'; return; }
+    var d = Math.floor(left / 86400000);
+    var h = Math.floor(left / 3600000) % 24;
+    var m = Math.floor(left / 60000) % 60;
+    var s = Math.floor(left / 1000) % 60;
+    lwCdVal.innerHTML = (d > 0 ? '<b>' + d + '</b>日 ' : '') + '<b>' + h + '</b>時間 <b>' + m + '</b>分 <b>' + s + '</b>秒';
+  }
+  tick(); setInterval(tick, 1000);
+
+  /* ---- 音の準備（ブラウザは無操作のページで音を鳴らせない） ---- */
+  var lwSound = document.getElementById('lwSound');
+  lwSound.addEventListener('click', function () {
+    setSound(true);
+    try { sndClick(); } catch (e) {}
+    lwSound.classList.add('on');
+    lwSound.textContent = '🔊 音の準備ができました';
+    document.getElementById('lwSoundNote').textContent = '当日は、このまま音つきでご覧いただけます。';
+  });
+  document.getElementById('lwTerms').addEventListener('click', openTerms);
+
+  /* ---- 配信を受けたら待機画面を消して演出へ ---- */
+  var handed = false;
+  setInterval(function () {
+    if (handed) return;
+    if (revealed || assembling || SHOW_PHASE === 'armed' || SHOW_PHASE === 'revealed') {
+      handed = true;
+      if (raf) cancelAnimationFrame(raf);
+      liveWait.classList.add('fading');
+      setTimeout(function () {
+        // body.stage は起動時から付いている（LIVEはSTAGEに含まれる）。
+        // 待機画面を外すだけで、その下の投影と同じ画面が現れる。
+        document.body.classList.remove('live');
+        liveWait.style.display = 'none';
+        try { resize(); drawBoard(); } catch (e) {}
+      }, REDUCED() ? 0 : 1000);
+    }
+  }, 300);
+})();
 
 /* ============================================================
    STAGE / REHEARSAL — 屋外LEDビジョン用の投影ビュー
