@@ -1173,7 +1173,7 @@
       <div class="lwCard">
         <span class="lwCardH">◆ 会場でご覧になる方</span>
         <dl>
-          <dt>日時</dt><dd>2026年8月6日（木）19:00〜（予定）</dd>
+          <dt>日時</dt><dd>2026年8月6日（木）20:00〜（予定）</dd>
           <dt>場所</dt><dd>メルパルク広島（HIROSHIMA GATE PARK メルパルク前 予定）</dd>
           <dt>内容</dt><dd>ピースアート完成投影・企画説明・作品解説など<br>『Pride of Hiroshima ナイトミュージアム』18:00〜21:30 の中で実施</dd>
           <dt>入場料</dt><dd>無料（どなたでもご参加いただけます）</dd>
@@ -1181,7 +1181,7 @@
       </div>
       <div class="lwCard">
         <span class="lwCardH">◆ オンラインでご覧になる方</span>
-        <p class="lwP">会場に来られない方も、<b>この画面のまま</b>お待ちください。<br>8月6日19:00〜（予定）、会場と<b>同じ瞬間</b>に、完成した絵が現れます。</p>
+        <p class="lwP">会場に来られない方も、<b>この画面のまま</b>お待ちください。<br>8月6日20:00〜（予定）、会場と<b>同じ瞬間</b>に、完成した絵が現れます。</p>
         <p class="lwNote">事前のログインや入力は不要です。<br>このページを開いたままにしておいてください。</p>
         <button class="lwSound" id="lwSound" type="button">🔈 音を出す準備をする</button>
         <p class="lwNote lwSoundNote" id="lwSoundNote">※ブラウザの決まりで、一度タップしないと音が出せません。当日、音つきでご覧になりたい方は先に押しておいてください。</p>
@@ -1266,8 +1266,13 @@ var REHEARSAL = IS_FILE || (Q.has('rehearsal') && qn('rehearsal', 0) > 0);
    演出そのものは会場の投影と同一なので、STAGEの土台をそのまま使う。 */
 var LIVE = (Q.has('live') && qn('live', 0) > 0);
 var STAGE = REHEARSAL || LIVE || (Q.has('stage') && qn('stage', 0) > 0);
-/* お披露目の日時（サイト全体でここだけを見る） */
-var SHOW_AT = new Date('2026-08-06T19:00:00+09:00');
+/* お披露目の日時（サイト全体でここだけを見る）。
+   ※2026-07-18 19:00→20:00 に変更。メルパルクの壁面プロジェクションは周囲が暗いほど
+     鮮やかに出るが、8/6の広島の日没は19:08。19:00開始だと空がまだ明るく、
+     いちばん見せたい「光が広がる」瞬間が白っぽく溶ける。
+     ナイトミュージアムは18:00-21:30の枠なので、その中で後ろへずらした。
+   ※プレスリリースは19:00で公表済み。告知の訂正が別途必要。 */
+var SHOW_AT = new Date('2026-08-06T20:00:00+09:00');
 // セルフテスト中は本番DBを汚さないよう保存オフ（demo扱い）
 var SB_ON = !((Q.has('demo') && qn('demo', 0) > 0) || (Q.has('selftest') && qn('selftest', 0) > 0) || REHEARSAL);
 function sbHeaders(extra) {
@@ -3140,7 +3145,7 @@ if (document.fonts && document.fonts.ready) document.fonts.ready.then(function (
 
 /* test hooks */
 window.PW = {
-  version: '9.6.1',
+  version: '9.7',
   hash: function (s) { sha256hex(String(s), function (h) { console.log('ADMIN_HASH:', h); }); return '（コンソールにハッシュを出力しました）'; },
   place: function (c, m, n) { return placePiece(nextEmpty(), c || PALETTE[0], m || 'テスト', n || '', true); },
   assemble: assemble, reset: function () { seed(true); }, count: function () { return placed; }, target: TARGET,
