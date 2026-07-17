@@ -1475,16 +1475,29 @@ function showPoll() {
         if (showTimer) { clearTimeout(showTimer); showTimer = null; }
         return;
       }
-      // 発火予約
-      if (st.phase === 'armed' && st.reveal_at && !showArmed && !revealed && !assembling) {
+      // 発火予約 / 追いつき
+      if (st.phase === 'armed' && st.reveal_at && !revealed && !assembling) {
         var at = new Date(st.reveal_at).getTime();
         var delay = at - serverNow();
-        if (delay < -30000) return;         // 30秒以上前の指示は無視（古い状態）
-        showArmed = true;
-        try { if (typeof showCountdown === 'function' && !STAGE) showCountdown(at); } catch (e) {}
-        showTimer = setTimeout(function () {
-          if (!revealed && !assembling) assemble();
-        }, Math.max(0, delay));
+
+        // 【追いつき】発火時刻を過ぎている＝スマホが背面だった／後から開いた。
+        // ブラウザは背面タブの setTimeout を大幅に間引くので、予約だけに頼ると
+        // ロック解除後に何十秒も遅れて光る。ポーリングのたびに時刻を見て、
+        // 過ぎていたら即座に再生することで、戻ってきた瞬間に追いつく。
+        if (delay <= 0) {
+          showArmed = true;
+          if (showTimer) { clearTimeout(showTimer); showTimer = null; }
+          assemble();
+          return;
+        }
+        // まだ未来 → その瞬間ちょうどに発火するよう予約（前面なら誤差10ms台）
+        if (!showArmed) {
+          showArmed = true;
+          try { if (typeof showCountdown === 'function' && !STAGE) showCountdown(at); } catch (e) {}
+          showTimer = setTimeout(function () {
+            if (!revealed && !assembling) assemble();
+          }, delay);
+        }
       }
     })
     .catch(function () {});
@@ -2941,6 +2954,13 @@ function boot() {
     setInterval(sbPoll, 12000); // 12秒ごとに、他の人のピースがポンと増える
     showPoll();                 // お披露目の状態（遅れて開いた人にも完成絵を出す）
     setInterval(showPoll, 3000); // 3秒ごと。発火は「時刻」で揃えるので間隔が粗くてもズレない
+    // スマホがロック解除・アプリ復帰した瞬間に追いつく。
+    // 背面タブはポーリング自体も間引かれる（最悪1分に1回）ため、
+    // 「戻ってきた」合図を拾って即座に状態を取り直すのが確実。
+    document.addEventListener('visibilitychange', function () {
+      if (!document.hidden) { showPoll(); sbPoll(); }
+    });
+    window.addEventListener('focus', showPoll);
   }
   // 開いた直後に「つかいかた」窓（投影用のステージモードでは絶対に出さない）
   if (!STAGE && !(Q.has('tut') && qn('tut', 1) === 0)) setTimeout(openTut, 600);
@@ -2950,7 +2970,7 @@ if (document.fonts && document.fonts.ready) document.fonts.ready.then(function (
 
 /* test hooks */
 window.PW = {
-  version: '9.3',
+  version: '9.3.1',
   hash: function (s) { sha256hex(String(s), function (h) { console.log('ADMIN_HASH:', h); }); return '（コンソールにハッシュを出力しました）'; },
   place: function (c, m, n) { return placePiece(nextEmpty(), c || PALETTE[0], m || 'テスト', n || '', true); },
   assemble: assemble, reset: function () { seed(true); }, count: function () { return placed; }, target: TARGET,
