@@ -568,6 +568,11 @@
   #finaleArt.on{display:block}
   #finaleArt.show{opacity:1}
   #finaleArt img{width:100%;height:100%;object-fit:cover;display:block}
+  /* プロ制作映像(show.mp4)の再生面。壁が主役のとき、Canvas演出の代わりにこれを流す。
+     contain(黒帯あり)にする理由: 投影では黒は「無」なので帯は見えず、作家の構図が崩れない */
+  #showVideo{position:fixed;inset:0;z-index:43;display:none;background:#000}
+  #showVideo.on{display:block}
+  #showVideo video{width:100%;height:100%;object-fit:contain;display:block;background:#000}
   .faBtn{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);
     border:1.5px solid rgba(255,255,255,.55);background:rgba(8,20,42,.62);color:#fff;
     border-radius:999px;padding:10px 20px;font-family:var(--serif);font-size:13px;
@@ -1253,6 +1258,9 @@
 <div class="liveCd" id="liveCd">まもなく、みんなの画面で同時にお披露目します <b id="liveCdN">8</b> 秒</div>
 <div id="bloomFlash" aria-hidden="true"></div>
 
+<!-- プロ制作の演出映像（show.mp4 があるときだけ。会場の投影専用） -->
+<div id="showVideo" aria-hidden="true"><video id="showVid" playsinline preload="auto" muted></video></div>
+
 <!-- ⑤ 完成した絵が画面いっぱいに（art.jpg があるときだけ現れる） -->
 <div id="finaleArt">
   <img id="finaleImg" alt="完成した一枚の絵「2045年の広島」">
@@ -1638,6 +1646,7 @@ function sbUndo(idx, pc, msgToast) {
    これで会場の投影も、広場のスマホも、家のPCも、1秒以内で揃う。
    ※「今すぐ始めろ」を配ると、ポーリング間隔ぶん端末ごとにバラバラに光ってしまう。 */
 var SHOW_PHASE = 'waiting';
+var showFireAt = 0;         // 発火時刻(サーバ基準ms)。映像の頭出し・途中合流の基準にも使う
 var showArmed = false;      // 発火予約済みか（二重予約の防止）
 var clockOffset = 0;        // localNow + clockOffset ≒ serverNow
 var showTimer = null;
@@ -1682,6 +1691,7 @@ function showPoll() {
       // 発火予約 / 追いつき
       if (st.phase === 'armed' && st.reveal_at && !revealed && !assembling) {
         var at = new Date(st.reveal_at).getTime();
+        showFireAt = at;
         var delay = at - serverNow();
 
         // 【追いつき】発火時刻を過ぎている＝スマホが背面だった／後から開いた。
@@ -3214,7 +3224,7 @@ if (document.fonts && document.fonts.ready) document.fonts.ready.then(function (
 
 /* test hooks */
 window.PW = {
-  version: '10.0',
+  version: '10.1',
   hash: function (s) { sha256hex(String(s), function (h) { console.log('ADMIN_HASH:', h); }); return '（コンソールにハッシュを出力しました）'; },
   place: function (c, m, n) { return placePiece(nextEmpty(), c || PALETTE[0], m || 'テスト', n || '', true); },
   assemble: assemble, reset: function () { seed(true); }, count: function () { return placed; }, target: TARGET,
@@ -3821,7 +3831,8 @@ if (STAGE) (function () {
       document.getElementById('finaleImg').src = probe.src;
       finaleReady = true;
     };
-    probe.src = 'art.jpg?v=' + Date.now();
+    // USB(file://)ではクエリ付きURLがファイル名扱いになり検出に失敗するため付けない
+    probe.src = IS_FILE ? 'art.jpg' : ('art.jpg?v=' + Date.now());
   })();
   /* リハ・緊急用: 実行中に作品画像を差し込む。
      例: PW_setFinale('og.png')。art.jpg のアップロードを忘れた場合の当日の保険にもなる */
@@ -3830,6 +3841,65 @@ if (STAGE) (function () {
     finaleReady = true;
     return 'finale image set: ' + src;
   };
+
+  /* ===== プロ制作映像の差し込み口（show.mp4 / 会場の投影専用） =====
+     TouchDesigner等で事前制作した演出映像を、配信時刻ぴったりに再生する。
+     ・リポジトリ直下(またはUSBのindex.htmlと同じフォルダ)に show.mp4 を置くだけ
+     ・映像が無ければ従来のCanvas演出（何も壊れない）
+     ・スマホ(?live=1)では常にCanvas演出。広場の数百台が同時に数十MBの動画を
+       取りに行くと携帯回線が詰まるため、映像は壁だけの特権にする
+     ・BGMは映像に埋め込む→会場のPAから鳴る（ブラウザの自動再生制限は、
+       運営が開演前に画面を一度クリックしていれば解除される） */
+  var showVid = document.getElementById('showVid');
+  var showVideoBox = document.getElementById('showVideo');
+  var showVideoReady = false;
+  if (!LIVE) (function () {
+    showVid.addEventListener('loadedmetadata', function () { showVideoReady = true; }, { once: true });
+    showVid.src = IS_FILE ? 'show.mp4' : ('show.mp4?v=' + Date.now());
+  })();
+  window.PW_setShowVideo = function (url) {
+    showVideoReady = false;
+    showVid.addEventListener('loadedmetadata', function () { showVideoReady = true; }, { once: true });
+    showVid.src = url;
+    return 'show video set: ' + url;
+  };
+
+  function playShowVideo() {
+    if (raf) cancelAnimationFrame(raf);
+    liveWait.classList.add('gathering');          // 文字が引く
+    showVideoBox.classList.add('on');
+    try { showVid.muted = false; } catch (e) {}   // 会場PCは操作済みなので音が出せる
+    // 途中から開いた場合も、全端末で「同じコマ」が映るよう時刻から頭出し
+    var off = showFireAt ? Math.max(0, (serverNow() - showFireAt) / 1000) : 0;
+    try { showVid.currentTime = off; } catch (e) {}
+    var pr = showVid.play(); if (pr && pr.catch) pr.catch(function () {});
+    var corr = setInterval(function () {          // 再生ズレの補正(±0.4s)
+      if (!showFireAt || showVid.paused || showVid.ended || !showVid.duration) return;
+      var want = (serverNow() - showFireAt) / 1000;
+      if (want < showVid.duration - 0.5 && Math.abs(showVid.currentTime - want) > 0.4) {
+        try { showVid.currentTime = want; } catch (e) {}
+      }
+    }, 2000);
+    showVid.addEventListener('ended', function () {
+      clearInterval(corr);
+      // 映像の最終フレーム(=完成作品)から、そのまま⑤⑥へ引き継ぐ
+      document.body.classList.remove('waiting');
+      liveWait.style.display = 'none';
+      try { resize(); drawBoard(); } catch (e) {}
+      assemble();
+      if (finaleReady) {
+        finaleArt.classList.add('on');
+        requestAnimationFrame(function () { finaleArt.classList.add('show'); });
+        setTimeout(function () { showVideoBox.classList.remove('on'); }, 1400);
+      } else {
+        showVideoBox.style.transition = 'opacity 1.2s ease';
+        showVideoBox.style.opacity = '0';
+        setTimeout(function () {
+          showVideoBox.classList.remove('on'); showVideoBox.style.opacity = '';
+        }, 1300);
+      }
+    }, { once: true });
+  }
   document.getElementById('faRead').addEventListener('click', function () {
     finaleArt.classList.remove('show');
     setTimeout(function () { finaleArt.classList.remove('on'); }, 900);
@@ -3868,6 +3938,7 @@ if (STAGE) (function () {
       if (finaleReady) { finaleArt.classList.add('on'); finaleArt.classList.add('show'); }
       return;
     }
+    if (showVideoReady) { playShowVideo(); return; }   // プロ映像があれば壁はそちらが主役
     if (raf) cancelAnimationFrame(raf);
     liveWait.classList.add('gathering');          // 文字が静かに引く（夜空はそのまま）
     setTimeout(function () { showSequence(finaleGo); }, 900);
