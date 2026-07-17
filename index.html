@@ -2676,7 +2676,13 @@ function assemble() {
   hidePop();
   var empties = [];
   for (var i = 0; i < pieces.length; i++) if (!pieces[i]) empties.push(i);
-  if (!empties.length) { toast('もう810ピースそろっています'); return; }
+  // 810ピースそろいきっている場合。埋める工程は不要なので、そのままお披露目へ進む。
+  // ※ここで return してしまうと「目標を達成したときに限ってお披露目が再生されない」ことになる
+  if (!empties.length) {
+    if (revealed) { toast('すでにお披露目ずみです'); return; }
+    finishAssemble();
+    return;
+  }
   assembling = true; assembleBtn.disabled = true; drawBtn.disabled = true;
   if (REDUCED()) {
     for (var e = 0; e < empties.length; e++) { pieces[empties[e]] = mkPiece(PALETTE[(Math.random() * PALETTE.length) | 0], SEED_MESSAGES[(Math.random() * SEED_MESSAGES.length) | 0], '', false); markFilled(empties[e]); }
@@ -2808,7 +2814,7 @@ if (document.fonts && document.fonts.ready) document.fonts.ready.then(function (
 
 /* test hooks */
 window.PW = {
-  version: '9.0',
+  version: '9.1',
   hash: function (s) { sha256hex(String(s), function (h) { console.log('ADMIN_HASH:', h); }); return '（コンソールにハッシュを出力しました）'; },
   place: function (c, m, n) { return placePiece(nextEmpty(), c || PALETTE[0], m || 'テスト', n || '', true); },
   assemble: assemble, reset: function () { seed(true); }, count: function () { return placed; }, target: TARGET,
@@ -2923,6 +2929,21 @@ function runSelfTest() {
       check('うら面へめくり替え', faceMode === 'mosaic');
       flipBtn.click();
       check('おもて面へ戻る', faceMode === 'art');
+
+      // --- 回帰: 810が「すでに埋まりきっている」状態からのお披露目 ---
+      // 本番当日いちばん起きてほしい状況（目標達成）で、お披露目が動かないことがあった。
+      // assemble() が「空きを埋める」前提で、空きゼロだと即returnしていたため。
+      seed(true);
+      var savedSeed = SEED_COUNT;
+      for (var fi = 0; fi < pieces.length; fi++) {
+        if (!pieces[fi]) { pieces[fi] = mkPiece(PALETTE[0], 'まんぱいテスト', '', false); placed++; markFilled(fi); }
+      }
+      revealed = false; faceMode = 'art'; flipBtn.hidden = true;
+      updateCounter(); drawBoard();
+      check('前提: 810すべて埋まっている', placed === TARGET);
+      assemble(); await sleep(400);
+      check('満杯からでもお披露目が再生される', revealed === true);
+      check('満杯からでも完成絵になる', faceMode === 'art' && !flipBtn.hidden);
 
       seed(false); // 後片付け
     } catch (e) {
