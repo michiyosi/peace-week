@@ -480,6 +480,17 @@
   .bdNote{font-size:10.5px;line-height:1.8;color:var(--ink-soft);opacity:.85;margin:10px 0 0;text-align:center}
   .agreeMinor{display:block;margin-top:4px;font-size:10.5px;line-height:1.7;color:var(--ink-soft);opacity:.9;font-weight:600}
   .tmMail{color:#2F6FB5;font-weight:700;text-decoration:underline;word-break:break-all}
+  /* 全員配信ボタン（8/6に押す本番のボタン。他と明確に見分けがつくように） */
+  .abtn.live{background:linear-gradient(135deg,#E8434F,#B8232F);border-color:#B8232F;color:#fff;font-weight:700}
+  .abtn.live:hover{filter:brightness(1.08)}
+  .abtn.live:disabled{opacity:.5}
+  /* 全員配信のカウントダウン */
+  .liveCd{position:fixed;left:50%;top:12px;transform:translateX(-50%);z-index:65;display:none;
+    background:rgba(184,35,47,.94);color:#fff;border-radius:999px;padding:9px 20px;
+    font-family:var(--serif);font-size:14px;font-weight:700;letter-spacing:.06em;
+    box-shadow:0 8px 26px rgba(120,10,20,.4)}
+  .liveCd.on{display:block}
+  .liveCd b{font-family:var(--latin);font-size:19px;margin:0 3px}
   .nameHint{margin:6px 2px 0;font-size:11px;line-height:1.7;color:var(--ink-soft);opacity:.92;font-weight:600}
   .nameHint b{color:#2E3A45;font-weight:700}
 
@@ -508,7 +519,8 @@
   body.stage #stats,
   body.stage #bulkDel,
   body.stage #extract,
-  body.stage #pick{display:none !important}
+  body.stage #pick,
+  body.stage .liveCd{display:none !important}
   /* 大画面の進捗表示（画面下・遠くから読める） */
   .stageHud{position:fixed;left:0;right:0;bottom:0;z-index:20;display:none;
     padding:2.2vh 3vw;text-align:center;pointer-events:none;
@@ -716,7 +728,9 @@
       <button class="abtn" id="bulkDelBtn" type="button">🧹 一括削除</button>
       <button class="abtn" id="expCsvBtn" type="button">⬇ CSV</button>
       <button class="abtn" id="expJsonBtn" type="button">⬇ JSON</button>
-      <button class="abtn gold" id="assembleBtn" type="button">✨ お披露目</button>
+      <button class="abtn gold" id="assembleBtn" type="button">✨ お披露目（この画面だけ）</button>
+      <button class="abtn live" id="broadcastBtn" type="button">📡 お披露目を全員に配信</button>
+      <button class="abtn" id="showResetBtn" type="button">⟲ 配信を待機に戻す</button>
       <button class="abtn" id="resetBtn" type="button">↺ リセット</button>
       <button class="abtn" id="adminOut" type="button">× 終了</button>
     </div>
@@ -1056,6 +1070,7 @@
 </div>
 <!-- ===== 大画面（ステージ）モード用のUI ===== -->
 <div class="rehBadge">● リハーサル用（本番データではありません）</div>
+<div class="liveCd" id="liveCd">まもなく、みんなの画面で同時にお披露目します <b id="liveCdN">8</b> 秒</div>
 <div class="stageHud">
   <div class="stageNum"><b id="sgNum">0</b> / 810</div>
   <div class="stageCap" id="sgCap">みんなの想いが、あつまっています</div>
@@ -1418,6 +1433,63 @@ function sbUndo(idx, pc, msgToast) {
   wizShow(0); wiz.classList.add('on');
   if (msgToast) toast(msgToast);
 }
+/* ---- お披露目の同時配信（show_state） ----
+   サーバから「◯時◯分◯秒に始めろ」という未来時刻(reveal_at)を受け取り、
+   自分の時計のズレを補正して、その瞬間ちょうどに再生する。
+   これで会場の投影も、広場のスマホも、家のPCも、1秒以内で揃う。
+   ※「今すぐ始めろ」を配ると、ポーリング間隔ぶん端末ごとにバラバラに光ってしまう。 */
+var SHOW_PHASE = 'waiting';
+var showArmed = false;      // 発火予約済みか（二重予約の防止）
+var clockOffset = 0;        // localNow + clockOffset ≒ serverNow
+var showTimer = null;
+
+function serverNow() { return Date.now() + clockOffset; }
+
+function showPoll() {
+  if (!SB_ON) return;
+  var t0 = Date.now();
+  fetch(SB_URL + '/rest/v1/show_state?select=phase,reveal_at&id=eq.1', { headers: sbHeaders(), cache: 'no-store' })
+    .then(function (r) {
+      // HTTPのDateヘッダで自分の時計のズレを推定（±0.5秒精度）
+      var t1 = Date.now();
+      var d = r.headers.get('Date');
+      if (d) {
+        var sv = new Date(d).getTime();
+        if (!isNaN(sv)) clockOffset = sv - (t0 + t1) / 2;
+      }
+      return r.ok ? r.json() : null;
+    })
+    .then(function (rows) {
+      if (!rows || !rows.length) return;
+      var st = rows[0];
+      SHOW_PHASE = st.phase;
+
+      // すでに終わっている → 遅れて開いた人には演出なしで完成絵を出す
+      if (st.phase === 'revealed' && !revealed && !assembling) {
+        finishAssemble();
+        return;
+      }
+      // 待機に戻された（リハの繰り返し）→ 予約を取り消す
+      if (st.phase === 'waiting') {
+        showArmed = false;
+        if (showTimer) { clearTimeout(showTimer); showTimer = null; }
+        return;
+      }
+      // 発火予約
+      if (st.phase === 'armed' && st.reveal_at && !showArmed && !revealed && !assembling) {
+        var at = new Date(st.reveal_at).getTime();
+        var delay = at - serverNow();
+        if (delay < -30000) return;         // 30秒以上前の指示は無視（古い状態）
+        showArmed = true;
+        try { if (typeof showCountdown === 'function' && !STAGE) showCountdown(at); } catch (e) {}
+        showTimer = setTimeout(function () {
+          if (!revealed && !assembling) assemble();
+        }, Math.max(0, delay));
+      }
+    })
+    .catch(function () {});
+}
+
 function sbSubmit(idx, tries) {
   if (!SB_ON) return;
   var pc = pieces[idx]; if (!pc) return;
@@ -2488,6 +2560,65 @@ bdGo.addEventListener('click', function () {
   });
 });
 
+/* ---- 8/6本番: お披露目を全員に配信 ----
+   これを押すと、会場の投影・広場のスマホ・家のPCが、8秒後に同時に光る。
+   押し間違いは取り返しがつかない（全参加者の画面で演出が始まる）ので確認を挟む。 */
+var liveCd = document.getElementById('liveCd');
+var liveCdN = document.getElementById('liveCdN');
+var broadcastBtn = document.getElementById('broadcastBtn');
+var liveCdTimer = null;
+
+function showCountdown(atMs) {
+  clearInterval(liveCdTimer);
+  liveCd.classList.add('on');
+  liveCdTimer = setInterval(function () {
+    var left = Math.ceil((atMs - serverNow()) / 1000);
+    if (left <= 0) { clearInterval(liveCdTimer); liveCd.classList.remove('on'); return; }
+    liveCdN.textContent = left;
+  }, 200);
+}
+
+function setShowState(phase, delaySec, onDone) {
+  if (!SB_ON) { toast('デモ／リハでは配信しません'); return; }
+  if (!adminPass) { toast('配信にはパスワードの再入力が必要です'); openGate(); return; }
+  fetch(SB_URL + '/rest/v1/rpc/set_show_state', {
+    method: 'POST', headers: sbHeaders(),
+    body: JSON.stringify({ p_pass: adminPass, p_phase: phase, p_delay_seconds: delaySec })
+  }).then(function (r) {
+    if (r.status === 404) { toast('サーバにset_show_stateがありません。SQLの適用がまだのようです'); return null; }
+    return r.json();
+  }).then(function (res) {
+    if (!res) return;
+    if (res.ok !== true) {
+      toast(res.error === 'bad_password' ? '配信できません（パスワードが違います）' : '配信できませんでした');
+      return;
+    }
+    onDone && onDone(res);
+  }).catch(function () { toast('通信エラーで配信できませんでした'); });
+}
+
+broadcastBtn.addEventListener('click', function () {
+  if (!window.confirm('お披露目を「全員の画面」で同時に再生します。\n\n会場の投影も、参加者のスマホも、オンラインで見ている人も、\n8秒後にいっせいに始まります。\n\n本当に始めますか？')) return;
+  broadcastBtn.disabled = true;
+  setShowState('armed', 8, function (res) {
+    // 自分の画面も showPoll 経由で同じ時刻に発火する（特別扱いしない＝会場だけ早いのを防ぐ）
+    var at = new Date(res.reveal_at).getTime();
+    showCountdown(at);
+    toast('配信しました。8秒後にみんなの画面で始まります');
+    setTimeout(function () { broadcastBtn.disabled = false; }, 12000);
+  });
+});
+
+document.getElementById('showResetBtn').addEventListener('click', function () {
+  if (!window.confirm('配信を「待機」に戻します。\nリハーサルを繰り返すときに使います。よろしいですか？')) return;
+  setShowState('waiting', 0, function () {
+    showArmed = false;
+    if (showTimer) { clearTimeout(showTimer); showTimer = null; }
+    clearInterval(liveCdTimer); liveCd.classList.remove('on');
+    toast('配信を待機に戻しました');
+  });
+});
+
 delModeBtn.addEventListener('click', function () {
   adminDelete = !adminDelete;
   delModeBtn.classList.toggle('danger', adminDelete);
@@ -2808,6 +2939,8 @@ function boot() {
   if (SB_ON) {
     sbFetchAll();
     setInterval(sbPoll, 12000); // 12秒ごとに、他の人のピースがポンと増える
+    showPoll();                 // お披露目の状態（遅れて開いた人にも完成絵を出す）
+    setInterval(showPoll, 3000); // 3秒ごと。発火は「時刻」で揃えるので間隔が粗くてもズレない
   }
   // 開いた直後に「つかいかた」窓（投影用のステージモードでは絶対に出さない）
   if (!STAGE && !(Q.has('tut') && qn('tut', 1) === 0)) setTimeout(openTut, 600);
@@ -2817,7 +2950,7 @@ if (document.fonts && document.fonts.ready) document.fonts.ready.then(function (
 
 /* test hooks */
 window.PW = {
-  version: '9.2',
+  version: '9.3',
   hash: function (s) { sha256hex(String(s), function (h) { console.log('ADMIN_HASH:', h); }); return '（コンソールにハッシュを出力しました）'; },
   place: function (c, m, n) { return placePiece(nextEmpty(), c || PALETTE[0], m || 'テスト', n || '', true); },
   assemble: assemble, reset: function () { seed(true); }, count: function () { return placed; }, target: TARGET,
