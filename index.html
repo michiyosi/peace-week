@@ -480,6 +480,8 @@
   .bdNote{font-size:10.5px;line-height:1.8;color:var(--ink-soft);opacity:.85;margin:10px 0 0;text-align:center}
   .agreeMinor{display:block;margin-top:4px;font-size:10.5px;line-height:1.7;color:var(--ink-soft);opacity:.9;font-weight:600}
   .tmMail{color:#2F6FB5;font-weight:700;text-decoration:underline;word-break:break-all}
+  .nameHint{margin:6px 2px 0;font-size:11px;line-height:1.7;color:var(--ink-soft);opacity:.92;font-weight:600}
+  .nameHint b{color:#2E3A45;font-weight:700}
   .exsheet{width:min(620px,100%)}
   .exsheet h2 b{font-family:var(--serif);color:#2F6FB5;font-weight:600}
   .exlead{font-size:12px;line-height:1.9;color:var(--ink-soft);font-weight:500;margin:8px 0 14px}
@@ -720,7 +722,8 @@
           <input id="msgInput" maxlength="24" enterkeyhint="done" placeholder="例：平和公園で絵を描いてる" aria-label="2045年の今この瞬間、していたいこと">
         </div>
         <div class="chips" id="chips"><span class="ex">例</span></div>
-        <div class="field nameField"><input id="nameInput" maxlength="10" placeholder="なまえ（任意）" aria-label="なまえ（任意）"></div>
+        <div class="field nameField"><input id="nameInput" maxlength="10" placeholder="ニックネーム（任意）" aria-label="ニックネーム（任意）。本名は書かないでください"></div>
+        <p class="nameHint">みんなに見えるので、<b>本名は書かないでね</b>。ニックネームか、空っぽでもOK。</p>
       </div>
       <button class="place wcta" id="wNext1" type="button">つぎへ →</button>
     </section>
@@ -2690,7 +2693,7 @@ if (document.fonts && document.fonts.ready) document.fonts.ready.then(function (
 
 /* test hooks */
 window.PW = {
-  version: '8.8',
+  version: '8.9',
   hash: function (s) { sha256hex(String(s), function (h) { console.log('ADMIN_HASH:', h); }); return '（コンソールにハッシュを出力しました）'; },
   place: function (c, m, n) { return placePiece(nextEmpty(), c || PALETTE[0], m || 'テスト', n || '', true); },
   assemble: assemble, reset: function () { seed(true); }, count: function () { return placed; }, target: TARGET,
