@@ -3224,7 +3224,7 @@ if (document.fonts && document.fonts.ready) document.fonts.ready.then(function (
 
 /* test hooks */
 window.PW = {
-  version: '10.2',
+  version: '11.0',
   hash: function (s) { sha256hex(String(s), function (h) { console.log('ADMIN_HASH:', h); }); return '（コンソールにハッシュを出力しました）'; },
   place: function (c, m, n) { return placePiece(nextEmpty(), c || PALETTE[0], m || 'テスト', n || '', true); },
   assemble: assemble, reset: function () { seed(true); }, count: function () { return placed; }, target: TARGET,
@@ -3644,6 +3644,15 @@ if (STAGE) (function () {
     lwSound.addEventListener('click', function () {
       setSound(true);
       try { sndClick(); } catch (e) {}
+      /* ★ここが肝: このクリック（＝本物のユーザー操作）の最中に一度 play() を通しておくと、
+         ブラウザがこのページの音を許可し、当日の発火時に確実にBGMが鳴る。
+         無音で0.1秒だけ鳴らして即止める。 */
+      try {
+        bgm.volume = 0; var p = bgm.play();
+        if (p && p.then) p.then(function () {
+          setTimeout(function () { bgm.pause(); bgm.currentTime = 0; bgm.volume = 0.85; }, 100);
+        }, function () {});
+      } catch (e) {}
       lwSound.classList.add('on');
       lwSound.textContent = '🔊 音の準備ができました';
       document.getElementById('lwSoundNote').textContent = '当日は、このまま音つきでご覧いただけます。';
@@ -3693,6 +3702,12 @@ if (STAGE) (function () {
     if (!realColors.length) realColors = PALETTE.slice();
 
     // タイルの設計図: 中心の輪から外へ。到着時刻をリングごとにずらす
+    /* ★時間割は BGM(show_bgm.mp3 / 40秒) と同じ設計値。片方だけ変えないこと。
+       showSequence開始を基準に:
+         0.8s〜27.3s ピースが飛来（アルペジオが鳴っている区間）
+         〜29.5s 脈動（ライザーが登りきる）
+         29.5s→ handOff → 光が広がる（打点 30.4s）
+       8秒で終わらせると音楽が立ち上がる前に終わる。資料の「少しずつ」に合わせて約30秒。 */
     var tiles = [], ci = 0;
     for (var ri = 0; ri < RINGS; ri++) {
       var r = (ri + 0.5) * ringW;
@@ -3702,8 +3717,8 @@ if (STAGE) (function () {
         tiles.push({
           r: r, a: ta,
           color: realColors[(ci++) % realColors.length],
-          start: 600 + ri * 520 + (j / cnt) * 260 + Math.random() * 220,
-          dur: 750,
+          start: 800 + ri * 2900 + (j / cnt) * 1300 + Math.random() * 500,
+          dur: 1500,
           fromA: ta + (Math.random() * 2.4 - 1.2),
           fromR: Math.max(W, H) * 0.72,
           landed: false
@@ -3738,8 +3753,8 @@ if (STAGE) (function () {
       drawStars(t, 0.45);
       if (skyline) ctx.drawImage(skyline, 0, 0, W, H);
 
-      // ② 器: 白い光の円がまず生まれる
-      var vs = Math.min(t / 900, 1);
+      // ② 器: 白い光の円がまず生まれる（パッドの立ち上がりと同じ約3秒）
+      var vs = Math.min(t / 2600, 1);
       ctx.save();
       ctx.globalCompositeOperation = 'lighter';
       var vg = ctx.createRadialGradient(cx, cy, R * 0.2, cx, cy, R * 1.12);
@@ -3751,8 +3766,8 @@ if (STAGE) (function () {
       ctx.strokeStyle = '#FFFFFF'; ctx.lineWidth = 2;
       ctx.beginPath(); ctx.arc(cx, cy, R + ringW, 0, 6.283); ctx.stroke();
 
-      // 光の柱(③に向けてゆっくり強まる)
-      var ramp = Math.min(Math.max((t - 700) / 1600, 0), 1);
+      // 光の柱(③に向けてゆっくり強まる。ライザーが登る24s手前で満ちる)
+      var ramp = Math.min(Math.max((t - 2000) / 20000, 0), 1);
       for (var k = 0; k < 7; k++) {
         var ang = t * 0.00011 + k * (6.283 / 7);
         var L = Math.min(W, H) * 0.78;
@@ -3817,7 +3832,7 @@ if (STAGE) (function () {
           doneAt = t;
           if (!chimed) { chimed = true; try { sndChime(); vibrate([10, 40, 10]); } catch (e) {} }
         }
-        var pq = (t - doneAt) / 850;
+        var pq = (t - doneAt) / 2100;   // 脈動。ライザーが登りきるまでの間
         ctx.save(); ctx.globalCompositeOperation = 'lighter';
         ctx.globalAlpha = Math.max(0, 0.5 - pq * 0.5);
         ctx.strokeStyle = '#FFFDF0'; ctx.lineWidth = 3;
@@ -3860,6 +3875,38 @@ if (STAGE) (function () {
        取りに行くと携帯回線が詰まるため、映像は壁だけの特権にする
      ・BGMは映像に埋め込む→会場のPAから鳴る（ブラウザの自動再生制限は、
        運営が開演前に画面を一度クリックしていれば解除される） */
+  /* ===== BGM（show_bgm.mp3 / 40秒） =====
+     資料③「説明が終わる頃から、落ち着いたBGMが流れ始め」。
+     ・演出の時間割と同じ設計値で作曲済み。片方だけ変えると同期が崩れる
+     ・ブラウザは無操作のページで音を鳴らせない。鳴らなくても演出は完走する
+       （映像で学んだ教訓と同じ: 音は演出を止める理由にならない）
+     ・途中から開いた人にも、経過時間ぶん頭出しして合わせる */
+  var bgm = new Audio();
+  var bgmReady = false;
+  bgm.preload = 'auto';
+  bgm.addEventListener('canplaythrough', function () { bgmReady = true; }, { once: true });
+  bgm.src = IS_FILE ? 'show_bgm.mp3' : ('show_bgm.mp3?v=1');
+  window.PW_setBgm = function (u) { bgmReady = false; bgm.src = u; return 'bgm: ' + u; };
+
+  function playBgm() {
+    if (!bgm.src) return;
+    try {
+      var off = showFireAt ? Math.max(0, (serverNow() - showFireAt) / 1000) : 0;
+      if (off > 0 && off < 39) bgm.currentTime = off;
+      bgm.volume = 0.85;
+      var p = bgm.play();
+      if (p && p.catch) p.catch(function () { /* 音は出せない。演出は続ける */ });
+    } catch (e) {}
+  }
+  function fadeOutBgm(ms) {
+    var v0 = bgm.volume, t0 = performance.now();
+    (function s() {
+      var k = (performance.now() - t0) / ms;
+      if (k >= 1) { try { bgm.pause(); } catch (e) {} return; }
+      bgm.volume = v0 * (1 - k); requestAnimationFrame(s);
+    })();
+  }
+
   var showVid = document.getElementById('showVid');
   var showVideoBox = document.getElementById('showVideo');
   var showVideoReady = false;
@@ -3960,6 +4007,8 @@ if (STAGE) (function () {
           requestAnimationFrame(function () { finaleArt.classList.add('show'); });
         }, 650);
       }
+      // BGMは解決の和音を鳴らしきってから、ゆっくり引く（ぶつ切りにしない）
+      setTimeout(function () { fadeOutBgm(4000); }, 6500);
     }, 250);
   }
 
@@ -3978,9 +4027,11 @@ if (STAGE) (function () {
       if (finaleReady) { finaleArt.classList.add('on'); finaleArt.classList.add('show'); }
       return;
     }
-    if (showVideoReady) { playShowVideo(); return; }   // プロ映像があれば壁はそちらが主役
+    // プロ映像があれば壁はそちらが主役（音も映像に入っているのでBGMは鳴らさない）
+    if (showVideoReady) { playShowVideo(); return; }
     if (raf) cancelAnimationFrame(raf);
     liveWait.classList.add('gathering');          // 文字が静かに引く（夜空はそのまま）
+    playBgm();                                    // ③ BGMが流れ始める
     setTimeout(function () { showSequence(finaleGo); }, 900);
   };
 
@@ -4046,6 +4097,23 @@ if (STAGE) (function () {
     if (document.fullscreenElement) document.exitFullscreen();
     else document.documentElement.requestFullscreen && document.documentElement.requestFullscreen();
   }
+  /* 会場PCの音の解錠。
+     運営は開演前に必ず「Enterで全画面」を押す＝そこが唯一確実なユーザー操作。
+     その瞬間にBGMを無音で一度通しておくと、本番の発火時に確実に鳴る。
+     ここを逃すと、壁は光るのに音だけ出ない、という事故になる。 */
+  function primeAudio() {
+    try {
+      setSound(true);
+      if (typeof bgm !== 'undefined' && bgm.src) {
+        bgm.volume = 0; var p = bgm.play();
+        if (p && p.then) p.then(function () {
+          setTimeout(function () { bgm.pause(); bgm.currentTime = 0; bgm.volume = 0.85; }, 100);
+        }, function () {});
+      }
+    } catch (e) {}
+  }
+  window.addEventListener('pointerdown', primeAudio, { once: true });
+  window.addEventListener('keydown', primeAudio, { once: true });
   if (OPERATOR) {
     document.getElementById('sgGo').addEventListener('click', go);
     document.getElementById('sgFlip').addEventListener('click', function () { if (!flipBtn.hidden) flipBtn.click(); });
