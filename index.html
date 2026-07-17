@@ -489,6 +489,10 @@
   /* ※盤面(#boardWrap)は隠さない。隠すとサイズが0になり、切り替え時に描画が崩れる。
      待機画面が不透明な背景で全面を覆うので、見た目には出てこない。 */
   #driftCanvas{position:fixed;inset:0;width:100%;height:100%;pointer-events:none}
+  /* 漂うピースが文字に重なっても読めるよう、上半分にやわらかい影を敷く。
+     ピースを薄くすると空の中に沈むので、文字側を持ち上げるほうが絵が保てる。 */
+  #liveWait::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:1;
+    background:radial-gradient(ellipse 80% 55% at 50% 30%,rgba(12,48,90,.42),rgba(12,48,90,0) 70%)}
   .lwInner{position:relative;z-index:2;max-width:760px;margin:0 auto;padding:7vh 22px 60px;text-align:center}
   .lwTag{display:inline-block;font-family:var(--latin);font-style:italic;font-size:12px;
     letter-spacing:.26em;color:#EAF4FC;background:rgba(255,255,255,.16);
@@ -3302,17 +3306,27 @@ if (LIVE) (function () {
   var ctx = cv.getContext('2d');
   var W = 0, H = 0, DPR = 1, drifts = [], raf = null;
 
-  /* 1枚の漂うピース。盤面のジグソーと同じ「きのこ型のツメ」で形を揃える */
+  /* 1枚の漂うピース。
+     ツメは「付け根が細く、先が膨らむ」きのこ型。
+     制御点を付け根より外に張り出させることで膨らみが出る。
+     kw(付け根の半幅)を大きくしすぎるとヒトデ状に崩れるので 0.13 程度に抑える。 */
   function driftPath(s) {
-    var p = new Path2D(), k = s * 0.30, r = s * 0.5;
+    var p = new Path2D();
+    var r = s * 0.5;     // 半辺
+    var kw = s * 0.13;   // ツメの付け根の半幅
+    var kh = s * 0.20;   // ツメの出っ張り
     p.moveTo(-r, -r);
-    p.lineTo(-k, -r); p.bezierCurveTo(-k * 0.2, -r - k * 1.5, k * 0.2, -r - k * 1.5, k, -r);
+    p.lineTo(-kw, -r);                                              // 上辺: 凸
+    p.bezierCurveTo(-kw * 1.9, -r - kh, kw * 1.9, -r - kh, kw, -r);
     p.lineTo(r, -r);
-    p.lineTo(r, -k); p.bezierCurveTo(r + k * 1.5, -k * 0.2, r + k * 1.5, k * 0.2, r, k);
+    p.lineTo(r, -kw);                                               // 右辺: 凸
+    p.bezierCurveTo(r + kh, -kw * 1.9, r + kh, kw * 1.9, r, kw);
     p.lineTo(r, r);
-    p.lineTo(k, r); p.bezierCurveTo(k * 0.2, r + k * 1.5, -k * 0.2, r + k * 1.5, -k, r);
+    p.lineTo(kw, r);                                                // 下辺: 凹
+    p.bezierCurveTo(kw * 1.9, r - kh, -kw * 1.9, r - kh, -kw, r);
     p.lineTo(-r, r);
-    p.lineTo(-r, k); p.bezierCurveTo(-r + k * 1.2, k * 0.2, -r + k * 1.2, -k * 0.2, -r, -k);
+    p.lineTo(-r, kw);                                               // 左辺: 凹
+    p.bezierCurveTo(-r + kh, kw * 1.9, -r + kh, -kw * 1.9, -r, -kw);
     p.closePath();
     return p;
   }
