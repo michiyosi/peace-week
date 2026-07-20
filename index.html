@@ -211,7 +211,10 @@
   .field input{border:0;outline:0;background:transparent;font-size:16px;color:var(--ink);flex:1 1 auto;min-width:0;font-weight:500;height:36px}
   .field input::placeholder{color:var(--ink-faint)}
   .cnt{flex:0 0 auto;font-size:10px;font-weight:600;color:var(--ink-faint);font-variant-numeric:tabular-nums;letter-spacing:.06em}
-  #nameInput{width:clamp(74px,20vw,120px);flex:0 0 auto;font-size:14px}
+  /* ※以前はメッセージ欄の「横」に並ぶ細い欄だったため幅を120pxで固定していたが、
+     ウィザードでは独立した1行になったので、その名残りの上限がプレースホルダ
+     「ニックネーム（任意）」(14pxで約140px)を20px切り落としていた。欄いっぱいに広げる。 */
+  #nameInput{flex:1 1 auto;min-width:0;font-size:14px}
   .nameField{flex:0 0 auto}
   .place{
     flex:0 0 auto;border:0;cursor:pointer;border-radius:99px;position:relative;overflow:hidden;
