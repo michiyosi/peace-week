@@ -417,7 +417,9 @@
   #events{position:fixed;inset:0;z-index:33;display:none;align-items:center;justify-content:center;
     background:rgba(31,75,115,.42);backdrop-filter:blur(6px);padding:18px}
   #events.on{display:flex}
-  .evsheet{width:min(520px,100%);text-align:left}
+  /* ※.gsheet（解錠画面用・360px中央寄せ）が後方に定義されており、同じ詳細度だと
+     そちらが勝ってイベント一覧が狭く中央寄せになる。.sheet を足して詳細度で勝たせる。 */
+  .sheet.evsheet{width:min(520px,100%);text-align:left}
   .evsheet h2 b{color:#2F6FB5;font-weight:600}
   .evrow{border:1px solid var(--line);border-radius:12px;padding:13px 15px;margin:10px 0;background:#F7FAFD}
   .evrow b{display:block;font-size:13px;color:#2F6FB5;letter-spacing:.06em;margin-bottom:4px}
