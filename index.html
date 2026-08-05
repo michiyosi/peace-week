@@ -400,6 +400,15 @@
   .rdmsg{font-size:14.5px;font-weight:600;color:var(--ink);line-height:1.5;word-break:break-word}
   .rdmeta{display:flex;align-items:center;gap:7px;margin-top:5px;font-size:10.5px;color:var(--ink-soft);font-weight:500}
   .rddot{width:10px;height:10px;border-radius:3px;flex:0 0 auto;box-shadow:inset 0 0 0 1px rgba(0,0,0,.1)}
+  /* 管理モードのとき、一覧の各行に付く個別削除ボタン（盤面から探さずに消せる） */
+  .rdrow{display:flex;align-items:stretch;gap:8px;margin-bottom:8px}
+  .rdrow .rditem{margin-bottom:0;flex:1 1 auto}
+  .rddel{flex:0 0 auto;border:1px solid rgba(226,76,76,.5);background:#fff;color:#C13B3B;border-radius:13px;
+    padding:0 14px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:5px;
+    white-space:nowrap;transition:background .15s ease}
+  .rddel:hover{background:#FDECEC}
+  .rdadminnote{font-size:11.5px;font-weight:600;color:#C13B3B;background:#FDECEC;border:1px solid rgba(226,76,76,.3);
+    border-radius:10px;padding:8px 11px;margin-bottom:10px;line-height:1.6}
   .rdempty{text-align:center;padding:30px 10px;color:var(--ink-soft)}
   .rdempty b{display:block;font-size:15px;color:var(--ink);margin-bottom:6px;font-weight:600}
   .rdempty .cta{display:inline-block;width:auto;margin-top:14px;padding:11px 26px}
@@ -2477,13 +2486,21 @@ function buildReadList() {
     return;
   }
   var html = '';
+  // 管理モードのときだけ、一覧の各行に「消す」ボタンを出す（盤面から探さなくてよい）
+  if (ADMIN) html += '<div class="rdadminnote">管理モード：気になる投稿の「🗑 消す」を押すと、その1件だけを非表示にできます。</div>';
   for (var k = 0; k < items.length; k++) {
     var pc = items[k].pc;
     var who = (pc.name && pc.name !== '—') ? esc(pc.name) + ' さん' : 'あなたたち';
-    html += '<button class="rditem" data-idx="' + items[k].idx + '" type="button">' +
+    var item = '<button class="rditem" data-idx="' + items[k].idx + '" type="button">' +
       '<span class="rdart">' + (ART[pc.art] || ART.hikari) + '</span>' +
       '<span class="rdmain"><span class="rdmsg">' + esc(pc.msg || '（メッセージなし）') + '</span>' +
       '<span class="rdmeta"><span class="rddot" style="background:' + pc.color + '"></span>' + who + ' · ' + fmtTime(pc.ts) + '</span></span></button>';
+    if (ADMIN) {
+      html += '<div class="rdrow">' + item +
+        '<button class="rddel" data-idx="' + items[k].idx + '" type="button">🗑 消す</button></div>';
+    } else {
+      html += item;
+    }
   }
   rdList.innerHTML = html;
   var btns = rdList.querySelectorAll('.rditem');
@@ -2493,6 +2510,29 @@ function buildReadList() {
       closeRead();
       window.scrollTo({ top: 0, behavior: REDUCED() ? 'auto' : 'smooth' });
       setTimeout(function () { showPiecePop(idx); }, REDUCED() ? 0 : 300);
+    });
+  }
+  // 一覧からの個別削除（管理モード時のみ描画される）
+  var dels = rdList.querySelectorAll('.rddel');
+  for (var d = 0; d < dels.length; d++) {
+    dels[d].addEventListener('click', function () {
+      var idx = parseInt(this.getAttribute('data-idx'), 10);
+      var pcx = pieces[idx];
+      if (!pcx) { buildReadList(); return; }
+      if (!window.confirm('この投稿を非表示にしますか？\n\n「' + (pcx.msg || '（メッセージなし）') + '」' + (pcx.name ? ' — ' + pcx.name : '') + '\n\n※非表示にするだけで、データは残ります。')) return;
+      var sbId = pcx.sbId;
+      if (SB_ON && sbId) {
+        // 鍵が要る。無ければ入力を求めて、そのまま削除まで続ける
+        needPass(function () {
+          fetch(SB_URL + '/rest/v1/rpc/hide_piece', { method: 'POST', headers: sbHeaders(), body: JSON.stringify({ p_id: sbId, p_pass: adminPass }) })
+            .then(function (r) { return r.json(); })
+            .then(function (ok) {
+              if (ok === true) { deletePiece(idx); buildReadList(); }
+              else toast('削除に失敗しました（パスワード不一致）');
+            })
+            .catch(function () { toast('通信エラーで削除できませんでした'); });
+        });
+      } else { deletePiece(idx); buildReadList(); }
     });
   }
 }
