@@ -2370,11 +2370,11 @@ function updateCounter() {
     : '810人の想いがそろいました。8月6日、メルパルクで“未来”をお披露目。';
   var dIdx, label;
   if (frac >= 1) { dIdx = 6; label = '8/6 · お披露目'; }
-  else if (frac > 0.8) { dIdx = 5; label = '8/5 · あつまり中'; }
-  else if (frac > 0.6) { dIdx = 4; label = '8/4 · あつまり中'; }
-  else if (frac > 0.4) { dIdx = 3; label = '8/3 · あつまり中'; }
-  else if (frac > 0.2) { dIdx = 2; label = '8/2 · あつまり中'; }
-  else { dIdx = 1; label = '8/1 · あつまり中'; }
+  else { var _n=new Date(),_j=new Date(_n.getTime()+(_n.getTimezoneOffset()+540)*60000);var _d=(_j.getMonth()===7)?Math.max(1,Math.min(_j.getDate(),6)):1;dIdx=_d;label='8/'+_d+' · あつまり中'; }
+  //
+  //
+  //
+  //
   dayLabel.textContent = label;
   var dots = dayDots.children;
   for (var i = 0; i < 6; i++) dots[i].className = i < dIdx ? 'on' : '';
