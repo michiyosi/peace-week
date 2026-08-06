@@ -3273,6 +3273,11 @@ function flipLabel() {
 flipBtn.addEventListener('click', function () {
   faceMode = faceMode === 'art' ? 'mosaic' : 'art';
   flipLabel(); hidePop(); drawBoard();
+  var _fa = document.getElementById('finaleArt');
+  if (_fa && !STAGE) {
+    if (faceMode === 'art' && revealed) { _fa.classList.add('on'); requestAnimationFrame(function () { _fa.classList.add('show'); }); }
+    else { _fa.classList.remove('show'); setTimeout(function () { _fa.classList.remove('on'); }, 400); }
+  }
 });
 function assemble() {
   if (assembling) return;
@@ -3319,7 +3324,7 @@ function finishAssemble() {
         var _show = function () {
           _fa.classList.add('on');
           requestAnimationFrame(function () { _fa.classList.add('show'); });
-          _fa.onclick = function () { _fa.classList.remove('show'); setTimeout(function () { _fa.classList.remove('on'); }, 900); };
+          _fa.onclick = function () { _fa.classList.remove('show'); setTimeout(function () { _fa.classList.remove('on'); }, 900); faceMode = 'mosaic'; try { flipLabel(); drawBoard(); } catch (e) {} };
         };
         if (_fi.src && _fi.complete && _fi.naturalWidth > 0) { _show(); }
         else { var _im = new Image(); _im.onload = function () { _fi.src = _im.src; _show(); }; _im.src = (typeof IS_FILE !== 'undefined' && IS_FILE) ? 'art.jpg' : ('art.jpg?v=' + Date.now()); }
